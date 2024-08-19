@@ -17,7 +17,7 @@ jobs:
         run: |
           CHANGED_FILES=$(git diff \
             --name-only ${{ github.event.before }} ${{ github.sha }} \
-            -- queries | paste -sd "," -)
+            -- *.sql | paste -sd "," -)
           echo "CHANGED_FILES=$CHANGED_FILES" >> $GITHUB_ENV
           echo "changed_files=$CHANGED_FILES" >> $GITHUB_OUTPUT
 
