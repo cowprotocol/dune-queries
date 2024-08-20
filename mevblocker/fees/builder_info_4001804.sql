@@ -1,4 +1,9 @@
 -- Exposes all relevant information about MEV Blocker connected builders
+-- Builders that disconnected and then re-connected again have separate 
+-- entries for each subscription period.
+--
+-- To end a subscription, change the end_block of the exiting builder to 
+-- the last block on which they received flow.
 
 SELECT
     billing_address,
