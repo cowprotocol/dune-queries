@@ -34,14 +34,14 @@ builder_addresses AS (
 -- select number of blocks from subscribed builders
 blocks AS (
     SELECT COUNT(*) AS cnt_blocks
-    FROM ethereum.raw_0004
+    FROM ethereum.raw_0004 AS b
     WHERE
         (
-            FROM_HEX(block.extraData) IN (SELECT extra_data_item FROM builders_extra_data WHERE blockNumber >= start_block AND blockNumber < end_block)
-            OR FROM_HEX(block.miner) IN (SELECT builder_address FROM builder_addresses WHERE blockNumber >= start_block AND blockNumber < end_block)
+            FROM_HEX(b.block.extraData) IN (SELECT extra_data_item FROM builders_extra_data WHERE blockNumber >= start_block AND blockNumber < end_block) --noqa: RF01
+            OR FROM_HEX(b.block.miner) IN (SELECT builder_address FROM builder_addresses WHERE blockNumber >= start_block AND blockNumber < end_block) --noqa: RF01
         )
-        AND blockNumber >= (SELECT start_block FROM block_range)
-        AND blockNumber < (SELECT end_block FROM block_range)
+        AND b.blockNumber >= (SELECT start_block FROM block_range)
+        AND b.blockNumber < (SELECT end_block FROM block_range)
 ),
 
 -- select total fee
