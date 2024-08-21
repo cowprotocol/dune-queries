@@ -28,7 +28,7 @@ builder_blocks AS (
     FROM ethereum.raw_0004
     INNER JOIN query_4001804 AS info
         ON
-            (CONTAINS(info.extra_data, FROM_HEX(b.block.extraData)) OR CONTAINS(info.builder_addresses, FROM_HEX(b.block.miner))) --noqa: RF01
+            (CONTAINS(info.extra_data, FROM_HEX(block.extraData)) OR CONTAINS(info.builder_addresses, FROM_HEX(block.miner))) --noqa: RF01
             AND blockNumber >= start_block
             AND blockNumber < end_block
             AND blockNumber >= (SELECT start_block FROM block_range)
@@ -36,13 +36,10 @@ builder_blocks AS (
     GROUP BY 1, 2
 )
 
--- rename columns for backwards compatibility
 SELECT
-    label AS miner_label,
-    billing_address AS miner_biller_address,
-    blocks_won,
+    b.*,
     avg_block_fee_wei AS weekly_fee,
     blocks_won * avg_block_fee_wei AS amount_due_wei,
     blocks_won * avg_block_fee_wei / 1e18 AS amount_due_eth
-FROM builder_blocks
+FROM builder_blocks AS b
 CROSS JOIN final_fee
