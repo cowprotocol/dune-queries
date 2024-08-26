@@ -1,3 +1,6 @@
 [sqlfluff:templater:jinja:context]
 start='2024-08-01 12:00'
 end='2024-08-02 12:00'
+fee_computation_start='2024-08-01 12:00'
+fee_computation_end='2024-08-02 12:00'
+billing_date='2024-08-01 12:00'
