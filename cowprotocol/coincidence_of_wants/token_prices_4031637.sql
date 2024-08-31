@@ -20,8 +20,7 @@
 -- prices need to be scaled using decimals of the token.
 
 with filtered_trades as (
-    select
-        *
+    select *
     from cow_protocol_{{blockchain}}.trades
     where block_time >= cast('{{start_time}}' as timestamp) and block_time < cast('{{end_time}}' as timestamp)
 ),
@@ -35,10 +34,11 @@ token_prices_from_trades as (
         order_uid,
         sell_price * units_sold / atoms_sold as token_price_sell, -- in usd per atom
         buy_price * units_bought / atoms_bought as token_price_buy,
-        buy_price * units_bought / atoms_bought * atoms_bought / atoms_sold  as token_price_backup_sell,
-        sell_price * units_sold / atoms_sold * atoms_sold / atoms_bought  as token_price_backup_buy
+        buy_price * units_bought / atoms_bought * atoms_bought / atoms_sold as token_price_backup_sell,
+        sell_price * units_sold / atoms_sold * atoms_sold / atoms_bought as token_price_backup_buy
     from filtered_trades
 ),
+
 token_prices_from_trades_sell as (
     select
         block_time,
@@ -48,6 +48,7 @@ token_prices_from_trades_sell as (
         token_price_backup_sell as token_price_backup
     from token_prices_from_trades
 ),
+
 token_prices_from_trades_buy as (
     select
         block_time,
@@ -57,6 +58,7 @@ token_prices_from_trades_buy as (
         token_price_backup_buy as token_price_backup
     from token_prices_from_trades
 ),
+
 token_prices_all as (
     select * from token_prices_from_trades_sell
     union all

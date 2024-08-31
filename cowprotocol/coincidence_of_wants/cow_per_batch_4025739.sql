@@ -10,36 +10,40 @@
 with cow_per_token as (
     select * from "query_4021555(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')"
 ),
+
 -- get prices from trades table
 token_prices as (
     select * from "query_4031637(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')"
 ),
+
 -- join token amounts with prices from trades table
 cow_per_token_with_prices as (
     select
         cpt.*,
         token_price
-    from cow_per_token cpt
-    left outer join token_prices tp
-    on tp.tx_hash = cpt.tx_hash and tp.token_address = cpt.token_address
+    from cow_per_token as cpt
+    left outer join token_prices as tp
+        on cpt.tx_hash = tp.tx_hash and cpt.token_address = tp.token_address
 ),
+
 -- convert amounts to dollar values
 cow_per_token_usd as (
     select
         block_time,
         tx_hash,
         token_address,
+        naive_cow_potential,
+        naive_cow,
+        naive_cow_averaged,
         token_price * user_in as user_in,
         token_price * user_out as user_out,
         token_price * amm_in as amm_in,
         token_price * amm_out as amm_out,
         token_price * slippage_in as slippage_in,
-        token_price * slippage_out as slippage_out,
-        naive_cow_potential,
-        naive_cow,
-        naive_cow_averaged
+        token_price * slippage_out as slippage_out
     from cow_per_token_with_prices
 ),
+
 -- aggregate token volumes
 cow_volume_per_batch as (
     select
@@ -57,10 +61,11 @@ cow_volume_per_batch as (
     from cow_per_token_usd
     group by block_time, tx_hash
 )
+
 -- compute cow values per batch
 select
     *,
-    case when user_out > 0 then naive_cow_potential_volume / user_out else null end as naive_cow_potential,
-    case when user_out > 0 then naive_cow_volume / user_out else null end as naive_cow,
-    case when user_in + user_out > 0 then naive_cow_averaged_volume / (user_in + user_out) else null end as naive_cow_averaged
+    case when user_out > 0 then naive_cow_potential_volume / user_out end as naive_cow_potential,
+    case when user_out > 0 then naive_cow_volume / user_out end as naive_cow,
+    case when user_in + user_out > 0 then naive_cow_averaged_volume / (user_in + user_out) end as naive_cow_averaged
 from cow_volume_per_batch

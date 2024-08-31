@@ -14,6 +14,7 @@ with t as (
         sum(user_in + user_out) as total_volume_in_out
     from "query_4025739(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')"
 )
+
 select
     *,
     naive_cow_potential_volume / total_volume as naive_cow_potential_fraction,

@@ -22,11 +22,12 @@ with aggregate_transfers_with_types as (
         block_time,
         tx_hash,
         token_address,
-        sum(amount) as amount,
-        transfer_type
+        transfer_type,
+        sum(amount) as amount
     from "query_4021306(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')"
     group by block_time, tx_hash, token_address, transfer_type
 ),
+
 transfers_per_token as (
     select
         block_time,
@@ -44,7 +45,7 @@ transfers_per_token as (
 
 select
     *,
-    case when user_out > 0 then least(1.0 * user_in / user_out, 1.0) else null end as naive_cow_potential,
-    case when user_out > 0 then greatest(least(1.0 * (user_in - amm_out - slippage_in) / user_out, 1.0), 0.0) else null end as naive_cow,
-    case when user_in + user_out > 0 then greatest(1.0 * ((user_in + user_out) - (amm_in + amm_out) - (slippage_in + slippage_out)) / (user_in + user_out), 0.0) else null end as naive_cow_averaged
+    case when user_out > 0 then least(1.0 * user_in / user_out, 1.0) end as naive_cow_potential,
+    case when user_out > 0 then greatest(least(1.0 * (user_in - amm_out - slippage_in) / user_out, 1.0), 0.0) end as naive_cow,
+    case when user_in + user_out > 0 then greatest(1.0 * ((user_in + user_out) - (amm_in + amm_out) - (slippage_in + slippage_out)) / (user_in + user_out), 0.0) end as naive_cow_averaged
 from transfers_per_token

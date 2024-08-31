@@ -1,9 +1,9 @@
 -- This is a base query for monitoring balance changes on CoW Protocol
 --
--- The query collects all balance changes to the settlemenr contract. Those changes can comw from
+-- The query collects all balance changes to the settlement contract. Those changes can come from
 -- - erc20 transfers
 -- - native transfers
--- - chain specific event like deposits and widrawals
+-- - chain specific event like deposits and withdrawals
 --
 -- Parameters:
 --  {{start_time}} - the timestamp for which the analysis should start (inclusively)
@@ -35,9 +35,11 @@ with erc20_transfers as (
         to as receiver,
         value as amount
     from erc20_{{blockchain}}.evt_transfer
-    where evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
+    where
+        evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and 0x9008D19f58AAbD9eD0D60971565AA8510560ab41 in ("from", to)
 ),
+
 -- 1.2) all native token transfers
 native_transfers as (
     select
@@ -48,7 +50,8 @@ native_transfers as (
         to as receiver,
         value as amount
     from {{blockchain}}.traces
-    where block_time >= cast('{{start_time}}' as timestamp) and block_time < cast('{{end_time}}' as timestamp) -- partition column
+    where
+        block_time >= cast('{{start_time}}' as timestamp) and block_time < cast('{{end_time}}' as timestamp) -- partition column
         and value > cast(0 as uint256)
         and success = true
         and 0x9008d19f58aabd9ed0d60971565aa8510560ab41 in (to, "from")
@@ -71,9 +74,10 @@ weth_deposits_withdrawals_ethereum as (
         0x9008d19f58aabd9ed0d60971565aa8510560ab41 as receiver,
         wad as amount
     from zeroex_ethereum.WETH9_evt_Deposit
-    where evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
+    where
+        evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and dst = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
-    union
+    union distinct
     -- withdrawals (contract withdraws ETH by returning WETH)
     select
         evt_block_time as block_time,
@@ -83,9 +87,11 @@ weth_deposits_withdrawals_ethereum as (
         0x0000000000000000000000000000000000000000 as receiver,
         wad as amount
     from zeroex_ethereum.WETH9_evt_Withdrawal
-    where evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
+    where
+        evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and src = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
 ),
+
 -- 2.1.2) all deposit and withdrawal events for sDAI
 sdai_deposits_withdraws_ethereum as (
     -- deposits
@@ -97,9 +103,10 @@ sdai_deposits_withdraws_ethereum as (
         0x9008d19f58aabd9ed0d60971565aa8510560ab41 as receiver,
         shares as amount_wei
     from maker_ethereum.SavingsDai_evt_Deposit
-    where evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
+    where
+        evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and owner = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
-    union
+    union distinct
     -- withdraws
     select
         evt_block_time as block_time,
@@ -109,9 +116,11 @@ sdai_deposits_withdraws_ethereum as (
         0x0000000000000000000000000000000000000000 as receiver,
         shares as amount_wei
     from maker_ethereum.SavingsDai_evt_Withdraw
-    where evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
+    where
+        evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and owner = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
 ),
+
 special_balance_changes_ethereum as (
     select * from weth_deposits_withdrawals_ethereum
     union all
@@ -134,9 +143,10 @@ wxdai_deposits_withdrawals_gnosis as (
         0x9008d19f58aabd9ed0d60971565aa8510560ab41 as receiver,
         wad as amount
     from wxdai_gnosis.WXDAI_evt_Deposit
-    where evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
+    where
+        evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and dst = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
-    union
+    union distinct
     -- withdrawals (contract withdraws XDAI by returning WXDAI)
     select
         evt_block_time as block_time,
@@ -146,9 +156,11 @@ wxdai_deposits_withdrawals_gnosis as (
         0x0000000000000000000000000000000000000000 as receiver,
         wad as amount
     from wxdai_gnosis.WXDAI_evt_Withdrawal
-    where evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
+    where
+        evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and src = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
 ),
+
 -- 2.2.2) all deposit and withdrawal events for sDAI
 sdai_deposits_withdraws_gnosis as (
     -- deposits
@@ -160,9 +172,10 @@ sdai_deposits_withdraws_gnosis as (
         0x9008d19f58aabd9ed0d60971565aa8510560ab41 as receiver,
         shares as amount_wei
     from sdai_gnosis.SavingsXDai_evt_Deposit
-    where evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
+    where
+        evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and owner = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
-    union
+    union distinct
     -- withdraws
     select
         evt_block_time as block_time,
@@ -172,10 +185,12 @@ sdai_deposits_withdraws_gnosis as (
         0x0000000000000000000000000000000000000000 as receiver,
         shares as amount_wei
     from sdai_gnosis.SavingsXDai_evt_Withdraw
-    where evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
+    where
+        evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and owner = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
 ),
-special_balance_changes_gnosis as (
+
+special_balance_changes_gnosis as ( -- noqa: ST03
     select * from wxdai_deposits_withdrawals_gnosis
     union all
     select * from sdai_deposits_withdraws_gnosis
@@ -196,9 +211,10 @@ weth_deposits_withdrawals_arbitrum as (
         0x9008d19f58aabd9ed0d60971565aa8510560ab41 as receiver,
         wad as amount
     from mindgames_weth_arbitrum.WETH9_evt_Deposit
-    where evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
+    where
+        evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and dst = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
-    union
+    union distinct
     -- withdrawals (contract withdraws ETH by returning WETH)
     select
         evt_block_time as block_time,
@@ -208,10 +224,12 @@ weth_deposits_withdrawals_arbitrum as (
         0x0000000000000000000000000000000000000000 as receiver,
         wad as amount
     from mindgames_weth_arbitrum.WETH9_evt_Withdrawal
-    where evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
+    where
+        evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and src = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
 ),
-special_balance_changes_arbitrum as (
+
+special_balance_changes_arbitrum as ( -- noqa: ST03
     select * from weth_deposits_withdrawals_arbitrum
 )
 

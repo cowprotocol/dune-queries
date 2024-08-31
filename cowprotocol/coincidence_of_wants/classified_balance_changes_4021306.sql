@@ -23,22 +23,23 @@
 -- This behavior will be wrong when an order is created with receiver set to the settlement contract.
 
 with filtered_trades as (
-    select
-        *
+    select *
     from cow_protocol_{{blockchain}}.trades
     where block_time >= cast('{{start_time}}' as timestamp) and block_time < cast('{{end_time}}' as timestamp)
 ),
+
 traders as (
     select
         trader as sender,
         receiver
     from filtered_trades
 ),
+
 balance_changes as (
-    select
-        *
+    select *
     from "query_4021257(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')"
 ),
+
 -- classify balance changes
 balance_changes_with_types as (
     select
@@ -48,23 +49,27 @@ balance_changes_with_types as (
         amount,
         case
             -- user in
-            when (sender in (select sender from traders) -- transfer coming from a trader
-                or sender = 0x40a50cf069e992aa4536211b23f286ef88752187) -- transfer coming from ETH flow
-                and receiver = 0x9008D19f58AAbD9eD0D60971565AA8510560ab41 -- transfer going to the settlement contract
-            then 'user_in'
+            when (
+                sender in (select sender from traders) -- transfer coming from a trader
+                or sender = 0x40a50cf069e992aa4536211b23f286ef88752187
+            ) -- transfer coming from ETH flow
+            and receiver = 0x9008D19f58AAbD9eD0D60971565AA8510560ab41 -- transfer going to the settlement contract
+                then 'user_in'
             -- user out
-            when receiver in (select receiver from traders) -- transfer going to a trader
+            when
+                receiver in (select receiver from traders) -- transfer going to a trader
                 and sender = 0x9008D19f58AAbD9eD0D60971565AA8510560ab41 -- transfer coming from the settlement contract
-            then 'user_out'
+                then 'user_out'
             -- amm in
             when receiver = 0x9008D19f58AAbD9eD0D60971565AA8510560ab41
-            then 'amm_in'
+                then 'amm_in'
             -- amm out
             when sender = 0x9008D19f58AAbD9eD0D60971565AA8510560ab41
-            then 'amm_out'
+                then 'amm_out'
         end as transfer_type
     from balance_changes
 ),
+
 slippage as (
     select
         block_time,
