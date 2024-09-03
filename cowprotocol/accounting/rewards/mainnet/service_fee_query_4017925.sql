@@ -1,16 +1,15 @@
 WITH
-  bonding_pools (pool, name, initial_funder) AS (
+bonding_pools (pool, name, initial_funder) AS (
     SELECT
-      from_hex(pool),
-      name,
-      from_hex(funder)
-    FROM
-      (
-        VALUES
-          {{BondingPoolData}}
-      ) AS _ (pool, name, funder)
+        name,
+        from_hex(pool),
+        from_hex(funder)
+    FROM (
+        VALUES {{BondingPoolData}}
+    ) AS _ (name, pool,funder)
   ),
-  first_event_after_timestamp AS (
+
+first_event_after_timestamp AS (
     SELECT
       MAX(number)
     FROM
