@@ -1,13 +1,15 @@
 WITH
 
-bonding_pools (name, pool, initial_funder) AS (
+bonding_pools (pool, pool_name, initial_funder) AS (
     SELECT
-        name,
-        from_hex(pool),
-        from_hex(funder)
-    FROM (
-        VALUES {{BondingPoolData}}
-    ) AS _ (name, pool,funder)
+        from_hex('0x8353713b6D2F728Ed763a04B886B16aAD2b16eBD') AS pool,
+        'Gnosis' AS pool_name,
+        from_hex('0x6c642cafcbd9d8383250bb25f67ae409147f78b2') AS initial_funder
+    UNION ALL
+    SELECT
+        from_hex('0x5d4020b9261F01B6f8a45db929704b0Ad6F5e9E6') AS pool,
+        'CoW Services' AS pool_name,
+        from_hex('0x423cec87f19f0778f549846e0801ee267a917935') AS initial_funder
 ),
 
 first_event_after_timestamp AS (
@@ -164,7 +166,7 @@ joined_on AS (
         jd.solver,
         jd.reward_target,
         jd.pool,
-        bp.name AS pool_name,
+        bp.pool_name,
         b.time AS joined_on
     FROM
         joined_on_data AS jd
