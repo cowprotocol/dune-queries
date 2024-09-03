@@ -122,7 +122,7 @@ latest_vouches AS (
                 evt_block_number,
                 evt_index,
                 solver,
-                Null AS cowRewardTarget, -- Invalidation does not have a reward target
+                NULL AS cowRewardTarget, -- Invalidation does not have a reward target
                 bondingPool,
                 sender,
                 'InvalidateVouch' AS event_type
