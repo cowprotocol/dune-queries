@@ -26,7 +26,7 @@ initial_vouches AS (
         cowRewardTarget,
         bondingPool,
         sender,
-        True AS active,
+        TRUE AS active,
         rank() OVER (
             PARTITION BY
                 solver,
@@ -64,7 +64,7 @@ joined_on_data AS (
         iv.evt_block_number,
         iv.evt_index,
         iv.rk,
-        True AS active
+        TRUE AS active
     FROM
         initial_vouches AS iv
     WHERE
@@ -88,7 +88,7 @@ latest_vouches AS (
                 evt_block_number DESC,
                 evt_index DESC
         ) AS rk,
-        coalesce (event_type = 'Vouch', FALSE) AS active
+        coalesce(event_type = 'Vouch', FALSE) AS active
     FROM
         (
             SELECT
@@ -156,7 +156,7 @@ valid_vouches AS (
         latest_vouches AS lv
     WHERE
         lv.rk = 1
-        AND lv.active = True
+        AND lv.active = TRUE
 ),
 
 joined_on AS (
@@ -247,6 +247,7 @@ SELECT
     END AS expires,
     coalesce(
         now() > fnr.expires
-        AND fnr.pool_name != 'Gnosis', FALSE) AS service_fee
+        AND fnr.pool_name != 'Gnosis', FALSE
+    ) AS service_fee
 FROM
     filtered_named_results AS fnr;
