@@ -11,11 +11,11 @@ bonding_pools (name, pool, initial_funder) AS (
 ),
 
 first_event_after_timestamp AS (
-    SELECT MAX(number)
+    SELECT max(number)
     FROM
         ethereum.blocks
     WHERE
-        time > CAST('2024-08-20 00:00:00' AS timestamp) -- CIP-48 starts bonding pool timer at midnight UTC on 20/08/24
+        time > cast('2024-08-20 00:00:00' AS timestamp) -- CIP-48 starts bonding pool timer at midnight UTC on 20/08/24
 ),
 
 initial_vouches AS (
@@ -27,7 +27,7 @@ initial_vouches AS (
         bondingPool,
         sender,
         True AS active,
-        RANK() OVER (
+        rank() OVER (
             PARTITION BY
                 solver,
                 bondingPool,
@@ -79,7 +79,7 @@ latest_vouches AS (
         cowRewardTarget,
         bondingPool,
         sender,
-        RANK() OVER (
+        rank() OVER (
             PARTITION BY
                 solver,
                 bondingPool,
@@ -88,7 +88,7 @@ latest_vouches AS (
                 evt_block_number DESC,
                 evt_index DESC
         ) AS rk,
-        COALESCE (event_type = 'Vouch', FALSE) AS active
+        coalesce (event_type = 'Vouch', FALSE) AS active
     FROM
         (
             SELECT
@@ -178,8 +178,8 @@ named_results AS (
         jd.pool_name,
         jd.pool,
         jd.joined_on,
-        CONCAT(environment, '-', s.name) AS solver_name,
-        DATE_DIFF('day', DATE(jd.joined_on), DATE(NOW())) AS days_in_pool
+        concat(environment, '-', s.name) AS solver_name,
+        date_diff('day', date(jd.joined_on), date(now())) AS days_in_pool
     FROM
         joined_on AS jd
     INNER JOIN cow_protocol_ethereum.solvers AS s ON jd.solver = s.address
@@ -196,13 +196,13 @@ ranked_named_results AS (
         nr.pool,
         nr.joined_on,
         nr.days_in_pool,
-        ROW_NUMBER() OVER (
+        row_number() OVER (
             PARTITION BY
                 nr.solver_name
             ORDER BY
                 nr.joined_on DESC
         ) AS rn,
-        COUNT(*) OVER (
+        count(*) OVER (
             PARTITION BY
                 nr.solver_name
         ) AS solver_name_count
@@ -222,9 +222,9 @@ filtered_named_results AS (
             ELSE rnr.pool_name
         END AS pool_name,
         CASE
-            WHEN rnr.solver_name_count > 1 THEN DATE_ADD('month', 3, rnr.joined_on) -- Add 3 month grace period for colocated solvers
-            ELSE GREATEST(
-                DATE_ADD('month', 6, rnr.joined_on), -- Add 6 month grace period to joined_on for non colocated solvers
+            WHEN rnr.solver_name_count > 1 THEN date_add('month', 3, rnr.joined_on) -- Add 3 month grace period for colocated solvers
+            ELSE greatest(
+                date_add('month', 6, rnr.joined_on), -- Add 6 month grace period to joined_on for non colocated solvers
                 TIMESTAMP '2024-08-20 00:00:00' -- Introduction of CIP-48
             )
         END AS expires
@@ -245,7 +245,8 @@ SELECT
         WHEN fnr.pool_name = 'Gnosis' THEN TIMESTAMP '2028-10-08 00:00:00'
         ELSE fnr.expires
     END AS expires,
-    COALESCE (NOW() > fnr.expires
-    AND fnr.pool_name != 'Gnosis', FALSE) AS service_fee
+    coalesce(
+        now() > fnr.expires
+        AND fnr.pool_name != 'Gnosis', FALSE) AS service_fee
 FROM
     filtered_named_results AS fnr;
