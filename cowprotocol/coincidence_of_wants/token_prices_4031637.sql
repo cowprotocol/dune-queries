@@ -32,10 +32,10 @@ token_prices_from_trades as (
         sell_token_address,
         buy_token_address,
         order_uid,
-        sell_price * units_sold / atoms_sold as token_price_sell, -- in usd per atom
-        buy_price * units_bought / atoms_bought as token_price_buy,
-        buy_price * units_bought / atoms_bought * atoms_bought / atoms_sold as token_price_backup_sell,
-        sell_price * units_sold / atoms_sold * atoms_sold / atoms_bought as token_price_backup_buy
+        sell_value_usd / atoms_sold as token_price_sell, -- in usd per atom
+        buy_value_usd / atoms_bought as token_price_buy,
+        buy_value_usd / atoms_sold as token_price_backup_sell,
+        sell_value_usd / atoms_bought as token_price_backup_buy
     from filtered_trades
 ),
 
