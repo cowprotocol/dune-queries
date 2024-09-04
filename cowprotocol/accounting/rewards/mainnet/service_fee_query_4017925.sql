@@ -158,7 +158,7 @@ valid_vouches as (
         latest_vouches as lv
     where
         lv.rk = 1
-        and lv.active = TRUE
+        and lv.active = true
 ),
 
 joined_on as (
