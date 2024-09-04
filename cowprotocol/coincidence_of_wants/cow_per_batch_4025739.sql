@@ -56,8 +56,7 @@ cow_volume_per_batch as (
         sum(slippage_in) as slippage_in,
         sum(slippage_out) as slippage_out,
         sum(user_out * naive_cow_potential) as naive_cow_potential_volume,
-        sum(user_out * naive_cow) as naive_cow_volume,
-        sum((user_in + user_out) * naive_cow_averaged) as naive_cow_averaged_volume
+        sum(user_out * naive_cow) as naive_cow_volume
     from cow_per_token_usd
     group by block_time, tx_hash
 )

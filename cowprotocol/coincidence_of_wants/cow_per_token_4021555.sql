@@ -46,6 +46,5 @@ transfers_per_token as (
 select
     *,
     case when user_out > 0 then least(1.0 * user_in / user_out, 1.0) end as naive_cow_potential,
-    case when user_out > 0 then greatest(least(1.0 * (user_in - amm_out - slippage_in) / user_out, 1.0), 0.0) end as naive_cow,
-    case when user_in + user_out > 0 then greatest(1.0 * ((user_in + user_out) - (amm_in + amm_out) - (slippage_in + slippage_out)) / (user_in + user_out), 0.0) end as naive_cow_averaged
+    case when user_out > 0 then greatest(least(1.0 * (user_in - amm_out - slippage_in) / user_out, 1.0), 0.0) end as naive_cow
 from transfers_per_token
