@@ -90,7 +90,7 @@ latest_vouches as (
                 evt_block_number desc,
                 evt_index desc
         ) as rk,
-        coalesce(event_type = 'Vouch', FALSE) as active
+        coalesce(event_type = 'Vouch', false) as active
     from
         (
             select
