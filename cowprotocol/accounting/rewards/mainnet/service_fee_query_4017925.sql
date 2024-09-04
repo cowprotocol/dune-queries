@@ -28,7 +28,7 @@ initial_vouches as (
         cow_reward_target,
         bonding_pool,
         sender,
-        TRUE as active,
+        true as active,
         rank() over (
             partition by
                 solver,
