@@ -249,7 +249,7 @@ select
     end as expires,
     coalesce(
         now() > fnr.expires
-        and fnr.pool_name != 'Gnosis', FALSE
+        and fnr.pool_name != 'Gnosis', false
     ) as service_fee
 from
     filtered_named_results as fnr;
