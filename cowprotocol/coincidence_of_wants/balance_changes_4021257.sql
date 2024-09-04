@@ -60,7 +60,7 @@ native_transfers as (
 -- 2) chain specific data
 -- 2.1) ethereum
 -- special treatmet of
--- 2.1.1) WETCH
+-- 2.1.1) WETH
 -- 2.1.2) sDAI
 
 -- 2.1.1) all deposit and withdrawal events for WETH
