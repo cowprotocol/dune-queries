@@ -66,7 +66,7 @@ joined_on_data as (
         iv.evt_block_number,
         iv.evt_index,
         iv.rk,
-        TRUE as active
+        true as active
     from
         initial_vouches as iv
     where
