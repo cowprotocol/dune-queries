@@ -1,255 +1,255 @@
-WITH
+with
 
-bonding_pools (pool, pool_name, initial_funder) AS (
-    SELECT
-        from_hex('0x8353713b6D2F728Ed763a04B886B16aAD2b16eBD') AS pool,
-        'Gnosis' AS pool_name,
-        from_hex('0x6c642cafcbd9d8383250bb25f67ae409147f78b2') AS initial_funder
-    UNION ALL
-    SELECT
-        from_hex('0x5d4020b9261F01B6f8a45db929704b0Ad6F5e9E6') AS pool,
-        'CoW Services' AS pool_name,
-        from_hex('0x423cec87f19f0778f549846e0801ee267a917935') AS initial_funder
+bonding_pools (pool, pool_name, initial_funder) as (
+    select
+        from_hex('0x8353713b6D2F728Ed763a04B886B16aAD2b16eBD') as pool,
+        'Gnosis' as pool_name,
+        from_hex('0x6c642cafcbd9d8383250bb25f67ae409147f78b2') as initial_funder
+    union all
+    select
+        from_hex('0x5d4020b9261F01B6f8a45db929704b0Ad6F5e9E6') as pool,
+        'CoW Services' as pool_name,
+        from_hex('0x423cec87f19f0778f549846e0801ee267a917935') as initial_funder
 ),
 
-first_event_after_timestamp AS (
-    SELECT max(number)
-    FROM
+first_event_after_timestamp as (
+    select max(number)
+    from
         ethereum.blocks
-    WHERE
-        time > cast('2024-08-20 00:00:00' AS timestamp) -- CIP-48 starts bonding pool timer at midnight UTC on 20/08/24
+    where
+        time > cast('2024-08-20 00:00:00' as timestamp) -- CIP-48 starts bonding pool timer at midnight UTC on 20/08/24
 ),
 
-initial_vouches AS (
-    SELECT
+initial_vouches as (
+    select
         evt_block_number,
         evt_index,
         solver,
-        cowRewardTarget,
-        bondingPool,
+        cow_reward_target,
+        bonding_pool,
         sender,
-        TRUE AS active,
-        rank() OVER (
-            PARTITION BY
+        true as active,
+        rank() over (
+            partition by
                 solver,
-                bondingPool,
+                bonding_pool,
                 sender
-            ORDER BY
-                evt_block_number ASC,
-                evt_index ASC
-        ) AS rk
-    FROM
+            order by
+                evt_block_number asc,
+                evt_index asc
+        ) as rk
+    from
         cow_protocol_ethereum.VouchRegister_evt_Vouch
-    WHERE
+    where
         evt_block_number <= (
-            SELECT *
-            FROM
+            select *
+            from
                 first_event_after_timestamp
         )
-        AND bondingPool IN (
-            SELECT pool
-            FROM
+        and bonding_pool in (
+            select pool
+            from
                 bonding_pools
         )
-        AND sender IN (
-            SELECT initial_funder
-            FROM
+        and sender in (
+            select initial_funder
+            from
                 bonding_pools
         )
 ),
 
-joined_on_data AS (
-    SELECT
+joined_on_data as (
+    select
         iv.solver,
-        iv.cowRewardTarget AS reward_target,
-        iv.bondingPool AS pool,
+        iv.cow_reward_target as reward_target,
+        iv.bonding_pool as pool,
         iv.evt_block_number,
         iv.evt_index,
         iv.rk,
-        TRUE AS active
-    FROM
-        initial_vouches AS iv
-    WHERE
+        true as active
+    from
+        initial_vouches as iv
+    where
         iv.rk = 1
 ),
 
-latest_vouches AS (
-    SELECT
+latest_vouches as (
+    select
         evt_block_number,
         evt_index,
         solver,
-        cowRewardTarget,
-        bondingPool,
+        cow_reward_target,
+        bonding_pool,
         sender,
-        rank() OVER (
-            PARTITION BY
+        rank() over (
+            partition by
                 solver,
-                bondingPool,
+                bonding_pool,
                 sender
-            ORDER BY
-                evt_block_number DESC,
-                evt_index DESC
-        ) AS rk,
-        coalesce(event_type = 'Vouch', FALSE) AS active
-    FROM
+            order by
+                evt_block_number desc,
+                evt_index desc
+        ) as rk,
+        coalesce(event_type = 'Vouch', false) as active
+    from
         (
-            SELECT
+            select
                 evt_block_number,
                 evt_index,
                 solver,
-                cowRewardTarget,
-                bondingPool,
+                cow_reward_target,
+                bonding_pool,
                 sender,
-                'Vouch' AS event_type
-            FROM
+                'Vouch' as event_type
+            from
                 cow_protocol_ethereum.VouchRegister_evt_Vouch
-            WHERE
+            where
                 evt_block_number <= (
-                    SELECT *
-                    FROM
+                    select *
+                    from
                         first_event_after_timestamp
                 )
-                AND bondingPool IN (
-                    SELECT pool
-                    FROM
+                and bonding_pool in (
+                    select pool
+                    from
                         bonding_pools
                 )
-                AND sender IN (
-                    SELECT initial_funder
-                    FROM
+                and sender in (
+                    select initial_funder
+                    from
                         bonding_pools
                 )
-            UNION DISTINCT
-            SELECT
+            union distinct
+            select
                 evt_block_number,
                 evt_index,
                 solver,
-                NULL AS cowRewardTarget, -- Invalidation does not have a reward target
-                bondingPool,
+                null as cow_reward_target, -- Invalidation does not have a reward target
+                bonding_pool,
                 sender,
-                'InvalidateVouch' AS event_type
-            FROM
+                'InvalidateVouch' as event_type
+            from
                 cow_protocol_ethereum.VouchRegister_evt_InvalidateVouch
-            WHERE
+            where
                 evt_block_number <= (
-                    SELECT *
-                    FROM
+                    select *
+                    from
                         first_event_after_timestamp
                 )
-                AND bondingPool IN (
-                    SELECT pool
-                    FROM
+                and bonding_pool in (
+                    select pool
+                    from
                         bonding_pools
                 )
-                AND sender IN (
-                    SELECT initial_funder
-                    FROM
+                and sender in (
+                    select initial_funder
+                    from
                         bonding_pools
                 )
-        ) AS unioned_events
+        ) as unioned_events
 ),
 
-valid_vouches AS (
-    SELECT
+valid_vouches as (
+    select
         lv.solver,
-        lv.cowRewardTarget AS reward_target,
-        lv.bondingPool AS pool
-    FROM
-        latest_vouches AS lv
-    WHERE
+        lv.cow_reward_target as reward_target,
+        lv.bonding_pool as pool
+    from
+        latest_vouches as lv
+    where
         lv.rk = 1
-        AND lv.active = TRUE
+        and lv.active = true
 ),
 
-joined_on AS (
-    SELECT
+joined_on as (
+    select
         jd.solver,
         jd.reward_target,
         jd.pool,
         bp.pool_name,
-        b.time AS joined_on
-    FROM
-        joined_on_data AS jd
-    INNER JOIN ethereum.blocks AS b ON jd.evt_block_number = b.number
-    INNER JOIN bonding_pools AS bp ON jd.pool = bp.pool
+        b.time as joined_on
+    from
+        joined_on_data as jd
+    inner join ethereum.blocks as b on jd.evt_block_number = b.number
+    inner join bonding_pools as bp on jd.pool = bp.pool
 ),
 
-named_results AS (
-    SELECT
+named_results as (
+    select
         jd.solver,
         jd.pool_name,
         jd.pool,
         jd.joined_on,
-        concat(environment, '-', s.name) AS solver_name,
-        date_diff('day', date(jd.joined_on), date(now())) AS days_in_pool
-    FROM
-        joined_on AS jd
-    INNER JOIN cow_protocol_ethereum.solvers AS s ON jd.solver = s.address
-    INNER JOIN valid_vouches
-        AS vv ON jd.solver = vv.solver
-    AND jd.pool = vv.pool
+        concat(environment, '-', s.name) as solver_name,
+        date_diff('day', date(jd.joined_on), date(now())) as days_in_pool
+    from
+        joined_on as jd
+    inner join cow_protocol_ethereum.solvers as s on jd.solver = s.address
+    inner join valid_vouches
+        as vv on jd.solver = vv.solver
+    and jd.pool = vv.pool
 ),
 
-ranked_named_results AS (
-    SELECT
+ranked_named_results as (
+    select
         nr.solver,
         nr.solver_name,
         nr.pool_name,
         nr.pool,
         nr.joined_on,
         nr.days_in_pool,
-        row_number() OVER (
-            PARTITION BY
+        row_number() over (
+            partition by
                 nr.solver_name
-            ORDER BY
-                nr.joined_on DESC
-        ) AS rn,
-        count(*) OVER (
-            PARTITION BY
+            order by
+                nr.joined_on desc
+        ) as rn,
+        count(*) over (
+            partition by
                 nr.solver_name
-        ) AS solver_name_count
-    FROM
-        named_results AS nr
+        ) as solver_name_count
+    from
+        named_results as nr
 ),
 
-filtered_named_results AS (
-    SELECT
+filtered_named_results as (
+    select
         rnr.solver,
         rnr.solver_name,
         rnr.pool,
         rnr.joined_on,
         rnr.days_in_pool,
-        CASE
-            WHEN rnr.solver_name_count > 1 THEN 'Colocation'
-            ELSE rnr.pool_name
-        END AS pool_name,
-        CASE
-            WHEN rnr.solver_name_count > 1 THEN date_add('month', 3, rnr.joined_on) -- Add 3 month grace period for colocated solvers
-            ELSE greatest(
+        case
+            when rnr.solver_name_count > 1 then 'Colocation'
+            else rnr.pool_name
+        end as pool_name,
+        case
+            when rnr.solver_name_count > 1 then date_add('month', 3, rnr.joined_on) -- Add 3 month grace period for colocated solvers
+            else greatest(
                 date_add('month', 6, rnr.joined_on), -- Add 6 month grace period to joined_on for non colocated solvers
-                TIMESTAMP '2024-08-20 00:00:00' -- Introduction of CIP-48
+                timestamp '2024-08-20 00:00:00' -- Introduction of CIP-48
             )
-        END AS expires
-    FROM
-        ranked_named_results AS rnr
-    WHERE
+        end as expires
+    from
+        ranked_named_results as rnr
+    where
         rnr.rn = 1
 )
 
-SELECT
+select
     fnr.solver,
     fnr.solver_name,
     fnr.pool_name,
     fnr.pool,
     fnr.joined_on,
     fnr.days_in_pool,
-    CASE
-        WHEN fnr.pool_name = 'Gnosis' THEN TIMESTAMP '2028-10-08 00:00:00'
-        ELSE fnr.expires
-    END AS expires,
+    case
+        when fnr.pool_name = 'Gnosis' then timestamp '2028-10-08 00:00:00'
+        else fnr.expires
+    end as expires,
     coalesce(
         now() > fnr.expires
-        AND fnr.pool_name != 'Gnosis', FALSE
-    ) AS service_fee
-FROM
-    filtered_named_results AS fnr;
+        and fnr.pool_name != 'Gnosis', false
+    ) as service_fee
+from
+    filtered_named_results as fnr;
