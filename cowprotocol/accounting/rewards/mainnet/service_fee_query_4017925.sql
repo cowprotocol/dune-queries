@@ -6,8 +6,8 @@ colocated_solvers as (
         'prod-Barter' as solver_name,
         'Reduced-Bonding' as pool_name,
         from_hex('0xB6113c260aD0a8A086f1E31c5C92455252A53Fb8') as pool,
-        timestamp '2024-08-21 07:15:00' as joined_on,
-        from_hex('0xC7899Ff6A3aC2FF59261bD960A8C880DF06E1041') as solver
+        from_hex('0xC7899Ff6A3aC2FF59261bD960A8C880DF06E1041') as solver,
+        timestamp '2024-08-21 07:15:00' as joined_on
 ),
 
 bonding_pools (pool, pool_name, initial_funder) as (
