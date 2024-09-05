@@ -1,5 +1,15 @@
 with
 
+-- Add colocated solvers here
+colocated_solvers as (
+    select
+        'prod-Barter' as solver_name,
+        'Reduced-Bonding' as pool_name,
+        from_hex('0xB6113c260aD0a8A086f1E31c5C92455252A53Fb8') as pool,
+        timestamp '2024-08-21 07:15:00' as joined_on,
+        from_hex('0xC7899Ff6A3aC2FF59261bD960A8C880DF06E1041') as solver
+),
+
 bonding_pools (pool, pool_name, initial_funder) as (
     select
         from_hex('0x8353713b6D2F728Ed763a04B886B16aAD2b16eBD') as pool,
@@ -71,6 +81,31 @@ joined_on_data as (
         initial_vouches as iv
     where
         iv.rk = 1
+),
+
+joined_on_with_colocated as (
+    select
+        solver,
+        reward_target,
+        pool,
+        evt_block_number,
+        evt_index,
+        rk,
+        active
+    from joined_on_data
+
+    union all
+
+    -- Add hardcoded colocated solvers
+    select
+        c.solver,
+        null as reward_target,
+        c.pool,
+        null as evt_block_number,
+        null as evt_index,
+        1 as rk,
+        true as active
+    from colocated_solvers c
 ),
 
 latest_vouches as (
@@ -169,7 +204,7 @@ joined_on as (
         bp.pool_name,
         b.time as joined_on
     from
-        joined_on_data as jd
+        joined_on_with_colocated as jd
     inner join ethereum.blocks as b on jd.evt_block_number = b.number
     inner join bonding_pools as bp on jd.pool = bp.pool
 ),
@@ -188,6 +223,17 @@ named_results as (
     inner join valid_vouches
         as vv on jd.solver = vv.solver
     and jd.pool = vv.pool
+    
+    union all
+    
+    select
+        c.solver,
+        c.pool_name,
+        c.pool,
+        c.joined_on,
+        c.solver_name,
+        date_diff('day', date(c.joined_on), date(now())) as days_in_pool
+    from colocated_solvers c
 ),
 
 ranked_named_results as (
@@ -219,12 +265,9 @@ filtered_named_results as (
         rnr.pool,
         rnr.joined_on,
         rnr.days_in_pool,
+        rnr.pool_name,
         case
-            when rnr.solver_name_count > 1 then 'Colocation'
-            else rnr.pool_name
-        end as pool_name,
-        case
-            when rnr.solver_name_count > 1 then date_add('month', 3, rnr.joined_on) -- Add 3 month grace period for colocated solvers
+            when rnr.pool_name = 'Reduced-Bonding' then date_add('month', 3, rnr.joined_on) -- Add 3 month grace period for colocated solvers
             else greatest(
                 date_add('month', 6, rnr.joined_on), -- Add 6 month grace period to joined_on for non colocated solvers
                 timestamp '2024-08-20 00:00:00' -- Introduction of CIP-48
