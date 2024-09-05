@@ -25,14 +25,14 @@ initial_vouches as (
         evt_block_number,
         evt_index,
         solver,
-        cow_reward_target,
-        bonding_pool,
+        cowrewardtarget,
+        bondingpool,
         sender,
         true as active,
         rank() over (
             partition by
                 solver,
-                bonding_pool,
+                bondingpool,
                 sender
             order by
                 evt_block_number asc,
@@ -46,7 +46,7 @@ initial_vouches as (
             from
                 first_event_after_timestamp
         )
-        and bonding_pool in (
+        and bondingpool in (
             select pool
             from
                 bonding_pools
@@ -61,8 +61,8 @@ initial_vouches as (
 joined_on_data as (
     select
         iv.solver,
-        iv.cow_reward_target as reward_target,
-        iv.bonding_pool as pool,
+        iv.cowrewardtarget as reward_target,
+        iv.bondingpool as pool,
         iv.evt_block_number,
         iv.evt_index,
         iv.rk,
@@ -78,13 +78,13 @@ latest_vouches as (
         evt_block_number,
         evt_index,
         solver,
-        cow_reward_target,
-        bonding_pool,
+        cowrewardtarget,
+        bondingpool,
         sender,
         rank() over (
             partition by
                 solver,
-                bonding_pool,
+                bondingpool,
                 sender
             order by
                 evt_block_number desc,
@@ -97,8 +97,8 @@ latest_vouches as (
                 evt_block_number,
                 evt_index,
                 solver,
-                cow_reward_target,
-                bonding_pool,
+                cowrewardtarget,
+                bondingpool,
                 sender,
                 'Vouch' as event_type
             from
@@ -109,7 +109,7 @@ latest_vouches as (
                     from
                         first_event_after_timestamp
                 )
-                and bonding_pool in (
+                and bondingpool in (
                     select pool
                     from
                         bonding_pools
@@ -124,8 +124,8 @@ latest_vouches as (
                 evt_block_number,
                 evt_index,
                 solver,
-                null as cow_reward_target, -- Invalidation does not have a reward target
-                bonding_pool,
+                null as cowrewardtarget, -- Invalidation does not have a reward target
+                bondingpool,
                 sender,
                 'InvalidateVouch' as event_type
             from
@@ -136,7 +136,7 @@ latest_vouches as (
                     from
                         first_event_after_timestamp
                 )
-                and bonding_pool in (
+                and bondingpool in (
                     select pool
                     from
                         bonding_pools
@@ -152,8 +152,8 @@ latest_vouches as (
 valid_vouches as (
     select
         lv.solver,
-        lv.cow_reward_target as reward_target,
-        lv.bonding_pool as pool
+        lv.cowrewardtarget as reward_target,
+        lv.bondingpool as pool
     from
         latest_vouches as lv
     where
@@ -253,3 +253,4 @@ select
     ) as service_fee
 from
     filtered_named_results as fnr;
+
