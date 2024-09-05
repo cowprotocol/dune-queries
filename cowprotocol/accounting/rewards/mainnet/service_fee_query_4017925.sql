@@ -253,4 +253,3 @@ select
     ) as service_fee
 from
     filtered_named_results as fnr;
-
