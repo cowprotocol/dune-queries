@@ -5,9 +5,9 @@ colocated_solvers as (
     select
         'prod-Barter' as solver_name,
         'Reduced-Bonding' as pool_name,
+        timestamp '2024-08-21 07:15:00' as joined_on,
         from_hex('0xB6113c260aD0a8A086f1E31c5C92455252A53Fb8') as pool,
-        from_hex('0xC7899Ff6A3aC2FF59261bD960A8C880DF06E1041') as solver,
-        timestamp '2024-08-21 07:15:00' as joined_on
+        from_hex('0xC7899Ff6A3aC2FF59261bD960A8C880DF06E1041') as solver
 ),
 
 bonding_pools (pool, pool_name, initial_funder) as (
@@ -105,7 +105,7 @@ joined_on_with_colocated as (
         null as evt_index,
         1 as rk,
         true as active
-    from colocated_solvers c
+    from colocated_solvers as c
 ),
 
 latest_vouches as (
@@ -215,17 +215,18 @@ named_results as (
         jd.pool_name,
         jd.pool,
         jd.joined_on,
-        date_diff('day', date(jd.joined_on), date(now())) as days_in_pool,
-        concat(environment, '-', s.name) as solver_name
+        concat(environment, '-', s.name) as solver_name,
+        date_diff('day', date(jd.joined_on), date(now())) as days_in_pool
     from
         joined_on as jd
     inner join cow_protocol_ethereum.solvers as s on jd.solver = s.address
-    inner join valid_vouches
-        as vv on jd.solver = vv.solver
-    and jd.pool = vv.pool
-    
+    inner join valid_vouches as vv
+        on
+            jd.solver = vv.solver
+            and jd.pool = vv.pool
+
     union all
-    
+
     select
         c.solver,
         c.pool_name,
@@ -233,7 +234,7 @@ named_results as (
         c.joined_on,
         c.solver_name,
         date_diff('day', date(c.joined_on), date(now())) as days_in_pool
-    from colocated_solvers c
+    from colocated_solvers as c
 ),
 
 ranked_named_results as (
