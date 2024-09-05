@@ -1,0 +1,48 @@
+with 
+cow_amm_pool as (
+select blockchain, address, token_1_address, token_2_address
+from query_3959044 q
+where address={{cow_amm_pool}}
+)
+, get_lp_balance as (
+    select date(evt_block_time) as day, 
+    sum(case when "from" = 0x0000000000000000000000000000000000000000 THEN (value/1e18) ELSE -(value/1e18) END) as lp_supply
+    from erc20_ethereum.evt_transfer
+    where contract_address = {{cow_amm_pool}}
+    and ("from" = 0x0000000000000000000000000000000000000000 or "to" = 0x0000000000000000000000000000000000000000)
+    group by 1
+)
+
+, total_lp as (
+select day, lp_supply, sum(lp_supply) over (order by day) as total_lp
+from get_lp_balance
+)
+
+, get_tvl as (
+select 
+  date(time) as day, 
+  time, 
+  blockchain, 
+  cow_amm_address, 
+  token_1_balance_usd+token_2_balance_usd as tvl,
+  RANK() OVER (PARTITION BY date(time) ORDER BY time DESC) AS tvl_rank
+from  dune.cowprotocol.result_balancer_cow_amm_base_query_v_2
+where cow_amm_address={{cow_amm_pool}}
+)
+
+, total_tvl as (
+select day,  blockchain, cow_amm_address, tvl as total_tvl
+from get_tvl
+where tvl_rank=1
+)
+
+select 
+  t1.day, 
+  total_tvl, 
+  total_lp, 
+  lp_supply,
+  total_tvl/total_lp as lp_token_price
+from total_tvl t1
+join total_lp t2 on t1.day=t2.day
+where t1.day>=date'2024-07-30'
+order by t1.day desc
