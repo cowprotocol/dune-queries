@@ -1,0 +1,94 @@
+WITH 
+cow_amm_pool as (
+select blockchain, address, token_1_address, token_2_address
+from query_3959044 q
+where address={{cow_amm_pool}}
+)
+
+, uniswap_pool as 
+    (select output_0 as pool from uniswap_v2_ethereum.Factory_call_getPair
+    where ((_0 in (select token_1_address from cow_amm_pool) and _1 in (select token_2_address from cow_amm_pool) )
+    or (_0 in (select token_2_address from cow_amm_pool) and _1 in (select token_1_address from cow_amm_pool)))
+    and not(output_0 = 0x0000000000000000000000000000000000000000)
+    limit 1
+    )
+    
+, get_lp_balance as (
+select date(evt_block_time) as day, 
+sum(case when "from" = 0x0000000000000000000000000000000000000000 THEN (value/1e18) ELSE -(value/1e18) END) as lp_supply
+from erc20_ethereum.evt_transfer
+where contract_address in (select pool from uniswap_pool)
+and ("from" = 0x0000000000000000000000000000000000000000 or "to" = 0x0000000000000000000000000000000000000000)
+group by 1
+)
+
+, total_lp as (
+select day, lp_supply, sum(lp_supply) over (order by day) as total_lp
+from get_lp_balance
+)
+
+, pair_sync_with_counts AS (
+    SELECT *
+        ,ROW_NUMBER() OVER (PARTITION BY date_trunc('day', evt_block_time) ORDER BY evt_block_time ASC ) AS sync_count_in_day
+    FROM uniswap_v2_ethereum.Pair_evt_Sync
+    WHERE contract_address in (select pool from uniswap_pool)
+    ORDER BY evt_block_time DESC
+)
+,pair_sync_last_in_day AS (
+    SELECT *, MAX(sync_count_in_day) OVER (PARTITION BY date_trunc('day', evt_block_time)) AS max_sync_count_in_day
+    FROM pair_sync_with_counts
+)
+,v2_pair_data AS (
+    SELECT
+        pc.*
+        ,t0.symbol AS t0_symbol
+        ,t1.symbol AS t1_symbol
+        ,t0.decimals AS t0_decimals
+        ,t1.decimals AS t1_decimals
+    FROM uniswap_v2_ethereum.Factory_evt_PairCreated AS pc
+    LEFT JOIN tokens.erc20 AS t0 ON t0.contract_address = pc.token0 AND t0.blockchain in (select blockchain from cow_amm_pool)
+    LEFT JOIN tokens.erc20 AS t1 ON t1.contract_address = pc.token1 AND t1.blockchain in (select blockchain from cow_amm_pool)
+    WHERE pc.pair in (select pool from uniswap_pool)
+)
+,token_address_list AS (
+    SELECT token0 AS token_address FROM v2_pair_data
+    UNION ALL
+    SELECT token1 AS token_address FROM v2_pair_data
+)
+,v2_reserves_by_day AS (
+    SELECT
+        s.contract_address
+        ,pc.token0
+        ,pc.token1
+        ,date_trunc('day',s.evt_block_time) AS month
+        , CAST(s.reserve0 AS DOUBLE)/POW(10,t0_decimals) as token_1_reserve
+        , CAST(s.reserve1 AS DOUBLE)/POW(10,t1_decimals) as token_2_reserve
+    FROM pair_sync_last_in_day AS s
+    LEFT JOIN v2_pair_data AS pc ON pc.pair = s.contract_address
+    WHERE sync_count_in_day = max_sync_count_in_day
+    ORDER BY month DESC
+)
+
+,prices AS (
+    SELECT day, contract_address,symbol, price_close as price
+    FROM prices.usd_daily
+    WHERE blockchain in (select blockchain from cow_amm_pool)
+        AND contract_address IN (SELECT token_address FROM token_address_list)
+)
+
+SELECT 
+    r.contract_address
+    , r.token0
+    , r.token1
+    , month as day
+    , total_lp
+    , lp_supply
+    , COALESCE(token_1_reserve * p1.price, token_2_reserve * p2.price) +COALESCE(token_2_reserve * p2.price, token_1_reserve * p1.price) as TVL
+    , COALESCE(token_1_reserve * p1.price, token_2_reserve * p2.price) +COALESCE(token_2_reserve * p2.price, token_1_reserve * p1.price) /total_lp as lp_token_price
+FROM v2_reserves_by_day AS r
+LEFT JOIN prices AS p1 ON r.month = p1.day AND r.token0=p1.contract_address
+LEFT JOIN prices AS p2 ON r.month = p2.day AND r.token1=p2.contract_address
+
+join total_lp lp 
+on lp.day=month
+ORDER BY r.month DESC
