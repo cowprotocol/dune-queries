@@ -6,6 +6,9 @@
 --  {{blockchain}} - network to run the analysis on
 --
 -- It computes a CoW fraction per batch by averaging the CoW fractions from query 4021555 weighted by usd volume
+--
+-- The query is based on a Master's Thesis by Vigan Lladrovci
+-- https://wwwmatthes.in.tum.de/pages/y9xcjv094zhn/Master-s-Thesis-Vigan-Lladrovci
 
 with cow_per_token as (
     select * from "query_4021555(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')"

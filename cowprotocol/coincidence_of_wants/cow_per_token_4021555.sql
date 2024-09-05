@@ -16,6 +16,9 @@
 --   This quantity indicates what fraction of the amount bought and sold is not traded via AMMs or internalizations (showing as slippage).
 --
 -- The query also returns aggregated amounts for user_in, user_out, amm_in, amm_out, slippage_in, slippage_out for all tokens.
+--
+-- The query is based on a Master's Thesis by Vigan Lladrovci
+-- https://wwwmatthes.in.tum.de/pages/y9xcjv094zhn/Master-s-Thesis-Vigan-Lladrovci
 
 with aggregate_transfers_with_types as (
     select
