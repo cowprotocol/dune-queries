@@ -215,8 +215,8 @@ named_results as (
         jd.pool_name,
         jd.pool,
         jd.joined_on,
-        concat(environment, '-', s.name) as solver_name,
-        date_diff('day', date(jd.joined_on), date(now())) as days_in_pool
+        date_diff('day', date(jd.joined_on), date(now())) as days_in_pool,
+        concat(environment, '-', s.name) as solver_name
     from
         joined_on as jd
     inner join cow_protocol_ethereum.solvers as s on jd.solver = s.address
