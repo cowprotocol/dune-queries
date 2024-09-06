@@ -37,7 +37,6 @@ cow_per_token_usd as (
         token_address,
         naive_cow_potential,
         naive_cow,
-        naive_cow_averaged,
         token_price * user_in as user_in,
         token_price * user_out as user_out,
         token_price * amm_in as amm_in,
@@ -68,6 +67,5 @@ cow_volume_per_batch as (
 select
     *,
     case when user_out > 0 then naive_cow_potential_volume / user_out end as naive_cow_potential,
-    case when user_out > 0 then naive_cow_volume / user_out end as naive_cow,
-    case when user_in + user_out > 0 then naive_cow_averaged_volume / (user_in + user_out) end as naive_cow_averaged
+    case when user_out > 0 then naive_cow_volume / user_out end as naive_cow
 from cow_volume_per_batch
