@@ -2,11 +2,11 @@
 -- Parameters
 --  {{token_a}} - either token of the desired uni pool
 --  {{token_b}} - other token of the desired uni pool
---  {{start}} - time date as of which the analysis should run
+--  {{start}} - date as of which the analysis should run
 
--- Given that we might not have records every day in the source data, but want to visualize development on a per day basis, 
--- creates an auxiluary table with one record per day between `start` and `now`
-
+-- Given that we might not have records every day in the source data (e.g. not every day the lp supply may change), 
+-- but still want to visualize development on a per day basis,  we create an auxiliary table with one record per 
+-- day between `start` and `now`
 with date_range as (
     select t.day
     from
@@ -16,7 +16,7 @@ with date_range as (
         )) t (day) --noqa: AL01
 ),
 
--- Finds the uniswap pool address given desired tokens (regardless of order)
+-- Finds the uniswap v2 pool address given tokens specified in query parameters (regardless of order)
 pool as (
     select
         pool as contract_address,
@@ -29,7 +29,7 @@ pool as (
     limit 1
 ),
 
--- per day lp token total supply changes by looking at burn/mint events
+-- per day lp token total supply changes of the uniswap pool by looking at burn/mint events
 lp_supply_delta as (
     select
         date(evt_block_time) as "day",
@@ -49,13 +49,13 @@ lp_total_supply_incomplete as (
     from lp_supply_delta
 ),
 
--- lp token total supply without gaps.
+-- lp token total supply without date gaps
 lp_total_supply as (
     select
         day,
         total_lp
     from (
-        -- join full date range with potentially incomplete supply. This results in many rows per day (all total supplies on or before that day)
+        -- join full date range with potentially incomplete data. This results in many rows per day (all total supplies on or before that day)
         -- rank() is then used to order join candidates by recency (rank = 1 is the latest lp supply)
         select
             date_range.day,
@@ -64,13 +64,14 @@ lp_total_supply as (
         from date_range
         inner join lp_total_supply_incomplete as lp
             on date_range.day >= lp.day
-            -- perforance optimisation: assume there was at least one lp event in the week prior to the start
+            -- performance optimisation: this assumes one week prior to start there was at least one lp supply change event
             and lp.day >= (timestamp '{{start}}' - interval '7' day)
     )
     where latest = 1
 ),
 
--- get all syncs that happened on or before the end of a day in our date range and rank them by recency
+-- TVL calculation is based on `Sync` events which are emitted on every swap and contain current reserve amounts.
+-- Get all sync events that happened on or before the end of each day in our date range and rank them by recency
 -- the entry with rank 1 is the latest sync event before a target day (allowing for days without any sync).
 latest_syncs_per_day as (
     select
@@ -88,7 +89,7 @@ latest_syncs_per_day as (
         on sync.contract_address = pool.contract_address
 ),
 
--- get reserve balances of token_a and token_b per day, by looking at the last `Sync` emitted event for each day
+-- Get reserve balances of token_a and token_b per day, by looking at the last `Sync` emitted event for each day
 reserve_balances as (
     select
         date_range.day,
@@ -104,13 +105,14 @@ reserve_balances as (
             and latest = 1
 ),
 
--- compute tvl by multiplying day's closing price with balance 
+-- Compute tvl by multiplying each day's closing price with balance
 tvl as (
     select
         balances.day,
         balances.contract_address,
         sum(balance * price_close / pow(10, decimals)) as tvl
     from (
+        -- turns (date, balance0, balance1) into (date, balance0) + (date, balance1)
         select
             day,
             contract_address,
@@ -133,7 +135,7 @@ tvl as (
     group by 1, 2
 ),
 
--- now we can plot the lp token price (tvl/lp total supply) over time  
+-- With this we can plot the lp token price (tvl/lp total supply) over time
 lp_token_price as (
     select
         tvl.day,
@@ -145,17 +147,17 @@ lp_token_price as (
         on tvl.day = lp.day
 )
 
--- compute current value of initial investment together with other relevant output columns
+-- Compute current value of initial investment together with other relevant output columns
 select
     day,
     tvl,
     total_lp,
     lp_token_price,
     (
-        -- assess initial investment
+        -- Assess initial investment in lp tokens
         select 10000 * lp_token_price as investment
         from lp_token_price
         where day = timestamp '{{start}}'
-    ) / lp_token_price as current_value
+    ) / lp_token_price as current_value_of_investment
 from lp_token_price
 order by 1 desc
