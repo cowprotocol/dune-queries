@@ -30,7 +30,7 @@ cow_amm_pool as (
 -- per day lp token total supply changes of the CoW AMM pool by looking at burn/mint events
 lp_balance_delta as (
     select
-        date(evt_block_time) as day,
+        date(evt_block_time) as "day",
         sum(case when "from" = 0x0000000000000000000000000000000000000000 then value else -value end) as lp_supply
     from erc20_ethereum.evt_transfer
     where
@@ -75,7 +75,7 @@ get_tvl as (
         sum(amount * price_close) as total_tvl
     from (
         select
-            date(evt_block_time) as day,
+            date(evt_block_time) as "day",
             symbol,
             -(value / pow(10, decimals)) as amount
         from erc20_ethereum.evt_transfer as a left join tokens.erc20 as b on a.contract_address = b.contract_address and blockchain in (select blockchain from cow_amm_pool)
@@ -88,7 +88,7 @@ get_tvl as (
 
         union all
         select
-            date(evt_block_time) as day,
+            date(evt_block_time) as "day",
             symbol,
             (value / pow(10, decimals)) as amount
         from erc20_ethereum.evt_transfer as a left join tokens.erc20 as b on a.contract_address = b.contract_address and blockchain in (select blockchain from cow_amm_pool)
