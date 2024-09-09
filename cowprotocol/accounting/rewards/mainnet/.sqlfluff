@@ -1,0 +1,6 @@
+[sqlfluff:templater:jinja:context]
+start_time='2024-08-01 12:00'
+end_time='2024-08-02 12:00'
+tx_hash='0xb548b6d5c99be70cc70162591e7699801f8841e59ce12aa653c9146f207f146e'
+solver_address='0x008300082C3000009e63680088f8c7f4D3ff2E87'
+cte_name = 'results'
