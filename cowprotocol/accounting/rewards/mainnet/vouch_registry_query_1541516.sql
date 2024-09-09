@@ -5,6 +5,7 @@ last_block_before_timestamp as (
     where time < cast('{{end_time}}' as timestamp)
 ),
 
+-- Query Logic Begins here!
 vouches as (
     select
         evt_block_number,
@@ -17,8 +18,8 @@ vouches as (
     from cow_protocol_ethereum.VouchRegister_evt_Vouch
     inner join query_4056263
         on
-            pool = pool_address
-            and sender = funder
+            pool = bondingPool
+            and sender = initial_funder
     where evt_block_number <= (select * from last_block_before_timestamp)
 ),
 
@@ -34,23 +35,21 @@ invalidations as (
     from cow_protocol_ethereum.VouchRegister_evt_InvalidateVouch
     inner join query_4056263
         on
-            pool = pool_address
-            and sender = funder
+            pool = bondingPool
+            and sender = initial_funder
     where evt_block_number <= (select * from last_block_before_timestamp)
-),
-
-vouches_and_invalidations as (
-    select *
-    from
-        vouches
-    union distinct
-    select *
-    from invalidations
 ),
 
 -- At this point we have excluded all arbitrary vouches (i.e. those not from initial funders of recognized pools)
 -- This ranks (solver, pool, sender) by most recent (vouch or invalidation)
 -- and yields as rank 1, the current "active" status of the triplet.
+vouches_and_invalidations as (
+    select *
+    from vouches
+    union distinct
+    select * from invalidations
+),
+
 ranked_vouches as (
     select
         *,
@@ -93,13 +92,13 @@ named_results as (
         solver,
         reward_target,
         vv.pool as bonding_pool,
-        bp.name as pool_name,
+        bp.pool_name,
         concat(environment, '-', s.name) as solver_name
     from valid_vouches as vv
     inner join cow_protocol_ethereum.solvers as s
         on address = solver
     inner join query_4056263 as bp
-        on vv.pool = bp.pool_address
+        on vv.pool = bp.pool
 )
 
 select * from {{vouch_cte_name}}
