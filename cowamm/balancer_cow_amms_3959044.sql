@@ -2,6 +2,7 @@
 -- It indexes all Balancer CoW AMMs on ethereum and gnosis
 --
 -- the final table has columns
+-- - created_at: the creation timestamp
 -- - blockchain: 'ethereum' or 'gnosis'
 -- - address: address of Balancer CoW AMM
 -- - token_1_address: address of token with smaller address
@@ -20,6 +21,7 @@ with cowamm_creations_ethereum as (
 -- get tokens added via bind (0xe4e1e538) on the CoW AMM address
 cowamms_ethereum as (
     select
+        block_time as created_at,
         'ethereum' as blockchain,
         contract_address as address,
         min(varbinary_substring(data, 5 + 2 * 32 + 12, 20)) as token_1_address,
@@ -30,7 +32,7 @@ cowamms_ethereum as (
         contract_address in (select address from cowamm_creations_ethereum)
         and topic0 = 0xe4e1e53800000000000000000000000000000000000000000000000000000000
         and block_time >= cast('2024-07-29 00:00:00' as timestamp)
-    group by 1, 2
+    group by 1, 2, 3
 ),
 
 -- on gnosis
@@ -46,6 +48,7 @@ cowamm_creations_gnosis as (
 
 cowamms_gnosis as (
     select
+        block_time as created_at,
         'gnosis' as blockchain,
         contract_address as address,
         min(varbinary_substring(data, 5 + 2 * 32 + 12, 20)) as token_1_address,
@@ -56,7 +59,7 @@ cowamms_gnosis as (
         contract_address in (select address from cowamm_creations_gnosis)
         and topic0 = 0xe4e1e53800000000000000000000000000000000000000000000000000000000
         and block_time >= cast('2024-07-29 00:00:00' as timestamp)
-    group by 1, 2
+    group by 1, 2, 3
 ),
 
 -- combine data for different chains
