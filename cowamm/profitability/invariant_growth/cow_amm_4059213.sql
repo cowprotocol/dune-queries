@@ -1,4 +1,4 @@
--- Computes the absolute surplus per $100 tvl per day (aka its invariant growth) for a CoW AMM.
+-- Computes the surplus per $100 tvl per day (aka its invariant growth) for a CoW AMM.
 -- Parameters
 --  {{token_a}} - either token of the desired uni pool
 --  {{token_b}} - other token of the desired uni pool
