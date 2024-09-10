@@ -102,6 +102,7 @@ get_tvl as (
         from erc20_ethereum.evt_transfer
         where
             "from" in (select address from cow_amm_pool)
+            and contract_address in ({{token_a}}, {{token_b}})
 
         union all
         select
@@ -111,6 +112,7 @@ get_tvl as (
         from erc20_ethereum.evt_transfer
         where
             "to" in (select address from cow_amm_pool)
+            and contract_address in ({{token_a}}, {{token_b}})
     ) as x inner join prices.usd_daily as y
         on blockchain = 'ethereum' and x.day = y.day and x.contract_address = y.contract_address
     group by 1
