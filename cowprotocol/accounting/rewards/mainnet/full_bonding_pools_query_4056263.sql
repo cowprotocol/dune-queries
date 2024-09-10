@@ -1,3 +1,5 @@
+-- Query that hardcodes all existing full bonding pools that
+--  are currently valid at CoW Protocol.
 with
 full_bonding_pools as (
     select
