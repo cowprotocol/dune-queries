@@ -4,46 +4,53 @@
 --  {{token_b}} - other token of the desired uni pool
 --  {{start}} - date as of which the analysis should run
 
-with recursive balances (day, balance0, balance1) as (
-    -- Base case: $10k are invested evenly into token_a and token_b at the opening price of the start day
+-- Note: not using a simpler recursive approach due to Dune's recursion depth limitation.
+-- Current value of initial investment can be computed as the product of cumulative price changes per day, since
+-- value(day+1) = value(day) * (p1.price(day+1)/p1.price(day) + p2.price(day+1) / p2.price(day))/2
+
+-- limit the relevant date range
+with date_series as (
+    select t.day
+    from
+        unnest(sequence(
+            date(timestamp '{{start}}'),
+            date(now())
+        )) t (day) --noqa: AL01
+),
+
+-- computes relative daily price changes for both assets
+daily_price_change as (
     select
-        date(timestamp '{{start}}'),
-        10000 / 2 / p1.price_open, -- Initial balance in token_a
-        10000 / 2 / p2.price_open  -- Initial balance in token_b
-    from prices.usd_daily as p1
+        ds.day,
+        p1.price_close / previous_p1.price_close as p1,
+        p2.price_close / previous_p2.price_close as p2
+    from date_series as ds
+    inner join prices.usd_daily as p1
+        on
+            p1.day
+            and p1.contract_address = {{token_a}}
+            and p1.blockchain = 'ethereum'
+    inner join prices.usd_daily as previous_p1
+        on
+            previous_p1.day = ds.day - interval '1' day
+            and previous_p1.contract_address = {{token_a}}
+            and previous_p1.blockchain = 'ethereum'
     inner join prices.usd_daily as p2
         on
-            p1.day = date(timestamp '{{start}}')
-            and p1.day = p2.day
-            and p1.blockchain = 'ethereum'
-            and p2.blockchain = 'ethereum'
-            and p1.contract_address = {{token_a}}
+            p2.day
             and p2.contract_address = {{token_b}}
-
-    union all
-
-    -- Recursive case: Compute the next day's balances according to previous day's closing price and reinvest half into each token
-    select
-        b.day + interval '1' day,
-        (balance0 * p1.price_close + balance1 * p2.price_close) / 2 / p1.price_close, -- Updated balance in token_a
-        (balance0 * p1.price_close + balance1 * p2.price_close) / 2 / p2.price_close  -- Updated balance in token_b
-    from balances as b
-    inner join prices.usd_daily as p1
-        on b.day = p1.day and p1.contract_address = {{token_a}}
-    inner join prices.usd_daily as p2
-        on b.day = p2.day and p2.contract_address = {{token_b}}
-    where b.day < date(now())
+            and p2.blockchain = 'ethereum'
+    inner join prices.usd_daily as previous_p2
+        on
+            previous_p2.day = ds.day - interval '1' day
+            and previous_p2.contract_address = {{token_b}}
+            and previous_p2.blockchain = 'ethereum'
 )
 
--- Multiply daily balances with end of day closing price to get current value
+-- For each day multiply initial investment with cumulative product of average price change of the two assets
 select
-    b.day,
-    b.balance0,
-    b.balance1,
-    (b.balance0 * p1.price_close) + (b.balance1 * p2.price_close) as current_value
-from balances as b
-inner join prices.usd_daily as p1
-    on b.day = p1.day and p1.contract_address = {{token_a}}
-inner join prices.usd_daily as p2
-    on b.day = p2.day and p2.contract_address = {{token_b}}
-order by 1 desc;
+    day,
+    -- SQL doesn't support PRODUCT() over (...), but luckily "the sum of logarithms" is equal to "logarithm of the product",
+    exp(sum(ln((p1 + p2) / 2)) over (order by day asc)) * 10000 as current_value
+from daily_price_change
+order by 1 desc
