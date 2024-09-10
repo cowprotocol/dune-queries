@@ -155,9 +155,9 @@ select
     lp_token_price,
     (
         -- Assess initial investment in lp tokens
-        select 10000 * lp_token_price as investment
+        select 10000 / lp_token_price as investment
         from lp_token_price
         where day = timestamp '{{start}}'
-    ) / lp_token_price as current_value_of_investment
+    ) * lp_token_price as current_value_of_investment
 from lp_token_price
 order by 1 desc
