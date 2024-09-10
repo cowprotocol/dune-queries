@@ -1,3 +1,10 @@
+-- Base query to convert accounting period to block range.
+-- Convention throughout the accounting that is used is that we consider all auctions whose
+-- block deadline is in the block range this query returns
+-- Parameters:
+--  {{start_time}} - the start date timestamp for the accounting period  (inclusively)
+--  {{end_time}} - the end date timestamp for the accounting period (exclusively)
+
 select
     min("number") as start_block,
     max("number") as end_block
