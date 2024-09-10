@@ -55,4 +55,4 @@ select
     -- SQL doesn't support PRODUCT() over (...), but luckily "the sum of logarithms" is equal to "logarithm of the product",
     exp(sum(ln((p1 + p2) / 2)) over (order by day asc)) * 10000 as current_value_of_investment
 from daily_price_change
-order by 1 desc
+order by 1 asc
