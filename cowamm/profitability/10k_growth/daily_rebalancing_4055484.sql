@@ -29,7 +29,7 @@ daily_price_change as (
     from date_series as ds
     inner join prices.usd_daily as p1
         on
-            p1.day
+            p1.day = ds.day
             and p1.contract_address = {{token_a}}
             and p1.blockchain = 'ethereum'
     inner join prices.usd_daily as previous_p1
@@ -39,7 +39,7 @@ daily_price_change as (
             and previous_p1.blockchain = 'ethereum'
     inner join prices.usd_daily as p2
         on
-            p2.day
+            p2.day = ds.day
             and p2.contract_address = {{token_b}}
             and p2.blockchain = 'ethereum'
     inner join prices.usd_daily as previous_p2
