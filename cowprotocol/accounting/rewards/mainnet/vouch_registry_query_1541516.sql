@@ -1,8 +1,10 @@
+-- Query that fetches the list of solver addresses that are active
+-- and are properly vouched for by a full bonding pool
+-- Parameters:
+--  {{end_time}} - the end date timestamp for the accounting period (exclusively)
 with
-
 last_block_before_timestamp as (
-    select max(number) from ethereum.blocks
-    where time < cast('{{end_time}}' as timestamp)
+    select end_block from "query_3333356(start_time='2018-01-01 00:00',end_time='{{end_time}}')"
 ),
 
 -- Query Logic Begins here!
@@ -44,8 +46,7 @@ invalidations as (
 -- This ranks (solver, pool, sender) by most recent (vouch or invalidation)
 -- and yields as rank 1, the current "active" status of the triplet.
 vouches_and_invalidations as (
-    select *
-    from vouches
+    select * from vouches
     union distinct
     select * from invalidations
 ),
