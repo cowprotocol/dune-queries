@@ -72,42 +72,52 @@ lp_total_supply as (
 get_tvl as (
     select
         x.day,
-        sum(amount * price_close) as total_tvl
+        sum(amount * price_close / pow(10, decimals)) as total_tvl
     from (
         select
             date(evt_block_time) as "day",
-            symbol,
-            -(value / pow(10, decimals)) as amount
-        from erc20_ethereum.evt_transfer as a left join tokens.erc20 as b on a.contract_address = b.contract_address and blockchain in (select blockchain from cow_amm_pool)
+            contract_address,
+            -value as amount
+        from erc20_ethereum.evt_transfer
         where
             "from" in (select address from cow_amm_pool)
-            and (
-                a.contract_address in (select token_1_address from cow_amm_pool)
-                or a.contract_address in (select token_2_address from cow_amm_pool)
-            )
 
         union all
         select
             date(evt_block_time) as "day",
-            symbol,
-            (value / pow(10, decimals)) as amount
-        from erc20_ethereum.evt_transfer as a left join tokens.erc20 as b on a.contract_address = b.contract_address and blockchain in (select blockchain from cow_amm_pool)
+            contract_address,
+            value as amount
+        from erc20_ethereum.evt_transfer
         where
             "to" in (select address from cow_amm_pool)
-            and (
-                a.contract_address in (select token_1_address from cow_amm_pool)
-                or a.contract_address in (select token_2_address from cow_amm_pool)
-            )
     ) as x inner join prices.usd_daily as y
-        on blockchain in (select blockchain from cow_amm_pool) and x.symbol = y.symbol and x.day = y.day
+        on blockchain = 'ethereum' and x.day = y.day and x.contract_address = y.contract_address
     group by 1
+),
+
+total_tvl_prep as (
+    select
+        day,
+        sum(total_tvl) over (order by day) as total_tvl
+    from get_tvl
 ),
 
 total_tvl as (
     select
         day,
-        sum(total_tvl) over (order by day) as total_tvl
-    from get_tvl
+        total_tvl
+    from (
+        select
+            date_range.day,
+            total_tvl,
+            rank() over (partition by (date_range.day) order by tvl.day desc) as latest
+        from date_range
+        inner join total_tvl_prep as tvl
+            on date_range.day >= tvl.day
+            -- performance optimisation: this assumes one week prior to start there was at least one lp supply change event
+            and tvl.day >= (timestamp '{{start}}' - interval '7' day)
+    )
+    where latest = 1
 ),
 
 -- With this we can plot the lp token price (tvl/lp total supply) over time
