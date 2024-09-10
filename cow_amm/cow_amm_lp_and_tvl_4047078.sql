@@ -107,6 +107,8 @@ total_tvl as (
         day,
         total_tvl
     from (
+        -- join full date range with potentially incomplete data. This results in many rows per day (all total tvl on or before that day)
+        -- rank() is then used to order join candidates by recency (rank = 1 is the latest tvl)
         select
             date_range.day,
             total_tvl,
@@ -114,7 +116,7 @@ total_tvl as (
         from date_range
         inner join total_tvl_prep as tvl
             on date_range.day >= tvl.day
-            -- performance optimisation: this assumes one week prior to start there was at least one lp supply change event
+            -- performance optimisation: this assumes one week prior to start there was at least one tvl change event
             and tvl.day >= (timestamp '{{start}}' - interval '7' day)
     )
     where latest = 1
