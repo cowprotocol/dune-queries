@@ -8,6 +8,20 @@ colocated_solvers as (
         timestamp '2024-08-21 07:15:00' as joined_on,
         from_hex('0xB6113c260aD0a8A086f1E31c5C92455252A53Fb8') as pool,
         from_hex('0xC7899Ff6A3aC2FF59261bD960A8C880DF06E1041') as solver
+    union all
+    select
+        'barn-Barter' as solver_name,
+        'Reduced-Bonding' as pool_name,
+        timestamp '2024-08-21 07:15:00' as joined_on,
+        from_hex('0xB6113c260aD0a8A086f1E31c5C92455252A53Fb8') as pool,
+        from_hex('0xC7899Ff6A3aC2FF59261bD960A8C880DF06E1041') as solver
+    union all
+    select
+        'prod-Copium_Capital' as solver_name,
+        'Reduced-Bonding' as pool_name,
+        timestamp '7-25-24 07:42:00' as joined_on,
+        from_hex('0xc5Dc06423f2dB1B11611509A5814dD1b242268dd') as pool,
+        from_hex('0x008300082C3000009e63680088f8c7f4D3ff2E87') as solver
 ),
 
 bonding_pools (pool, pool_name, initial_funder) as (
