@@ -6,7 +6,9 @@
 
 -- Note: not using a simpler recursive approach due to Dune's recursion depth limitation.
 -- Current value of initial investment can be computed as the product of cumulative price changes per day, since
--- value(day+1) = value(day) * (p1.price(day+1)/p1.price(day) + p2.price(day+1) / p2.price(day))/2
+-- `value(day+1) = value(day) * (p1.price(day+1)/p1.price(day) + p2.price(day+1) / p2.price(day))/2`
+-- Thus, current_value can be computed using cumulative products of (sums of) daily price changes:
+-- `(p1.price(day+1)/p1.price(day) + p2.price(day+1)/p2.price(day))/2`
 
 -- limit the relevant date range
 with date_series as (
