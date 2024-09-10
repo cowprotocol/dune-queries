@@ -19,7 +19,7 @@ colocated_solvers as (
     select
         'prod-Copium_Capital' as solver_name,
         'Reduced-Bonding' as pool_name,
-        timestamp '7-25-24 07:42:00' as joined_on,
+        timestamp '2024-07-25 07:42:00' as joined_on,
         from_hex('0xc5Dc06423f2dB1B11611509A5814dD1b242268dd') as pool,
         from_hex('0x008300082C3000009e63680088f8c7f4D3ff2E87') as solver
 ),
