@@ -18,13 +18,34 @@ with date_range as (
 
 -- Finds the CoW AMM pool address given tokens specified in query parameters (regardless of order) 
 cow_amm_pool as (
-    select
+    select distinct
+        cowamm_address as address,
         blockchain,
-        address,
         token_1_address,
         token_2_address
-    from query_3959044
-    where ((token_1_address = {{token_a}} and token_2_address = {{token_b}}) or (token_2_address = {{token_a}} and token_1_address = {{token_b}}))
+    from (
+        select
+            t.blockchain,
+            cowamm_address,
+            token_1_reserve as token_1_balance,
+            token_2_reserve as token_2_balance,
+            t.token_1_address,
+            t.token_2_address,
+            count(coalesce(token_1_reserve, token_2_reserve)) over (partition by cow_amm_nb order by "time" desc) as "temp"
+        from query_3959058 as t
+        left join
+            (select
+                *,
+                count(address) over (order by address, token_1_address, token_2_address) as cow_amm_nb
+            from query_3959044) as p
+            on
+                t.cowamm_address = p.address and t.blockchain = p.blockchain
+                and t.token_1_address = p.token_1_address and t.token_2_address = p.token_2_address
+
+        where
+            ((t.token_1_address = {{token_a}} and t.token_2_address = {{token_b}}) or (t.token_2_address = {{token_a}} and t.token_1_address = {{token_b}}))
+    ) where temp = 1
+    and token_1_balance > 0 and token_2_balance > 0
 ),
 
 -- per day lp token total supply changes of the CoW AMM pool by looking at burn/mint events
