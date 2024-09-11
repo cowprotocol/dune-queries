@@ -18,34 +18,12 @@ with date_range as (
 
 -- Finds the CoW AMM pool address given tokens specified in query parameters (regardless of order) 
 cow_amm_pool as (
-    select distinct
-        cowamm_address as address,
-        blockchain,
-        token_1_address,
-        token_2_address
-    from (
-        select
-            t.blockchain,
-            cowamm_address,
-            token_1_reserve as token_1_balance,
-            token_2_reserve as token_2_balance,
-            t.token_1_address,
-            t.token_2_address,
-            count(coalesce(token_1_reserve, token_2_reserve)) over (partition by cow_amm_nb order by "time" desc) as "temp"
-        from query_3959058 as t
-        left join
-            (select
-                *,
-                count(address) over (order by address, token_1_address, token_2_address) as cow_amm_nb
-            from query_3959044) as p
-            on
-                t.cowamm_address = p.address and t.blockchain = p.blockchain
-                and t.token_1_address = p.token_1_address and t.token_2_address = p.token_2_address
-
-        where
-            ((t.token_1_address = {{token_a}} and t.token_2_address = {{token_b}}) or (t.token_2_address = {{token_a}} and t.token_1_address = {{token_b}}))
-    ) where temp = 1
-    and token_1_balance > 0 and token_2_balance > 0
+    select
+        created_at,
+        address
+    from query_3959044
+    where ((token_1_address = {{token_a}} and token_2_address = {{token_b}}) or (token_2_address = {{token_a}} and token_1_address = {{token_b}}))
+    order by 1 desc
 ),
 
 -- per day lp token total supply changes of the CoW AMM pool by looking at burn/mint events
@@ -89,56 +67,20 @@ lp_total_supply as (
     where latest = 1
 ),
 
--- Compute tvl by multiplying each day's closing price with net transfers in and out of the pool
-get_tvl as (
-    select
-        x.day,
-        sum(amount * price_close / pow(10, decimals)) as total_tvl
-    from (
-        select
-            date(evt_block_time) as "day",
-            contract_address,
-            -value as amount
-        from erc20_ethereum.evt_transfer
-        where
-            "from" in (select address from cow_amm_pool)
-            and contract_address in ({{token_a}}, {{token_b}})
-
-        union all
-        select
-            date(evt_block_time) as "day",
-            contract_address,
-            value as amount
-        from erc20_ethereum.evt_transfer
-        where
-            "to" in (select address from cow_amm_pool)
-            and contract_address in ({{token_a}}, {{token_b}})
-    ) as x inner join prices.usd_daily as y
-        on blockchain = 'ethereum' and x.day = y.day and x.contract_address = y.contract_address
-    group by 1
-),
-
-total_tvl_prep as (
+tvl as (
     select
         day,
-        sum(total_tvl) over (order by day) as total_tvl
-    from get_tvl
-),
-
-total_tvl as (
-    select
-        day,
-        total_tvl
+        tvl
     from (
         -- join full date range with potentially incomplete data. This results in many rows per day (all total tvl on or before that day)
         -- rank() is then used to order join candidates by recency (rank = 1 is the latest tvl)
         select
             date_range.day,
-            total_tvl,
-            rank() over (partition by (date_range.day) order by tvl.day desc) as latest
+            tvl,
+            rank() over (partition by (date_range.day) order by tvl.block_time desc) as latest
         from date_range
-        inner join total_tvl_prep as tvl
-            on date_range.day >= tvl.day
+        inner join (SELECT * from "query_4059700(token_a='{{token_a}}', token_b='{{token_b}}')") as tvl
+            on date_range.day >= tvl.block_time
             -- performance optimisation: this assumes one week prior to start there was at least one tvl change event
             and tvl.day >= (timestamp '{{start}}' - interval '7' day)
     )
@@ -149,12 +91,12 @@ total_tvl as (
 final as (
     select
         t1.day,
-        total_tvl as tvl,
+        tvl,
         total_lp,
-        total_tvl / total_lp as lp_token_price
-    from total_tvl as t1
+        tvl / total_lp as lp_token_price
+    from tvl
     inner join lp_total_supply as lp
-        on t1.day = lp.day
+        on tvl.day = lp.day
 )
 
 -- Compute current value of initial investment together with other relevant output columns
