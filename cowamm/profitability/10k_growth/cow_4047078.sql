@@ -24,6 +24,7 @@ cow_amm_pool as (
     from query_3959044
     where ((token_1_address = {{token_a}} and token_2_address = {{token_b}}) or (token_2_address = {{token_a}} and token_1_address = {{token_b}}))
     order by 1 desc
+    limit 1
 ),
 
 -- per day lp token total supply changes of the CoW AMM pool by looking at burn/mint events
@@ -67,6 +68,16 @@ lp_total_supply as (
     where latest = 1
 ),
 
+tvl_by_tx as (
+    select
+        *,
+        rank() over (partition by date(block_time) order by block_time desc) as latest
+    from "query_4059700(token_a='{{token_a}}', token_b='{{token_b}}')"
+    where pool = (select address from cow_amm_pool)
+    -- performance optimisation: this assumes one week prior to start there was at least one tvl change event
+    and block_time >= timestamp '{{start}}' - interval '7' day
+),
+
 tvl as (
     select
         day,
@@ -79,10 +90,10 @@ tvl as (
             tvl,
             rank() over (partition by (date_range.day) order by tvl.block_time desc) as latest
         from date_range
-        inner join (SELECT * from "query_4059700(token_a='{{token_a}}', token_b='{{token_b}}')") as tvl
-            on date_range.day >= tvl.block_time
-            -- performance optimisation: this assumes one week prior to start there was at least one tvl change event
-            and tvl.day >= (timestamp '{{start}}' - interval '7' day)
+        inner join tvl_by_tx as tvl
+            on date_range.day >= date(tvl.block_time)
+            -- performance optimisation: only look at the last update of the day
+            and tvl.latest = 1
     )
     where latest = 1
 ),
@@ -90,7 +101,7 @@ tvl as (
 -- With this we can plot the lp token price (tvl/lp total supply) over time
 final as (
     select
-        t1.day,
+        tvl.day,
         tvl,
         total_lp,
         tvl / total_lp as lp_token_price
