@@ -4,11 +4,11 @@ per_settlement_prelim as (
         t.block_time,
         t.order_uid,
         t.tx_hash,
-        r.data.partner_fee_recipient as partner_recipient,
+        r.data.partner_fee_recipient as partner_recipient,  -- noqa: RF01
         t.app_data,
         usd_value,
-        cast(cast(r.data.protocol_fee as varchar) as int256) as protocol_fee,
-        r.data.protocol_fee_token,
+        cast(cast(r.data.protocol_fee as varchar) as int256) as protocol_fee,  -- noqa: RF01
+        r.data.protocol_fee_token,  -- noqa: RF01
         json_extract(a.encode, '$.metadata.partnerFee.bps') as patnerFeeBps,
         json_extract(a.encode, '$.metadata.widget.appCode') as app_code,
         cast(
@@ -23,9 +23,9 @@ per_settlement_prelim as (
         ) / 10000 * 0.15 as est_cow_revenue,
         cast(
             cast(
-                coalesce(r.data.partner_fee, r.data.protocol_fee) as varchar
+                coalesce(r.data.partner_fee, r.data.protocol_fee) as varchar  -- noqa: RF01
             ) as int256
-        ) * r.data.protocol_fee_native_price / pow(10, 18) as raw_integrator_fee_in_eth
+        ) * r.data.protocol_fee_native_price / pow(10, 18) as raw_integrator_fee_in_eth  -- noqa: RF01
     from
         cow_protocol_ethereum.trades as t
     left join dune.cowprotocol.dataset_app_data_mainnet as a on t.app_data = a.contract_app_data
