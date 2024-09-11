@@ -1,0 +1,4 @@
+[sqlfluff:templater:jinja:context]
+start_time='2024-08-01 12:00:00'
+end_time='2024-08-02 12:00:00'
+result=per_settlement,aggregate_per_recipient
