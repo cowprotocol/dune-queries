@@ -32,9 +32,11 @@ daily_price_change as (
             p1.day = ds.day
             and p1.contract_address = {{token_a}}
             and p1.blockchain = 'ethereum'
-    inner join prices.usd_daily as previous_p1
+    left join prices.usd_daily as previous_p1
         on
             previous_p1.day = ds.day - interval '1' day
+            -- avoid computing price change on first day
+            and previous_p1.day >= date(timestamp '{{start}}')
             and previous_p1.contract_address = {{token_a}}
             and previous_p1.blockchain = 'ethereum'
     inner join prices.usd_daily as p2
@@ -42,9 +44,11 @@ daily_price_change as (
             p2.day = ds.day
             and p2.contract_address = {{token_b}}
             and p2.blockchain = 'ethereum'
-    inner join prices.usd_daily as previous_p2
+    left join prices.usd_daily as previous_p2
         on
             previous_p2.day = ds.day - interval '1' day
+            -- avoid computing price change on first day
+            and previous_p2.day >= date(timestamp '{{start}}')
             and previous_p2.contract_address = {{token_b}}
             and previous_p2.blockchain = 'ethereum'
 )
@@ -53,6 +57,7 @@ daily_price_change as (
 select
     day,
     -- SQL doesn't support PRODUCT() over (...), but luckily "the sum of logarithms" is equal to "logarithm of the product",
-    exp(sum(ln((p1 + p2) / 2)) over (order by day asc)) * 10000 as current_value_of_investment
+    -- coalesce to factor 1 on first day
+    coalesce(exp(sum(ln((p1 + p2) / 2)) over (order by day asc)), 1) * 10000 as current_value_of_investment
 from daily_price_change
 order by 1 desc
