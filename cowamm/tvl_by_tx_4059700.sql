@@ -17,29 +17,17 @@ reserves_delta as (
     select
         evt_block_time,
         evt_tx_hash,
-        "from" as pool,
+        p.address as pool,
         contract_address as token,
         MAX(evt_block_number) as evt_block_number,
         MAX(evt_index) as evt_index,
-        SUM(-value) as amount
-    from erc20_ethereum.evt_transfer
-    where
-        "from" in (select address from cow_amm_pool)
-        and contract_address in ({{token_a}}, {{token_b}})
-    group by 1, 2, 3, 4
-    union all
-    select
-        evt_block_time,
-        evt_tx_hash,
-        "to" as pool,
-        contract_address as token,
-        MAX(evt_block_number) as evt_block_number,
-        MAX(evt_index) as evt_index,
-        SUM(value) as amount
-    from erc20_ethereum.evt_transfer
-    where
-        "to" in (select address from cow_amm_pool)
-        and contract_address in ({{token_a}}, {{token_b}})
+        SUM(case when "from" = p.address then -value else value end) as amount
+    from erc20_ethereum.evt_transfer as t
+    inner join cow_amm_pool as p
+        on
+            t."from" = p.address
+            or t.to = p.address
+    where contract_address in ({{token_a}}, {{token_b}})
     group by 1, 2, 3, 4
 ),
 
