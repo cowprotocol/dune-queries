@@ -14,13 +14,13 @@ vouches as (
         evt_index,
         solver,
         cowRewardTarget as reward_target,
-        pool,
-        sender,
+        pool_address,
+        initial_funder,
         True as active
     from cow_protocol_ethereum.VouchRegister_evt_Vouch
     inner join query_4056263
         on
-            pool = bondingPool
+            pool_address = bondingPool
             and sender = initial_funder
     where evt_block_number <= (select * from last_block_before_timestamp)
 ),
@@ -30,32 +30,33 @@ invalidations as (
         evt_block_number,
         evt_index,
         solver,
-        Null as reward_target,  -- This is just ot align with vouches to take a union
-        pool,
-        sender,
+        Null as reward_target,  -- This is just to align with vouches to take a union
+        pool_address,
+        initial_funder,
         False as active
     from cow_protocol_ethereum.VouchRegister_evt_InvalidateVouch
     inner join query_4056263
         on
-            pool = bondingPool
+            pool_address = bondingPool
             and sender = initial_funder
     where evt_block_number <= (select * from last_block_before_timestamp)
 ),
 
--- At this point we have excluded all arbitrary vouches (i.e. those not from initial funders of recognized pools)
--- This ranks (solver, pool, sender) by most recent (vouch or invalidation)
--- and yields as rank 1, the current "active" status of the triplet.
+-- Intermediate helper table
 vouches_and_invalidations as (
     select * from vouches
     union distinct
     select * from invalidations
 ),
 
+-- At this point we have excluded all arbitrary vouches (i.e., those not from initial funders of recognized pools)
+-- The next query ranks (solver, pool_address, initial_funder) by most recent (vouch or invalidation)
+-- and yields as rank 1, the current "active" status of the triplet.
 ranked_vouches as (
     select
         *,
         rank() over (
-            partition by solver, pool, sender
+            partition by solver, pool_address, initial_funder
             order by evt_block_number desc, evt_index desc
         ) as rk
     from vouches_and_invalidations
@@ -86,20 +87,6 @@ valid_vouches as (
         pool
     from current_active_vouches
     where time_rank = 1
-),
-
-named_results as (
-    select
-        solver,
-        reward_target,
-        vv.pool as bonding_pool,
-        bp.pool_name,
-        concat(environment, '-', s.name) as solver_name
-    from valid_vouches as vv
-    inner join cow_protocol_ethereum.solvers as s
-        on address = solver
-    inner join query_4056263 as bp
-        on vv.pool = bp.pool
 )
 
-select * from {{vouch_cte_name}}
+select * from valid_vouches
