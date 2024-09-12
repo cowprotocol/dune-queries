@@ -1,4 +1,4 @@
 [sqlfluff:templater:jinja:context]
-start_time='2024-08-20 00:00'
-end_time='2024-08-27 00:00'
+start_time='2024-08-20 00:00:00'
+end_time='2024-08-27 00:00:00'
 

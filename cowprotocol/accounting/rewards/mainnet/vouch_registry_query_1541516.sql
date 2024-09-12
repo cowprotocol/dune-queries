@@ -4,7 +4,7 @@
 --  {{end_time}} - the end date timestamp for the accounting period (exclusively)
 with
 last_block_before_timestamp as (
-    select end_block from "query_3333356(start_time='2018-01-01 00:00',end_time='{{end_time}}')"
+    select end_block from "query_3333356(start_time='2018-01-01 00:00:00',end_time='{{end_time}}')"
 ),
 
 -- Query Logic Begins here!
