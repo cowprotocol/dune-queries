@@ -43,8 +43,8 @@ per_settlement_prelim as (
             and t.tx_hash = from_hex(r.tx_hash)
     where
         json_extract(a.encode, '$.metadata.partnerFee.recipient') is not null
-        and t.block_number >= (select start_block from "query_3333356(start_time='2018-01-01 00:00',end_time='{{end_time}}')")
-        and t.block_number < (select end_block from "query_3333356(start_time='2018-01-01 00:00',end_time='{{end_time}}')")
+        and t.block_number >= (select start_block from "query_3333356(start_time='{{start_time}}',end_time='{{end_time}}')")
+        and t.block_number < (select end_block from "query_3333356(start_time='{{start_time}}',end_time='{{end_time}}')")
     order by
         t.block_time desc
 ),
