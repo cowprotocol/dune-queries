@@ -84,7 +84,7 @@ valid_vouches as (
     select
         solver,
         reward_target,
-        pool_addresss
+        pool_address
     from current_active_vouches
     where time_rank = 1
 ),
