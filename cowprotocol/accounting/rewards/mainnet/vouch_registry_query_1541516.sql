@@ -91,14 +91,14 @@ valid_vouches as (
 
 named_results as (
     select
-        solver,
-        reward_target,
+        vv.solver,
+        vv.reward_target,
         vv.pool_address,
         bp.pool_name,
         concat(environment, '-', s.name) as solver_name
     from valid_vouches as vv
     inner join cow_protocol_ethereum.solvers as s
-        on s.address = solver
+        on vv.solver = s.address
     inner join query_4056263 as bp
         on vv.pool_address = bp.pool_address
 )
