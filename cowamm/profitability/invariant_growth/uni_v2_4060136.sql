@@ -50,6 +50,7 @@ swaps as (
         on
             date_trunc('minute', sync.evt_block_time) = p1.minute
             and p1.contract_address = token1
+    where sync.evt_block_time < date(timestamp '{{start}}')
 )
 
 select
