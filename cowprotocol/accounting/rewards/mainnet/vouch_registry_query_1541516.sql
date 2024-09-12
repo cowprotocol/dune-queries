@@ -84,9 +84,23 @@ valid_vouches as (
     select
         solver,
         reward_target,
-        pool
+        pool_addresss
     from current_active_vouches
     where time_rank = 1
+),
+
+named_results as (
+    select
+        solver,
+        reward_target,
+        vv.pool as bonding_pool,
+        bp.name as pool_name,
+        concat(environment, '-', s.name) as solver_name
+    from valid_vouches as vv
+    inner join cow_protocol_ethereum.solvers as s
+        on pool_address = solver
+    inner join bonding_pools as bp
+        on vv.pool = bp.pool
 )
 
-select * from valid_vouches
+select * from {{vouch_cte_name}}
