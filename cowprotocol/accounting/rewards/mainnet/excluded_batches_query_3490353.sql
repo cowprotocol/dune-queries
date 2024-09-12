@@ -19,15 +19,14 @@ where
     or 0xe2f95ee8B72fFed59bC4D2F35b1d19b909A6e6b3 in (buy_token_address, sell_token_address) -- exclude EGGX
     or 0xd5C02bB3e40494D4674778306Da43a56138A383E in (buy_token_address, sell_token_address) -- exclude OMNI404
     or 0x92715b8F93729c0B014213f769EF493baecEDACC in (buy_token_address, sell_token_address) -- exclude WIFU 404 
-    or 0x413530a7beB9Ff6C44e9e6C9001C93B785420C32 in (buy_token_address, sell_token_address) -- exclude PFPAsia. NEEDS TO BE REMOVED FROM THIS LIST
-    or 0xe7468080c033cE50Dd09A22ad1E58D1BDA69E436 in (buy_token_address, sell_token_address) -- exclude YUMYUM. NEEDS TO BE REMOVED FROM THIS LIST 
+    or 0x413530a7beB9Ff6C44e9e6C9001C93B785420C32 in (buy_token_address, sell_token_address) -- exclude PFPAsia. 
+    or 0xe7468080c033cE50Dd09A22ad1E58D1BDA69E436 in (buy_token_address, sell_token_address) -- exclude YUMYUM. 
     or tx_hash = 0x41418cef26e608ed47a5c4997833caaa2366a0163173286140da28a32e37b25d -- temporary solution
     or tx_hash = 0xdf415f3048d401c9ca7bf079722be96aaed3d2d2b5c0e12b7dc75d6eec30b3d4 -- temporary solution
     or tx_hash = 0x15b9906aa2039ccbc9ae9fab0f0c7517e9c88c41b74cd8a09f202803d37f6341 -- temporary solution
     or tx_hash = 0x3a71df0f6898b229c3643d4703b56d7510d455c65649cb364e5b69cadf5d1d37 -- temporary solution
     or tx_hash = 0xc9bcb4c8c68d4edcb97403131d28416a418ae537c43e9feca50f11ca744c079e -- temporary solution
-    -- the following 2 stable-to-stable trades Otex settled. Due to inaccurate accounting, and since Otex has more of those, 
-    -- I decided to remove 2 of those to mitigate the inaccuracies resulting from the rest
+    -- for week of Feb 13, 2024 until Feb 20, 2024
     or tx_hash = 0x60157b1891dbdbcdc88c637079c4c9e37d5fe943bf3ffff14412b33bf7125ad1
     or tx_hash = 0x414e72fa7c061a1b2c5905f21e41d8cb5500ec9043b65b317cd20362f4eff757
     or tx_hash = 0x829d0583b647581cdd8f01f62e6715a7c6333b499f164995601217bde1976a09 -- internalization involving PANDORA
