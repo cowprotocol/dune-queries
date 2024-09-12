@@ -8,14 +8,7 @@ batch_meta as (
         b.block_time,
         b.block_number,
         b.tx_hash,
-        b.num_trades,
-        b.solver_address,
-        case
-            when dex_swaps = 0
-            -- Estimation made here: https://dune.com/queries/1646084
-                then cast((b.gas_used - 73688 - (70528 * b.num_trades)) / 90000 as int)
-            else dex_swaps
-        end as dex_swaps
+        b.solver_address
     from cow_protocol_ethereum.batches as b
     where
         b.block_number >= (select start_block from block_range) and b.block_number <= (select end_block from block_range)
@@ -196,8 +189,6 @@ batch_transfers as (
         block_time,
         block_number,
         pbt.tx_hash,
-        dex_swaps,
-        num_trades,
         solver_address,
         sender,
         receiver,
@@ -213,7 +204,6 @@ incoming_and_outgoing_temp as (
     select
         block_time,
         tx_hash,
-        dex_swaps,
         solver_address,
         transfer_type,
         case
