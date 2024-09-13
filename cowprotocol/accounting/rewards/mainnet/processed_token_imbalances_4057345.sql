@@ -12,8 +12,6 @@ batch_meta as (
     from cow_protocol_ethereum.batches as b
     where
         b.block_number >= (select start_block from block_range) and b.block_number <= (select end_block from block_range)
-        and (b.solver_address = from_hex('{{solver_address}}') or '{{solver_address}}' = '0x')
-        and (b.tx_hash = from_hex('{{tx_hash}}') or '{{tx_hash}}' = '0x')
 ),
 
 filtered_trades as (
@@ -30,6 +28,9 @@ filtered_trades as (
                 then 0x0000000000000000000000000000000000000001
             else trader
         end as trader_in,
+        -- here we aim to account for network fee. However, in case there is also a protocol fee
+        -- the surplus_fee accounts for that so there needs to be a correction here, that happens
+        -- a bit later on in this long query.
         atoms_sold - coalesce(surplus_fee, cast(0 as uint256)) as atoms_sold
     from cow_protocol_ethereum.trades as t
     inner join cow_protocol_ethereum.batches as b
@@ -39,10 +40,7 @@ filtered_trades as (
             t.tx_hash = f.tx_hash
             and t.order_uid = f.order_uid
     where
-        b.block_number >= (select start_block from block_range) and b.block_number <= (select end_block from block_range)
-        and t.block_number >= (select start_block from block_range) and t.block_number <= (select end_block from block_range)
-        and (b.solver_address = from_hex('{{solver_address}}') or '{{solver_address}}' = '0x')
-        and (t.tx_hash = from_hex('{{tx_hash}}') or '{{tx_hash}}' = '0x')
+        t.block_number >= (select start_block from block_range) and t.block_number <= (select end_block from block_range)
 ),
 
 batchwise_traders as (
@@ -107,8 +105,6 @@ other_transfers as (
             select distinct contract_address
             from cow_protocol_ethereum.CoWSwapEthFlow_evt_OrderPlacement
         )
-        and (t.evt_tx_hash = from_hex('{{tx_hash}}') or '{{tx_hash}}' = '0x')
-        and (solver_address = from_hex('{{solver_address}}') or '{{solver_address}}' = '0x')
 ),
 
 eth_transfers as (
@@ -179,16 +175,11 @@ all_transfers_temp as (
     select * from sdai_deposit_withdrawal_transfers
 ),
 
-pre_batch_transfers as (
-    select * from all_transfers_temp
-    order by tx_hash
-),
-
 batch_transfers as (
     select
         block_time,
         block_number,
-        pbt.tx_hash,
+        att.tx_hash,
         solver_address,
         sender,
         receiver,
@@ -196,8 +187,8 @@ batch_transfers as (
         amount_wei,
         transfer_type
     from batch_meta as bm
-    inner join pre_batch_transfers as pbt
-        on bm.tx_hash = pbt.tx_hash
+    inner join all_transfers_temp as att
+        on bm.tx_hash = att.tx_hash
 ),
 
 incoming_and_outgoing_temp as (
@@ -206,11 +197,6 @@ incoming_and_outgoing_temp as (
         tx_hash,
         solver_address,
         transfer_type,
-        case
-            when t.symbol = 'ETH' then 'WETH'
-            when t.symbol is not null then t.symbol
-            else cast(i.token as varchar)
-        end as symbol,
         case
             when token = 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
                 then 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2
@@ -234,7 +220,6 @@ incoming_and_outgoing as (
         block_time,
         tx_hash,
         solver_address,
-        symbol,
         token,
         amount,
         transfer_type
@@ -251,7 +236,6 @@ raw_protocol_fee_data as (
         data.protocol_fee_token,
         cast(cast(data.surplus_fee as varchar) as int256) as surplus_fee,
         solver,
-        symbol
     from cowswap.raw_order_rewards
     inner join tokens.erc20 as t
         on
@@ -265,7 +249,6 @@ raw_protocol_fee_data as (
 buy_token_imbalance_due_to_protocol_fee as (
     select
         t.block_time,
-        symbol,
         t.buy_token_address as token,
         'protocol_fee_correction' as transfer_type,
         from_hex(r.tx_hash) as tx_hash,
@@ -280,7 +263,6 @@ buy_token_imbalance_due_to_protocol_fee as (
 sell_token_imbalance_due_to_protocol_fee as (
     select
         t.block_time,
-        symbol,
         t.sell_token_address as token,
         'protocol_fee_correction' as transfer_type,
         from_hex(r.tx_hash) as tx_hash,
@@ -305,7 +287,6 @@ incoming_and_outgoing_final as (
         block_time,
         tx_hash,
         solver_address,
-        symbol,
         amount,
         transfer_type,
         case
@@ -325,7 +306,6 @@ excluded_batches as (
 final_token_balance_sheet as (
     select
         solver_address,
-        symbol,
         token,
         tx_hash,
         sum(amount) as token_imbalance_wei,
@@ -334,7 +314,7 @@ final_token_balance_sheet as (
         incoming_and_outgoing_final
     where tx_hash not in (select tx_hash from excluded_batches)
     group by
-        symbol, token, solver_address, tx_hash, block_time
+        token, solver_address, tx_hash, block_time
     having
         sum(amount) != cast(0 as int256)
 )
