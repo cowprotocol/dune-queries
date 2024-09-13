@@ -17,7 +17,7 @@ with cow_amm_pool as (
 
 -- computes, surplus, tvl and thus relative surplus (per $100)
 select
-    block_date as day,
+    block_date as "day",
     SUM(usd_value) as volume,
     SUM(surplus_usd) as absolute_invariant_growth,
     AVG(tvl) as tvl,
