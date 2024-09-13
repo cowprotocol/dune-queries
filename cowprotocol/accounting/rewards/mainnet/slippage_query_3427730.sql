@@ -1,15 +1,11 @@
--- https://github.com/cowprotocol/solver-rewards/pull/342
 with
 block_range as (
     select * from "query_3333356(start_time='{{start_time}}',end_time='{{end_time}}')"
 ),
 
-,final_token_balance_sheet as (
-    select
-        *
-    from
-        "query_4057345(start_time='{{start_time}}',end_time='{{end_time}}',tx_hash='{{tx_hash}}',solver_address='{{solver_address}}')"
-)
+final_token_balance_sheet as (
+    select * from "query_4057345(start_time='{{start_time}}',end_time='{{end_time}}')"
+),
 
 token_times as (
     select
@@ -23,13 +19,8 @@ precise_prices as (
     select
         contract_address,
         decimals,
-        date_trunc('hour', minute) as hour,
-        avg(
-            case
-                when (price > 10 and contract_address = 0xdef1ca1fb7fbcdc777520aa7f396b4e015f497ab) then 0.26 -- dirty fix for some bogus COW prices Dune reports on July 29, 2024
-                else price
-            end
-        ) as price
+        date_trunc('hour', minute) as 'hour',
+        avg(price) as price
     from
         prices.usd
     inner join token_times
@@ -54,7 +45,7 @@ intrinsic_prices as (
         select
             buy_token_address as contract_address,
             round(log(10, atoms_bought / units_bought)) as decimals,
-            date_trunc('hour', block_time) as hour,
+            date_trunc('hour', block_time) as 'hour',
             usd_value / units_bought as price
         from cow_protocol_ethereum.trades
         where
@@ -64,7 +55,7 @@ intrinsic_prices as (
         select
             sell_token_address as contract_address,
             round(log(10, atoms_sold / units_sold)) as decimals,
-            date_trunc('hour', block_time) as hour,
+            date_trunc('hour', block_time) as 'hour',
             usd_value / units_sold as price
         from cow_protocol_ethereum.trades
         where
@@ -102,7 +93,7 @@ prices as (
 -- -- ETH Prices: https://dune.com/queries/1578626?d=1
 eth_prices as (
     select
-        date_trunc('hour', minute) as hour,
+        date_trunc('hour', minute) as 'hour',
         avg(price) as eth_price
     from prices.usd
     where

@@ -197,11 +197,7 @@ incoming_and_outgoing_temp as (
         tx_hash,
         solver_address,
         transfer_type,
-        case
-            when token = 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-                then 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2
-            else token
-        end as token,
+        token,
         case
             when receiver = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
                 then amount_wei
@@ -232,18 +228,18 @@ raw_protocol_fee_data as (
     select
         order_uid,
         tx_hash,
-        cast(cast(data.protocol_fee as varchar) as int256) as protocol_fee,
-        data.protocol_fee_token,
-        cast(cast(data.surplus_fee as varchar) as int256) as surplus_fee,
-        solver,
+        cast(cast(data.protocol_fee as varchar) as int256) as protocol_fee,  -- noqa: RF01
+        data.protocol_fee_token,  -- noqa: RF01
+        cast(cast(data.surplus_fee as varchar) as int256) as surplus_fee,  -- noqa: RF01
+        solver
     from cowswap.raw_order_rewards
     inner join tokens.erc20 as t
         on
-            t.contract_address = from_hex(data.protocol_fee_token)
+            t.contract_address = from_hex(data.protocol_fee_token)  -- noqa: RF01
             and blockchain = 'ethereum'
     where
         block_number >= (select start_block from block_range) and block_number <= (select end_block from block_range)
-        and data.protocol_fee_native_price > 0
+        and data.protocol_fee_native_price > 0  -- noqa: RF01
 ),
 
 buy_token_imbalance_due_to_protocol_fee as (
@@ -309,7 +305,7 @@ final_token_balance_sheet as (
         token,
         tx_hash,
         sum(amount) as token_imbalance_wei,
-        date_trunc('hour', block_time) as hour
+        date_trunc('hour', block_time) as 'hour'
     from
         incoming_and_outgoing_final
     where tx_hash not in (select tx_hash from excluded_batches)
