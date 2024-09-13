@@ -4,7 +4,13 @@ block_range as (
 ),
 
 final_token_balance_sheet as (
-    select * from "query_4057345(start_time='{{start_time}}',end_time='{{end_time}}')"
+    select
+        solver_address,
+        token,
+        tx_hash,
+        sum(amount) as token_imbalance_wei,
+        date_trunc('hour', block_time) as 'hour'
+    from "query_4057345(start_time='{{start_time}}',end_time='{{end_time}}')"
 ),
 
 token_times as (

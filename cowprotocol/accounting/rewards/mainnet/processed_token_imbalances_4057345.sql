@@ -304,8 +304,8 @@ final_token_balance_sheet as (
         solver_address,
         token,
         tx_hash,
-        sum(amount) as token_imbalance_wei,
-        date_trunc('hour', block_time) as 'hour'
+        block_time,
+        sum(amount) as token_imbalance_wei
     from
         incoming_and_outgoing_final
     where tx_hash not in (select tx_hash from excluded_batches)
