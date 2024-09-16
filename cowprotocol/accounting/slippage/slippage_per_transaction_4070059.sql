@@ -10,14 +10,14 @@
 -- - tx_hash: settlement transaction hash
 -- - solver_address: address of the solver executing the settlement
 -- - slippage_usd: USD value of slippage
--- - slippage_native: value of slippage in native token
+-- - slippage_native_atom: value of slippage in atoms of native token
 
 select
     s.block_time,
     s.tx_hash,
     solver_address,
     sum(slippage_usd) as slippage_usd,
-    sum(slippage_native) as slippage_native
+    sum(slippage_native_atom) as slippage_native_atom
 from "query_4059683(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')" as s
 inner join cow_protocol_{{blockchain}}.batches as b
     on s.tx_hash = b.tx_hash

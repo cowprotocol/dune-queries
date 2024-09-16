@@ -15,7 +15,7 @@
 -- - price: USD price of one unit (i.e. pow(10, decimals) atoms) of a token
 -- - price_atom: USD price of one atom (i.e. 1. / pow(10, decimals) units) of a token
 -- - slippage_usd: USD value of slippage
--- - slippage_native: value of slippage in native token
+-- - slippage_native_atom: value of slippage in atoms of native token
 -- - transfer_type: 'raw_imbalance' for imbalance observable on chain, 'protocol_fee' for the total
 --   protocol fee (including partner fee), 'network_fee' for network fees
 
@@ -58,16 +58,14 @@ select
     amount as slippage_atoms,
     p.price,
     p.price_atom,
-    transfer_type,
     amount * p.price_atom as slippage_usd,
-    amount * p.price_atom / ep.price as slippage_native
+    cast(amount * p.price_atom / np.price_atom as int256) as slippage_native_atom,
+    transfer_type
 from
     raw_slippage as rs
 left join prices as p
-    on
-        rs.token_address = p.token_address
-        and rs.hour = p.hour
-left join prices as ep
-    on
-        rs.hour = ep.hour
-        and ep.token_address = 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+    on rs.token_address = p.token_address
+    and rs.hour = p.hour
+left join prices as np
+    on rs.hour = np.hour
+    and np.token_address = 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
