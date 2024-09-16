@@ -20,27 +20,25 @@ solver_slippage as (
 
 -- BEGIN SOLVER REWARDS: https://dune.com/queries/2283297
 batch_rewards_temp as (
-    select 
-        block_deadline,
-        block_number,  -- Null here means the settlement did not occur.
-        from_hex(solver) as winning_solver,
-        from_hex(tx_hash) as tx_hash,
+    select  --noqa: ST06
+        rbr.block_deadline,
+        rbr.block_number,  -- Null here means the settlement did not occur.
+        from_hex(rbr.solver) as winning_solver,
+        from_hex(rbr.tx_hash) as tx_hash,
         -- Unpacking the data
-        cast(cast(data.winning_score as varchar) as int256) as winning_score,
-        cast(cast(data.reference_score as varchar) as int256) as reference_score,
-        cast(cast(data.surplus as varchar) as int256) as surplus,
-        cast(cast(data.fee as varchar) as int256) as fee,
-        cast(cast(data.execution_cost as varchar) as int256) as execution_cost,
-        cast(cast(data.uncapped_payment_eth as varchar) as int256) as uncapped_payment_eth,
-        case
-            when (block_deadline >= 20413283 and block_deadline <= 20413965 and cast(cast(data.capped_payment as varchar) as int256) < 0) then 0
-            else cast(cast(data.capped_payment as varchar) as int256)
-        end as capped_payment,
-        transform(data.participating_solvers, x -> from_hex(x)) as participating_solvers,
-        cardinality(data.participating_solvers) as num_participants
-    from cowswap.raw_batch_rewards
-    where block_deadline > (select start_block from block_range)
-    and block_deadline <= (select end_block from block_range)
+        cast(cast(rbr.data.winning_score as varchar) as int256) as winning_score,  -- noqa: RF01
+        cast(cast(rbr.data.reference_score as varchar) as int256) as reference_score,  -- noqa: RF01
+        cast(cast(rbr.data.surplus as varchar) as int256) as surplus,  -- noqa: RF01
+        cast(cast(rbr.data.fee as varchar) as int256) as fee,  -- noqa: RF01
+        cast(cast(rbr.data.execution_cost as varchar) as int256) as execution_cost,  -- noqa: RF01
+        cast(cast(rbr.data.uncapped_payment_eth as varchar) as int256) as uncapped_payment_eth,  -- noqa: RF01
+        cast(cast(rbr.data.capped_payment as varchar) as int256) as capped_payment,  -- noqa: RF01
+        transform(rbr.data.participating_solvers, x -> from_hex(x)) as participating_solvers,  -- noqa: RF01
+        cardinality(rbr.data.participating_solvers) as num_participants  -- noqa: RF01
+    from cowswap.raw_batch_rewards as rbr
+    where
+        rbr.block_deadline > (select start_block from block_range)
+        and rbr.block_deadline <= (select end_block from block_range)
 ),
 
 batch_rewards as (
@@ -60,32 +58,11 @@ batch_rewards as (
     from batch_rewards_temp
 ),
 
-participation_data as (
-    select
-        tx_hash,
-        participant,
-        case
-            when block_deadline <= 20365510 then 1  -- final block deadline of accounting week of July 16 - July 23, 2024
-            else 0
-        end as participation_count
-    from batch_rewards
-    cross join unnest(participating_solvers) as t(participant)
-),
-
-participation_counts as (
-    select
-        participant as solver,
-        sum(participation_count) as num_participating_batches
-    from participation_data
-    group by participant
-),
-
 -- AKA Performance Rewards
 primary_rewards as (
     select
         winning_solver as solver,
         cast(sum(capped_payment) as double) as reward_wei
-        -- ,cast(SUM(execution_cost) as double) as exececution_cost_wei
     from batch_rewards
     group by winning_solver
 ),
@@ -94,7 +71,7 @@ fees_and_costs as (
     select
         winning_solver as solver,
         cast(sum(fee) as double) as network_fee_wei,
-        cast(sum(execution_cost) as double) as exececution_cost_wei
+        cast(sum(execution_cost) as double) as execution_cost_wei
     from batch_rewards
     group by winning_solver
 ),
@@ -137,8 +114,8 @@ winning_quotes as (
     select
         oq.order_uid,
         quote_solver as solver
-    from order_quotes oq
-    inner join cow_protocol_ethereum.trades t on oq.order_uid = t.order_uid and oq.quote_solver != 0x0000000000000000000000000000000000000000
+    from order_quotes as oq
+    inner join cow_protocol_ethereum.trades as t on oq.order_uid = t.order_uid and oq.quote_solver != 0x0000000000000000000000000000000000000000
 ),
 
 quote_rewards as (
@@ -149,37 +126,28 @@ quote_rewards as (
 ),
 
 pre_results as (
-    select 
-        pc.solver,
+    select
+        solver,
         coalesce(reward_wei, 0) / pow(10, 18) as reward_eth,
         coalesce(network_fee_wei, 0) / pow(10, 18) as network_fee_eth,
-        coalesce(exececution_cost_wei, 0) / pow(10, 18) as execution_cost_eth,
-        coalesce(reward_wei, 0) / pow(10, 18) * (select eth_price / cow_price from conversion_prices) as reward_cow,
-        num_participating_batches
-    from participation_counts pc
-    left outer join primary_rewards pr
-    on pr.solver = pc.solver
-    left outer join fees_and_costs fc
-    on fc.solver = pc.solver
+        coalesce(execution_cost_wei, 0) / pow(10, 18) as execution_cost_eth,
+        coalesce(reward_wei, 0) / pow(10, 18) * (select eth_price / cow_price from conversion_prices) as reward_cow
+    from primary_rewards as pr left outer join fees_and_costs as fc on pr.solver = fc.solver
 ),
 
-
 aggregate_results as (
-    select 
+    select
         solver,
         -- payment_eth,
         reward_eth as primary_reward_eth,
         reward_cow as primary_reward_cow,
         network_fee_eth,
-        execution_cost_eth,
-        0 as secondary_reward_cow,
-        0 as secondary_reward_eth,
-        num_participating_batches
+        execution_cost_eth
     from pre_results
 ),
 
 combined_data as (
-    select 
+    select
         coalesce(ar.solver, ss.solver, qr.solver) as solver,
         -- coalesce(ar.solver, qr.solver) as solver,
         -- payment_eth,
@@ -187,9 +155,6 @@ combined_data as (
         execution_cost_eth,
         primary_reward_eth,
         primary_reward_cow,
-        secondary_reward_cow,
-        secondary_reward_eth,
-        num_participating_batches,
         coalesce(quote_reward, 0) as quote_reward,
         coalesce(slippage, 0) as slippage_eth,
         -- 0 as slippage_eth,
@@ -210,22 +175,22 @@ combined_data as (
 ),
 
 extended_payout_data as (
-    select 
+    select
         cd.*,
         -- computed fields used to simplify case logic.
-        primary_reward_eth + secondary_reward_eth + slippage_eth + network_fee_eth as total_outgoing_eth,
-        case when primary_reward_eth + secondary_reward_eth + slippage_eth + network_fee_eth < 0 then true else false end as is_overdraft,
+        primary_reward_eth  + slippage_eth + network_fee_eth as total_outgoing_eth,
+        case when primary_reward_eth + slippage_eth + network_fee_eth < 0 then true else false end as is_overdraft,
         slippage_eth + network_fee_eth as reimbursement_eth,
         (slippage_eth + network_fee_eth) * (select eth_price / cow_price from conversion_prices) as reimbursement_cow,
-        primary_reward_cow + secondary_reward_cow as total_cow_reward,
-        primary_reward_eth + secondary_reward_eth as total_eth_reward
+        primary_reward_cow  as total_cow_reward,
+        primary_reward_eth  as total_eth_reward
     from combined_data cd
 ),
 
 -- Implement the logic contained in 
 -- https://github.com/cowprotocol/solver-rewards/blob/9838116e5253263e78e5b5777106458b541beb71/src/fetch/payouts.py#L136-L217
 final_results as (
-    select 
+    select
         epd.*,
         case 
             when is_overdraft then null
