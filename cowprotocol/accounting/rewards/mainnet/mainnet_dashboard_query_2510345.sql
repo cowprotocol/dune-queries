@@ -125,7 +125,7 @@ combined_data as (
         concat(
             '<a href="https://dune.com/queries/2332678?SolverAddress=',
             cast(ar.solver as varchar),
-            '&CTE_NAME=results_per_tx&StartTime={{start_time}}&endTime={{end_time}}&MinAbsoluteSlippageTolerance=0&RelativeSlippageTolerance=0&SignificantSlippageValue=0" target="_blank">link</a>'
+            '&start_time={{start_time}}&end_time={{end_time}}&min_absolute_slippage_tolerance=0&relative_slippage_tolerance=0&significant_slippage_value=0" target="_blank">link</a>'
         ) as slippage_per_tx,
         concat(environment, '-', name) as name  --noqa: RF04
     from aggregate_results as ar
@@ -138,24 +138,22 @@ combined_data as (
 ),
 
 extended_payout_data as (
-    select
+    select --noqa: ST06
         cd.*,
         -- computed fields used to simplify case logic.
-        primary_reward_eth  + slippage_eth + network_fee_eth as total_outgoing_eth,
-        case when primary_reward_eth + slippage_eth + network_fee_eth < 0 then true else false end as is_overdraft,
-        slippage_eth + network_fee_eth as reimbursement_eth,
-        (slippage_eth + network_fee_eth) * (select eth_price / cow_price from conversion_prices) as reimbursement_cow,
-        primary_reward_cow  as total_cow_reward,
-        primary_reward_eth  as total_eth_reward
-    from combined_data cd
+        cd.primary_reward_eth + cd.slippage_eth + cd.network_fee_eth as total_outgoing_eth,
+        coalesce(cd.primary_reward_eth + cd.slippage_eth + cd.network_fee_eth < 0, false) as is_overdraft,
+        cd.slippage_eth + cd.network_fee_eth as reimbursement_eth,
+        (cd.slippage_eth + cd.network_fee_eth) * (select eth_price / cow_price from conversion_prices) as reimbursement_cow,
+        cd.primary_reward_cow as total_cow_reward,
+        cd.primary_reward_eth as total_eth_reward
+    from combined_data as cd
 ),
 
--- Implement the logic contained in 
--- https://github.com/cowprotocol/solver-rewards/blob/9838116e5253263e78e5b5777106458b541beb71/src/fetch/payouts.py#L136-L217
 final_results as (
-    select
+    select  --noqa: ST06
         epd.*,
-        case 
+        case
             when is_overdraft then null
             when reimbursement_eth > 0 and total_cow_reward < 0
                 then reimbursement_eth + total_eth_reward
@@ -163,7 +161,7 @@ final_results as (
                 then 0
             else reimbursement_eth
         end as eth_transfer,
-        case 
+        case
             when is_overdraft then null
             when reimbursement_eth > 0 and total_cow_reward < 0
                 then 0
@@ -171,11 +169,12 @@ final_results as (
                 then reimbursement_cow + total_cow_reward
             else total_cow_reward
         end as cow_transfer,
-        case when is_overdraft then total_outgoing_eth else null end as overdraft,
+        case
+            when is_overdraft then total_outgoing_eth
+        end as overdraft,
         reward_target
-    from extended_payout_data epd
-        left join named_results nr
-        on epd.solver = nr.solver
+    from extended_payout_data as epd
+    left join named_results as nr on epd.solver = nr.solver
 )
 
 select * from final_results
