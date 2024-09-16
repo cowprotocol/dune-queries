@@ -18,12 +18,11 @@ solver_slippage as (
 ),
 
 named_results as (
-    select * from "query_1541516(end_time='{{end_time}}',cte_name='named_results')"
+    select * from "query_1541516(end_time='{{end_time}}',vouch_cte_name='named_results')"
 ),
--- end SLIPPAGE
 
--- BEGIN SOLVER REWARDS: https://dune.com/queries/2283297
-batch_rewards_temp as (
+-- BEGIN SOLVER REWARDS
+batch_rewards as (
     select  --noqa: ST06
         rbr.block_deadline,
         rbr.block_number,  -- Null here means the settlement did not occur.
@@ -35,31 +34,11 @@ batch_rewards_temp as (
         cast(cast(rbr.data.surplus as varchar) as int256) as surplus,  -- noqa: RF01
         cast(cast(rbr.data.fee as varchar) as int256) as fee,  -- noqa: RF01
         cast(cast(rbr.data.execution_cost as varchar) as int256) as execution_cost,  -- noqa: RF01
-        cast(cast(rbr.data.uncapped_payment_eth as varchar) as int256) as uncapped_payment_eth,  -- noqa: RF01
-        cast(cast(rbr.data.capped_payment as varchar) as int256) as capped_payment,  -- noqa: RF01
-        transform(rbr.data.participating_solvers, x -> from_hex(x)) as participating_solvers,  -- noqa: RF01
-        cardinality(rbr.data.participating_solvers) as num_participants  -- noqa: RF01
+        cast(cast(rbr.data.capped_payment as varchar) as int256) as capped_payment  -- noqa: RF01
     from cowswap.raw_batch_rewards as rbr
     where
         rbr.block_deadline > (select start_block from block_range)
         and rbr.block_deadline <= (select end_block from block_range)
-),
-
-batch_rewards as (
-    select
-        block_deadline,
-        block_number,
-        winning_solver,
-        tx_hash,
-        winning_score,
-        reference_score,
-        surplus,
-        fee,
-        execution_cost,
-        capped_payment,
-        participating_solvers,
-        num_participants
-    from batch_rewards_temp
 ),
 
 -- AKA Performance Rewards
@@ -83,12 +62,7 @@ fees_and_costs as (
 conversion_prices as (
     select
         (
-            select avg(
-                case
-                    when price > 10 then 0.26 -- dirty fix for some bogus COW prices Dune reports on July 29, 2024
-                    else price
-                end
-            ) from prices.usd
+            select avg(price) from prices.usd
             where
                 blockchain = 'ethereum'
                 and contract_address = 0xdef1ca1fb7fbcdc777520aa7f396b4e015f497ab
@@ -129,53 +103,38 @@ quote_rewards as (
     from winning_quotes group by solver
 ),
 
-pre_results as (
-    select
-        pr.solver,
-        coalesce(reward_wei, 0) / pow(10, 18) as reward_eth,
-        coalesce(network_fee_wei, 0) / pow(10, 18) as network_fee_eth,
-        coalesce(execution_cost_wei, 0) / pow(10, 18) as execution_cost_eth,
-        coalesce(reward_wei, 0) / pow(10, 18) * (select eth_price / cow_price from conversion_prices) as reward_cow
-    from primary_rewards as pr left outer join fees_and_costs as fc on pr.solver = fc.solver
-),
-
 aggregate_results as (
     select
-        solver,
-        -- payment_eth,
-        reward_eth as primary_reward_eth,
-        reward_cow as primary_reward_cow,
-        network_fee_eth,
-        execution_cost_eth
-    from pre_results
+        pr.solver,
+        coalesce(reward_wei, 0) / pow(10, 18) as primary_reward_eth,
+        coalesce(network_fee_wei, 0) / pow(10, 18) as network_fee_eth,
+        coalesce(execution_cost_wei, 0) / pow(10, 18) as execution_cost_eth,
+        coalesce(reward_wei, 0) / pow(10, 18) * (select eth_price / cow_price from conversion_prices) as primary_reward_cow
+    from primary_rewards as pr left outer join fees_and_costs as fc on pr.solver = fc.solver
 ),
 
 combined_data as (
     select
         coalesce(ar.solver, ss.solver, qr.solver) as solver,
-        -- coalesce(ar.solver, qr.solver) as solver,
-        -- payment_eth,
         network_fee_eth,
         execution_cost_eth,
         primary_reward_eth,
         primary_reward_cow,
         coalesce(quote_reward, 0) as quote_reward,
         coalesce(slippage, 0) as slippage_eth,
-        -- 0 as slippage_eth,
         concat(
             '<a href="https://dune.com/queries/2332678?SolverAddress=',
             cast(ar.solver as varchar),
             '&CTE_NAME=results_per_tx&StartTime={{start_time}}&endTime={{end_time}}&MinAbsoluteSlippageTolerance=0&RelativeSlippageTolerance=0&SignificantSlippageValue=0" target="_blank">link</a>'
         ) as slippage_per_tx,
-        concat(environment, '-', name) as name
-    from aggregate_results ar
-    full outer join solver_slippage ss
+        concat(environment, '-', name) as name  --noqa: RF04
+    from aggregate_results as ar
+    full outer join solver_slippage as ss
         on ar.solver = ss.solver
-    full outer join quote_rewards qr
+    full outer join quote_rewards as qr
         on ar.solver = qr.solver
-    left join cow_protocol_ethereum.solvers s
-        on coalesce(ar.solver, ss.solver, qr.solver) = address
-        -- on coalesce(ar.solver, qr.solver) = address
+    left join cow_protocol_ethereum.solvers as s
+        on coalesce(ar.solver, ss.solver, qr.solver) = s.address
 ),
 
 extended_payout_data as (
