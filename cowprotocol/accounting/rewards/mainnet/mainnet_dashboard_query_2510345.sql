@@ -6,6 +6,7 @@ block_range as (
 
 results_per_tx as (
     select * from "query_3427730(start_time='{{start_time}}',end_time='{{end_time}}',cte_name='results_per_tx')"
+
 ),
 
 solver_slippage as (
