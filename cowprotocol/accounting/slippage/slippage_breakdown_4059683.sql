@@ -10,7 +10,8 @@
 -- - tx_hash: settlement transaction hash
 -- - token_address: address of token with slippage. contract address for erc20 tokens,
 --   0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee for native token
--- - amount: value of slippage in atoms of the token
+-- - amount: signed value of slippage in atoms of the token; fees are represented as negative
+--   integers since they will be removed from imbalances
 -- - price: USD price of one unit (i.e. pow(10, decimals) atoms) of a token
 -- - price_atom: USD price of one atom (i.e. 1. / pow(10, decimals) units) of a token
 -- - slippage_usd: USD value of slippage
@@ -25,19 +26,21 @@ with raw_token_imbalances as (
         token_address,
         amount,
         'raw_imbalance' as transfer_type,
-        date_trunc('hour', block_time) as hour
+        date_trunc('hour', block_time) as hour --noqa: RF04
     from "query_4021644(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')"
 ),
+
 fee_balance_changes as (
     select
         block_time,
         tx_hash,
         token_address,
-        -amount,
         transfer_type,
-        date_trunc('hour', block_time) as hour
+        -amount as amount,
+        date_trunc('hour', block_time) as hour --noqa: RF04
     from "query_4058574(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')"
 ),
+
 raw_slippage as (
     select * from raw_token_imbalances
     union all
@@ -55,14 +58,16 @@ select
     amount as slippage_atoms,
     p.price,
     p.price_atom,
+    transfer_type,
     amount * p.price_atom as slippage_usd,
-    amount * p.price_atom / ep.price as slippage_native,
-    transfer_type
+    amount * p.price_atom / ep.price as slippage_native
 from
     raw_slippage as rs
 left join prices as p
-    on rs.token_address = p.token_address
+    on
+        rs.token_address = p.token_address
         and rs.hour = p.hour
 left join prices as ep
-    on rs.hour = ep.hour
-    and ep.token_address = 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+    on
+        rs.hour = ep.hour
+        and ep.token_address = 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee

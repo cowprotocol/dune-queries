@@ -13,12 +13,12 @@
 -- - slippage_native: value of slippage in native token
 
 select
-    block_time,
-    tx_hash,
+    s.block_time,
+    s.tx_hash,
     solver_address,
     sum(slippage_usd) as slippage_usd,
     sum(slippage_native) as slippage_native
-from "query_4059683(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')"
-join cow_protocol_{{blockchain}}.batches as b
+from "query_4059683(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')" as s
+inner join cow_protocol_{{blockchain}}.batches as b
     on s.tx_hash = b.tx_hash
 group by block_time, tx_hash
