@@ -21,4 +21,4 @@ select
 from "query_4059683(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')" as s
 inner join cow_protocol_{{blockchain}}.batches as b
     on s.tx_hash = b.tx_hash
-group by block_time, tx_hash
+group by 1, 2, 3
