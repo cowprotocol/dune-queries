@@ -11,6 +11,12 @@
 -- - solver_address: address of the solver executing the settlement
 -- - slippage_usd: USD value of slippage
 -- - slippage_native_atom: value of slippage in atoms of native token
+--
+-- Results of the query are filtered to not include batches from excluded_batches.
+
+with excluded_batches as (
+    select tx_hash from query_3490353
+)
 
 select
     s.block_time,
@@ -21,4 +27,5 @@ select
 from "query_4059683(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')" as s
 inner join cow_protocol_{{blockchain}}.batches as b
     on s.tx_hash = b.tx_hash
+where s.tx_hash not in (select tx_hash from excluded_batches)
 group by 1, 2, 3
