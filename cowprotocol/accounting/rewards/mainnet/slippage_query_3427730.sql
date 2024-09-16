@@ -163,4 +163,4 @@ results as (
         concat(environment, '-', name)
 )
 
-select * from results
+select * from {{cte_name}}
