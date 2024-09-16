@@ -6,7 +6,6 @@ block_range as (
 
 results_per_tx as (
     select * from "query_3427730(start_time='{{start_time}}',end_time='{{end_time}}',cte_name='results_per_tx')"
-
 ),
 
 solver_slippage as (
@@ -15,6 +14,10 @@ solver_slippage as (
         sum(eth_slippage_wei) * 1.0 / pow(10, 18) as slippage
     from results_per_tx
     group by solver_address
+),
+
+named_results as (
+    select * from "1541516(end_time='{{end_time}}',cte_name='named_results')"
 ),
 -- end SLIPPAGE
 
@@ -127,7 +130,7 @@ quote_rewards as (
 
 pre_results as (
     select
-        solver,
+        pr.solver,
         coalesce(reward_wei, 0) / pow(10, 18) as reward_eth,
         coalesce(network_fee_wei, 0) / pow(10, 18) as network_fee_eth,
         coalesce(execution_cost_wei, 0) / pow(10, 18) as execution_cost_eth,
