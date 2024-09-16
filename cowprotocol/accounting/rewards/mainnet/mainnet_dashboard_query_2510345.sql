@@ -18,7 +18,7 @@ solver_slippage as (
 ),
 
 named_results as (
-    select * from "1541516(end_time='{{end_time}}',cte_name='named_results')"
+    select * from "query_1541516(end_time='{{end_time}}',cte_name='named_results')"
 ),
 -- end SLIPPAGE
 
