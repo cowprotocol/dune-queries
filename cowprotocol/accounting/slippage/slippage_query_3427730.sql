@@ -10,6 +10,6 @@ select
         '&end_time={{end_time}}',
         '" target="_blank">link</a>'
     ) as slippage_per_transaction
-from "query_4070065(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')" as slippage
-inner join cow_protocol_{{blockchain}}.solvers as solvers
+from "query_4070065(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')"
+inner join cow_protocol_{{blockchain}}.solvers
     on solver_address = address

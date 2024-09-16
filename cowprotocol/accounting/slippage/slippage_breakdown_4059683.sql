@@ -12,12 +12,12 @@
 --   0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee for native token
 -- - amount: signed value of slippage in atoms of the token; fees are represented as negative
 --   integers since they will be removed from imbalances
+-- - transfer_type: 'raw_imbalance' for imbalance observable on chain, 'protocol_fee' for the total
+--   protocol fee (including partner fee), 'network_fee' for network fees
 -- - price: USD price of one unit (i.e. pow(10, decimals) atoms) of a token
 -- - price_atom: USD price of one atom (i.e. 1. / pow(10, decimals) units) of a token
 -- - slippage_usd: USD value of slippage
 -- - slippage_native_atom: value of slippage in atoms of native token
--- - transfer_type: 'raw_imbalance' for imbalance observable on chain, 'protocol_fee' for the total
---   protocol fee (including partner fee), 'network_fee' for network fees
 
 with raw_token_imbalances as (
     select
@@ -56,16 +56,18 @@ select
     tx_hash,
     rs.token_address,
     amount as slippage_atoms,
+    transfer_type,
     p.price,
     p.price_atom,
-    amount * p.price_atom as slippage_usd,
     cast(amount * p.price_atom / np.price_atom as int256) as slippage_native_atom,
-    transfer_type
+    amount * p.price_atom as slippage_usd
 from
     raw_slippage as rs
 left join prices as p
-    on rs.token_address = p.token_address
-    and rs.hour = p.hour
+    on
+        rs.token_address = p.token_address
+        and rs.hour = p.hour
 left join prices as np
-    on rs.hour = np.hour
-    and np.token_address = 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+    on
+        rs.hour = np.hour
+        and np.token_address = 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
