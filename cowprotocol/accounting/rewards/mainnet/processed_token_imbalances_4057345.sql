@@ -214,11 +214,11 @@ incoming_and_outgoing_temp as (
 incoming_and_outgoing as (
     select
         block_time,
+        token,
+        transfer_type,
         tx_hash,
         solver_address,
-        token,
-        amount,
-        transfer_type
+        amount
     from incoming_and_outgoing_temp
     order by block_time
 ),

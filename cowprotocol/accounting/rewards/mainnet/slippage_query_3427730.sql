@@ -15,8 +15,8 @@ final_token_balance_sheet as (
         token,
         tx_hash,
         token_imbalance_wei,
-        date_trunc('hour', block_time) as 'hour'
-    from "query_4057345(start_time='{{start_time}}',end_time='{{end_time}}')"
+        date_trunc('hour', block_time) as hour
+    from "query_4073375(start_time='{{start_time}}',end_time='{{end_time}}')"
     where tx_hash not in (select tx_hash from excluded_batches)
 ),
 
@@ -32,7 +32,7 @@ precise_prices as (
     select
         contract_address,
         decimals,
-        date_trunc('hour', minute) as 'hour',
+        date_trunc('hour', minute) as hour,
         avg(price) as price
     from
         prices.usd
@@ -58,7 +58,7 @@ intrinsic_prices as (
         select
             buy_token_address as contract_address,
             round(log(10, atoms_bought / units_bought)) as decimals,
-            date_trunc('hour', block_time) as 'hour',
+            date_trunc('hour', block_time) as hour,
             usd_value / units_bought as price
         from cow_protocol_ethereum.trades
         where
@@ -68,7 +68,7 @@ intrinsic_prices as (
         select
             sell_token_address as contract_address,
             round(log(10, atoms_sold / units_sold)) as decimals,
-            date_trunc('hour', block_time) as 'hour',
+            date_trunc('hour', block_time) as hour,
             usd_value / units_sold as price
         from cow_protocol_ethereum.trades
         where
@@ -106,7 +106,7 @@ prices as (
 -- -- ETH Prices: https://dune.com/queries/1578626?d=1
 eth_prices as (
     select
-        date_trunc('hour', minute) as 'hour',
+        date_trunc('hour', minute) as hour,
         avg(price) as eth_price
     from prices.usd
     where
@@ -163,4 +163,4 @@ results as (
         concat(environment, '-', name)
 )
 
-select * from {{cte_name}}
+select * from results
