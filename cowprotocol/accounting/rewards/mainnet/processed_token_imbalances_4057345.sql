@@ -293,12 +293,6 @@ incoming_and_outgoing_final as (
     order by block_time
 ),
 
--- These batches involve a token that either does not emit standard transfer events,
--- or has some inaccurate price in Dune.
-excluded_batches as (
-    select tx_hash from query_3490353
-),
-
 final_token_balance_sheet as (
     select
         solver_address,
@@ -308,7 +302,6 @@ final_token_balance_sheet as (
         sum(amount) as token_imbalance_wei
     from
         incoming_and_outgoing_final
-    where tx_hash not in (select tx_hash from excluded_batches)
     group by
         token, solver_address, tx_hash, block_time
     having

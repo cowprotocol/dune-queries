@@ -3,6 +3,12 @@ block_range as (
     select * from "query_3333356(start_time='{{start_time}}',end_time='{{end_time}}')"
 ),
 
+-- These batches involve a token that either does not emit standard transfer events,
+-- or has some inaccurate price in Dune.
+excluded_batches as (
+    select tx_hash from query_3490353
+),
+
 final_token_balance_sheet as (
     select
         solver_address,
@@ -11,6 +17,7 @@ final_token_balance_sheet as (
         token_imbalance_wei,
         date_trunc('hour', block_time) as 'hour'
     from "query_4057345(start_time='{{start_time}}',end_time='{{end_time}}')"
+    where tx_hash not in (select tx_hash from excluded_batches)
 ),
 
 token_times as (
