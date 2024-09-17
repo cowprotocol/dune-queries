@@ -24,14 +24,8 @@ named_results as (
 -- BEGIN SOLVER REWARDS
 batch_rewards as (
     select  --noqa: ST06
-        rbr.block_deadline,
-        rbr.block_number,  -- Null here means the settlement did not occur.
         from_hex(rbr.solver) as winning_solver,
-        from_hex(rbr.tx_hash) as tx_hash,
-        -- Unpacking the data
-        cast(cast(rbr.data.winning_score as varchar) as int256) as winning_score,  -- noqa: RF01
-        cast(cast(rbr.data.reference_score as varchar) as int256) as reference_score,  -- noqa: RF01
-        cast(cast(rbr.data.surplus as varchar) as int256) as surplus,  -- noqa: RF01
+        -- Unpacking the needed data
         cast(cast(rbr.data.fee as varchar) as int256) as fee,  -- noqa: RF01
         cast(cast(rbr.data.execution_cost as varchar) as int256) as execution_cost,  -- noqa: RF01
         cast(cast(rbr.data.capped_payment as varchar) as int256) as capped_payment  -- noqa: RF01
