@@ -21,9 +21,9 @@ with cowamm_creations_ethereum as (
 -- get tokens added via bind (0xe4e1e538) on the CoW AMM address
 cowamms_ethereum as (
     select
-        block_time as created_at,
         'ethereum' as blockchain,
         contract_address as address,
+        min(block_time) as created_at,
         min(varbinary_substring(data, 5 + 2 * 32 + 12, 20)) as token_1_address,
         max(varbinary_substring(data, 5 + 2 * 32 + 12, 20)) as token_2_address
     from
@@ -32,7 +32,7 @@ cowamms_ethereum as (
         contract_address in (select address from cowamm_creations_ethereum)
         and topic0 = 0xe4e1e53800000000000000000000000000000000000000000000000000000000
         and block_time >= cast('2024-07-29 00:00:00' as timestamp)
-    group by 1, 2, 3
+    group by 1, 2
 ),
 
 -- on gnosis
@@ -48,9 +48,9 @@ cowamm_creations_gnosis as (
 
 cowamms_gnosis as (
     select
-        block_time as created_at,
         'gnosis' as blockchain,
         contract_address as address,
+        min(block_time) as created_at,
         min(varbinary_substring(data, 5 + 2 * 32 + 12, 20)) as token_1_address,
         max(varbinary_substring(data, 5 + 2 * 32 + 12, 20)) as token_2_address
     from
@@ -59,7 +59,7 @@ cowamms_gnosis as (
         contract_address in (select address from cowamm_creations_gnosis)
         and topic0 = 0xe4e1e53800000000000000000000000000000000000000000000000000000000
         and block_time >= cast('2024-07-29 00:00:00' as timestamp)
-    group by 1, 2, 3
+    group by 1, 2
 ),
 
 -- combine data for different chains
