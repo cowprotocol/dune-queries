@@ -172,7 +172,7 @@ extended_payout_data as (
 
 select  --noqa: ST06
     name,
-    solver as solver_address,
+    epd.solver as solver_address,
     reward_target,
     quote_reward,
     case
