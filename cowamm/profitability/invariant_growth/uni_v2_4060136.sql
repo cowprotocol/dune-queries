@@ -40,6 +40,7 @@ swaps as (
         on
             sync.evt_tx_hash = swap.evt_tx_hash
             and sync.contract_address = swap.contract_address
+            and sync.evt_index + 1 = swap.evt_index
     inner join pool
         on sync.contract_address = pool.contract_address
     inner join prices.usd as p0
@@ -50,7 +51,7 @@ swaps as (
         on
             date_trunc('minute', sync.evt_block_time) = p1.minute
             and p1.contract_address = token1
-    where sync.evt_block_time < date(timestamp '{{start}}')
+    where sync.evt_block_time >= date(timestamp '{{start}}')
 )
 
 select
