@@ -85,23 +85,37 @@ tvl_by_tx as (
     and block_time >= timestamp '{{start}}' - interval '7' day
 ),
 
+-- take the balances of the pool at the end of each day and multiply it with closing price to get tvl
 tvl as (
     select
-        day,
-        tvl
+        tvl_complete.day,
+        balance1 * p1.price_close + balance2 * p2.price_close as tvl
     from (
-        -- join full date range with potentially incomplete data. This results in many rows per day (all total tvl on or before that day)
-        -- rank() is then used to order join candidates by recency (rank = 1 is the latest tvl)
+        -- join full date range with potentially incomplete data. This results in many rows per day (all pool balances on or before that day)
+        -- rank() is then used to order join candidates by recency (rank = 1 is the latest pool balances)
         select
             date_range.day,
-            tvl,
+            token1,
+            balance1,
+            token2,
+            balance2,
             rank() over (partition by (date_range.day) order by tvl.block_time desc) as latest
         from date_range
         inner join tvl_by_tx as tvl
             on date_range.day >= date(tvl.block_time)
             -- performance optimisation: only look at the last update of the day
             and tvl.latest = 1
-    )
+    ) as tvl_complete
+    inner join prices.usd_daily as p1
+        on
+            tvl_complete.day = p1.day
+            and p1.contract_address = token1
+            and p1.blockchain = 'ethereum'
+    inner join prices.usd_daily as p2
+        on
+            tvl_complete.day = p2.day
+            and p2.contract_address = token2
+            and p2.blockchain = 'ethereum'
     where latest = 1
 ),
 
