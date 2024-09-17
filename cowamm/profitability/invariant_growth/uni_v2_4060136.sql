@@ -58,7 +58,7 @@ select
     sum((volume_in + volume_out) / 2) as volume,
     sum((volume_in + volume_out) / 2) * 0.003 as absolute_invariant_growth,
     avg(tvl) as tvl,
-    sum((volume_in + volume_out) / 2 / tvl) * 0.003 * 100 as pct_invariant_growth
+    sum((volume_in + volume_out) / 2 / tvl) * 0.003 as pct_invariant_growth
 from date_range as dr
 left join swaps
     on dr.day = date(evt_block_time)

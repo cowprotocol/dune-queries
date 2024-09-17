@@ -21,7 +21,7 @@ select
     SUM(usd_value) as volume,
     SUM(surplus_usd) as absolute_invariant_growth,
     AVG(tvl) as tvl,
-    SUM(surplus_usd / tvl) * 100 as pct_invariant_growth
+    SUM(surplus_usd / tvl) as pct_invariant_growth
 from cow_protocol_ethereum.trades as t
 inner join "query_4059700(token_a='{{token_a}}', token_b='{{token_b}}')" as tvl
     on
