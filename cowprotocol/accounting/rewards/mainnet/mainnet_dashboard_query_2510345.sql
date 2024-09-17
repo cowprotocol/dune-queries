@@ -137,6 +137,32 @@ combined_data as (
         on coalesce(ar.solver, ss.solver, qr.solver) = s.address
 ),
 
+service_fee_flag as (
+    select
+        solver,
+        service_fee,
+        case
+            when service_fee is true then 0.85
+            else 1
+        end as service_fee_factor
+    from "query_4017925"
+),
+
+combined_data_after_service_fee as (
+    select  --noqa: ST06
+        cd.solver,
+        cd.network_fee_eth,
+        cd.execution_cost_eth,
+        sff.service_fee_factor * cd.primary_reward_eth as primary_reward_eth,
+        sff.service_fee_factor * cd.primary_reward_cow as primary_reward_cow,
+        sff.service_fee_factor * cd.quote_reward as quote_reward,
+        cd.slippage_eth,
+        cd.slippage_per_tx,
+        cd.name,
+        sff.service_fee as service_fee_enabled
+    from combined_data as cd inner join service_fee_flag as sff on cd.solver = sff.solver
+),
+
 extended_payout_data as (
     select --noqa: ST06
         cd.*,
@@ -147,7 +173,7 @@ extended_payout_data as (
         (cd.slippage_eth + cd.network_fee_eth) * (select eth_price / cow_price from conversion_prices) as reimbursement_cow,
         cd.primary_reward_cow as total_cow_reward,
         cd.primary_reward_eth as total_eth_reward
-    from combined_data as cd
+    from combined_data_after_service_fee as cd
 ),
 
 final_results as (
