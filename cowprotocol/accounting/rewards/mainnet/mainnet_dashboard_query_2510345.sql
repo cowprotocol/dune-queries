@@ -136,7 +136,7 @@ service_fee_flag as (
         solver,
         service_fee,
         case
-            when service_fee is true then 0.85
+            when service_fee then 0.85
             else 1
         end as service_fee_factor
     from "query_4017925"
