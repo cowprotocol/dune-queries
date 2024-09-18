@@ -1,3 +1,13 @@
+-- This query computes how much surplus has been provided to CoW AMMs, when trading with other user orders
+-- as part of a CoW. For that, a CoW detector query is used (4025739(). Finally, the query computes the 
+-- distribution of an amount {{budget}} of COW tokens to solvers, proportionally to the surplus generated 
+-- via CoWs and pushed to CoW AMMs.
+-- Parameters:
+--  {{start_time}} - the start date timestamp for the accounting period  (inclusively)
+--  {{end_time}} - the end date timestamp for the accounting period (exclusively)
+-- {{blockchain}} -- the chain we are interested in
+-- {{budget}} -- the amount of COW that needs to be distributed
+
 with cow_amm_surplus as (
     select
         tx_hash,
@@ -9,7 +19,7 @@ with cow_amm_surplus as (
     where istrade
 ),
 
-bonus_per_batch as (
+cow_surplus_per_batch as (
     select
         cow_per_batch.block_time,
         cow_per_batch.tx_hash,
@@ -29,8 +39,8 @@ aggregate_results_per_solver as (
         name as solver_name,
         sum(bonus_reward_potential) as bonus_reward_potential,
         sum(bonus_reward) as bonus_reward
-    from bonus_per_batch
-    inner join cow_protocol_{{blockchain}}.solvers as s on bonus_per_batch.solver_address = s.address and s.active
+    from cow_surplus_per_batch
+    inner join cow_protocol_{{blockchain}}.solvers as s on cow_surplus_per_batch.solver_address = s.address and s.active
     group by name
 ),
 
