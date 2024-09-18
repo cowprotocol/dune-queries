@@ -24,11 +24,9 @@ cow_surplus_per_batch as (
         cow_per_batch.block_time,
         cow_per_batch.tx_hash,
         solver_address,
-        naive_cow_potential,
-        naive_cow,
-        surplus,
-        naive_cow_potential * surplus as bonus_reward_potential,
-        naive_cow * surplus as bonus_reward
+        naive_cow,  -- fraction of batch volume traded within a CoW
+        surplus_in_usd,  -- surplus of the executed CoW AMM order, expressed in USD
+        naive_cow * surplus as realized_cow_surplus_in_usd -- surplus of the CoW AMM that is assumed to be generated via a CoW.
     from "query_4025739(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')" as cow_per_batch
     inner join cow_amm_surplus on cow_per_batch.tx_hash = cow_amm_surplus.tx_hash
     inner join cow_protocol_{{blockchain}}.batches as b on cow_per_batch.tx_hash = b.tx_hash
@@ -37,21 +35,21 @@ cow_surplus_per_batch as (
 aggregate_results_per_solver as (
     select
         name as solver_name,
-        sum(bonus_reward_potential) as bonus_reward_potential,
-        sum(bonus_reward) as bonus_reward
+        sum(realized_cow_surplus_in_usd) as total_cow_surplus_in_usd
     from cow_surplus_per_batch
     inner join cow_protocol_{{blockchain}}.solvers as s on cow_surplus_per_batch.solver_address = s.address and s.active
     group by name
 ),
 
 total_surplus as (
-    select sum(bonus_reward) as total_surplus from aggregate_results_per_solver
+    select sum(total_cow_surplus_in_usd) as total_surplus_in_usd from aggregate_results_per_solver
 ),
 
 bounty_distribution as (
     select
         arps.solver_name,
-        {{budget}} * arps.bonus_reward / ts.total_surplus as total_cow_reward
+        total_cow_surplus_in_usd,
+        {{budget}} * arps.realized_cow_surplus_in_usd / ts.total_surplus_in_usd as total_cow_reward
     from aggregate_results_per_solver as arps cross join total_surplus as ts
 )
 
