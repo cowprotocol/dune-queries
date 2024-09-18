@@ -199,6 +199,8 @@ select  --noqa: ST06
     service_fee_enabled,
     reimbursement_eth,
     reimbursement_cow,
-    total_cow_reward
+    total_cow_reward,
+    network_fee_eth,
+    execution_cost_eth
 from extended_payout_data as epd
 left join named_results as nr on epd.solver = nr.solver
