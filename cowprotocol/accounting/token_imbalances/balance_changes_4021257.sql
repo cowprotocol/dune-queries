@@ -102,7 +102,7 @@ sdai_deposits_withdraws_ethereum as (
         contract_address as token_address,
         0x0000000000000000000000000000000000000000 as sender,
         0x9008d19f58aabd9ed0d60971565aa8510560ab41 as receiver,
-        shares as amount_wei
+        shares as amount
     from maker_ethereum.SavingsDai_evt_Deposit
     where
         evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
@@ -115,7 +115,7 @@ sdai_deposits_withdraws_ethereum as (
         contract_address as token_address,
         0x9008d19f58aabd9ed0d60971565aa8510560ab41 as sender,
         0x0000000000000000000000000000000000000000 as receiver,
-        shares as amount_wei
+        shares as amount
     from maker_ethereum.SavingsDai_evt_Withdraw
     where
         evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
