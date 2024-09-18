@@ -25,7 +25,7 @@ cow_surplus_per_batch as (
         cow_per_batch.tx_hash,
         solver_address,
         naive_cow,  -- fraction of batch volume traded within a CoW
-        surplus_in_usd,  -- surplus of the executed CoW AMM order, expressed in USD
+        surplus as surplus_in_usd,  -- surplus of the executed CoW AMM order, expressed in USD
         naive_cow * surplus as realized_cow_surplus_in_usd -- surplus of the CoW AMM that is assumed to be generated via a CoW.
     from "query_4025739(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')" as cow_per_batch
     inner join cow_amm_surplus on cow_per_batch.tx_hash = cow_amm_surplus.tx_hash
