@@ -49,7 +49,7 @@ bounty_distribution as (
     select
         arps.solver_name,
         total_cow_surplus_in_usd,
-        {{budget}} * arps.realized_cow_surplus_in_usd / ts.total_surplus_in_usd as total_cow_reward
+        {{budget}} * arps.total_cow_surplus_in_usd / ts.total_surplus_in_usd as total_cow_reward
     from aggregate_results_per_solver as arps cross join total_surplus as ts
 )
 
