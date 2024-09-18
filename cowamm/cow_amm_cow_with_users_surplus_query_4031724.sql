@@ -45,7 +45,7 @@ total_surplus as (
     select sum(total_cow_surplus_in_usd) as total_surplus_in_usd from aggregate_results_per_solver
 ),
 
-bounty_distribution as (
+final_results_per_solver as (
     select
         arps.solver_name,
         total_cow_surplus_in_usd,
