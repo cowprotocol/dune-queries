@@ -170,34 +170,31 @@ extended_payout_data as (
     from combined_data_after_service_fee as cd
 ),
 
-select  --noqa: ST06
-    name,
-    epd.solver as solver_address,
-    reward_target,
-    quote_reward,
-    case
-        when is_overdraft then null
-        when reimbursement_eth > 0 and total_cow_reward < 0
-            then reimbursement_eth + total_eth_reward
-        when reimbursement_eth < 0 and total_cow_reward > 0
-            then 0
-        else reimbursement_eth
-    end as eth_transfer,
-    case
-        when is_overdraft then null
-        when reimbursement_eth > 0 and total_cow_reward < 0
-            then 0
-        when reimbursement_eth < 0 and total_cow_reward > 0
-            then reimbursement_cow + total_cow_reward
-        else total_cow_reward
-    end as cow_transfer,
-    case
-        when is_overdraft then total_outgoing_eth
-    end as overdraft,
-    slippage_eth,
-    slippage_per_tx,
-    service_fee_enabled,
-    reimbursement_eth,
-    reimbursement_cow,
-    total_cow_reward
-from extended_payout_data as epd left join named_results as nr on epd.solver = nr.solver
+final_results as (
+    select  --noqa: ST06
+        epd.*,
+        case
+            when is_overdraft then null
+            when reimbursement_eth > 0 and total_cow_reward < 0
+                then reimbursement_eth + total_eth_reward
+            when reimbursement_eth < 0 and total_cow_reward > 0
+                then 0
+            else reimbursement_eth
+        end as eth_transfer,
+        case
+            when is_overdraft then null
+            when reimbursement_eth > 0 and total_cow_reward < 0
+                then 0
+            when reimbursement_eth < 0 and total_cow_reward > 0
+                then reimbursement_cow + total_cow_reward
+            else total_cow_reward
+        end as cow_transfer,
+        case
+            when is_overdraft then total_outgoing_eth
+        end as overdraft,
+        reward_target
+    from extended_payout_data as epd
+    left join named_results as nr on epd.solver = nr.solver
+)
+
+select * from final_results
