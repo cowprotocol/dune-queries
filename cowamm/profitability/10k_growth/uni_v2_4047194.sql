@@ -49,6 +49,13 @@ lp_total_supply_incomplete as (
     from lp_supply_delta
 ),
 
+-- performance optimisation: reduce the total range of the join below to the last value before the start period
+lp_total_supply_start as (
+    select max(day) as "start"
+    from lp_total_supply_incomplete
+    where day <= date(timestamp '{{start}}')
+),
+
 -- lp token total supply without date gaps
 lp_total_supply as (
     select
@@ -63,9 +70,9 @@ lp_total_supply as (
             rank() over (partition by (date_range.day) order by lp.day desc) as latest
         from date_range
         inner join lp_total_supply_incomplete as lp
-            on date_range.day >= lp.day
-            -- performance optimisation: this assumes one week prior to start there was at least one lp supply change event
-            and lp.day >= (timestamp '{{start}}' - interval '7' day)
+            on
+                date_range.day >= lp.day
+                and lp.day >= (select start from lp_total_supply_start)
     )
     where latest = 1
 ),
