@@ -15,7 +15,6 @@
 -- - price_usd: USD price of one unit (i.e. pow(10, decimals) atoms) of a token
 -- - price_atom: USD price of one atom (i.e. 1. / pow(10, decimals) units) of a token
 
--- Fetch a list of token addresses and times we need prices for. We use hourly prices only.
 with token_times as (
     select
         token_address,
@@ -25,12 +24,11 @@ with token_times as (
     group by 1, 2
 ),
 
--- Precise prices are prices from the Dune price feed.
 precise_prices as (
-    select
+    select -- noqa: ST06
+        date_trunc('hour', minute) as hour, --noqa: RF04
         token_address,
         decimals,
-        date_trunc('hour', minute) as hour, --noqa: RF04
         avg(price) as price_usd,
         avg(price) / pow(10, decimals) as price_atom
     from
@@ -43,22 +41,18 @@ precise_prices as (
     group by 1, 2, 3
 ),
 
--- Intrinsic prices are prices reconstructed from exchange rates from within the auction
--- A price can be reconstructed if there was a trade with another token which did have a Dune price.
--- If there a multiple prices reconstructed in this way, an average is taken.
--- The native token is excluded from this analysis since we will explicitly get a price for that later.
 intrinsic_prices as (
     select
+        hour,
         token_address,
         decimals,
-        hour,
         avg(price_usd) as price_usd,
         avg(price_atom) as price_atom
     from (
         select
+            date_trunc('hour', block_time) as hour, --noqa: RF04
             buy_token_address as token_address,
             round(log(10, atoms_bought / units_bought)) as decimals,
-            date_trunc('hour', block_time) as hour, --noqa: RF04
             usd_value / units_bought as price_usd,
             usd_value / atoms_bought as price_atom
         from cow_protocol_{{blockchain}}.trades
@@ -67,9 +61,9 @@ intrinsic_prices as (
             and buy_token_address != 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
         union distinct
         select
+            date_trunc('hour', block_time) as hour, --noqa: RF04
             sell_token_address as token_address,
             round(log(10, atoms_sold / units_sold)) as decimals,
-            date_trunc('hour', block_time) as hour, --noqa: RF04
             usd_value / units_sold as price_usd,
             usd_value / atoms_sold as price_atom
         from cow_protocol_{{blockchain}}.trades
@@ -80,8 +74,7 @@ intrinsic_prices as (
     group by 1, 2, 3
 ),
 
--- The final price is the Dune price if it exists and the intrinsic price otherwise. If both prices
--- are not available, the price is null.
+-- -- Price Construction: https://dune.com/queries/1579091?
 prices as (
     select
         tt.hour,
@@ -118,12 +111,11 @@ wrapped_native_token as (
         end as native_token_address
 ),
 
--- The price of the native token is reconstructed from it chain-dependent wrapped version.
 native_token_prices as (
-    select
+    select -- noqa: ST06
+        date_trunc('hour', minute) as hour, --noqa: RF04
         0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee as token_address,
         18 as decimals,
-        date_trunc('hour', minute) as hour, --noqa: RF04
         avg(price) as price_usd,
         avg(price) / pow(10, 18) as price_atom
     from prices.usd
@@ -131,7 +123,7 @@ native_token_prices as (
         blockchain = '{{blockchain}}'
         and contract_address = (select native_token_address from wrapped_native_token)
         and minute >= cast('{{start_time}}' as timestamp) and minute < cast('{{end_time}}' as timestamp)
-    group by 3
+    group by 1, 2, 3
 )
 
 select * from prices
