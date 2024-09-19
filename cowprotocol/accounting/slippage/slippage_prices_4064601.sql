@@ -12,7 +12,7 @@
 -- - token_address: address of token with a price. contract address for erc20 tokens,
 --   0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee for native token
 -- - decimals: decimals of the token, can be null
--- - price_usd: USD price of one unit (i.e. pow(10, decimals) atoms) of a token
+-- - price_unit: USD price of one unit (i.e. pow(10, decimals) atoms) of a token
 -- - price_atom: USD price of one atom (i.e. 1. / pow(10, decimals) units) of a token
 
 -- Fetch a list of token addresses and times we need prices for. We use hourly prices only.
@@ -31,7 +31,7 @@ precise_prices as (
         date_trunc('hour', minute) as hour, --noqa: RF04
         token_address,
         decimals,
-        avg(price) as price_usd,
+        avg(price) as price_unit,
         avg(price) / pow(10, decimals) as price_atom
     from
         prices.usd
@@ -52,14 +52,14 @@ intrinsic_prices as (
         hour,
         token_address,
         decimals,
-        avg(price_usd) as price_usd,
+        avg(price_unit) as price_unit,
         avg(price_atom) as price_atom
     from (
         select
             date_trunc('hour', block_time) as hour, --noqa: RF04
             buy_token_address as token_address,
             round(log(10, atoms_bought / units_bought)) as decimals,
-            usd_value / units_bought as price_usd,
+            usd_value / units_bought as price_unit,
             usd_value / atoms_bought as price_atom
         from cow_protocol_{{blockchain}}.trades
         where
@@ -70,7 +70,7 @@ intrinsic_prices as (
             date_trunc('hour', block_time) as hour, --noqa: RF04
             sell_token_address as token_address,
             round(log(10, atoms_sold / units_sold)) as decimals,
-            usd_value / units_sold as price_usd,
+            usd_value / units_sold as price_unit,
             usd_value / atoms_sold as price_atom
         from cow_protocol_{{blockchain}}.trades
         where
@@ -91,9 +91,9 @@ prices as (
             intrinsic.decimals
         ) as decimals,
         coalesce(
-            precise.price_usd,
-            intrinsic.price_usd
-        ) as price_usd,
+            precise.price_unit,
+            intrinsic.price_unit
+        ) as price_unit,
         coalesce(
             precise.price_atom,
             intrinsic.price_atom
@@ -124,7 +124,7 @@ native_token_prices as (
         date_trunc('hour', minute) as hour, --noqa: RF04
         0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee as token_address,
         18 as decimals,
-        avg(price) as price_usd,
+        avg(price) as price_unit,
         avg(price) / pow(10, 18) as price_atom
     from prices.usd
     where
