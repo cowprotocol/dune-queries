@@ -1,4 +1,4 @@
--- This query return slippage per transaction
+-- This query returns slippage per transaction, evaluated in both usd and the native token of the chain.
 --
 -- Parameters:
 --  {{start_time}} - the timestamp for which the analysis should start (inclusively)
