@@ -12,7 +12,7 @@
 --   0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee for native token
 -- - amount: signed value of slippage in atoms of the token; fees are represented as negative
 --   integers since they will be removed from imbalances
--- - type: 'raw_imbalance' for imbalance observable on chain, 'protocol_fee' for the total
+-- - slippage_type: 'raw_imbalance' for imbalance observable on chain, 'protocol_fee' for the total
 --   protocol fee (including partner fee), 'network_fee' for network fees
 -- - price_unit: USD price of one unit (i.e. pow(10, decimals) atoms) of a token
 -- - price_atom: USD price of one atom (i.e. 1. / pow(10, decimals) units) of a token
@@ -25,18 +25,18 @@ with raw_token_imbalances as (
         tx_hash,
         token_address,
         amount,
-        'raw_imbalance' as type,
+        'raw_imbalance' as slippage_type,
         date_trunc('hour', block_time) as hour --noqa: RF04
     from "query_4021644(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')"
 ),
 
 fee_balance_changes as (
-    select
+    select -- noqa: ST06
         block_time,
         tx_hash,
         token_address,
         -amount as amount,
-        type,
+        fee_type as slippage_type,
         date_trunc('hour', block_time) as hour --noqa: RF04
     from "query_4058574(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')"
 ),
@@ -56,7 +56,7 @@ select
     tx_hash,
     rs.token_address,
     amount as slippage_atoms,
-    type,
+    slippage_type,
     p.price_unit,
     p.price_atom,
     cast(amount * p.price_atom / np.price_atom as int256) as slippage_wei,
