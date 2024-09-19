@@ -4,17 +4,11 @@ block_range as (
     select * from "query_3333356(start_time='{{start_time}}',end_time='{{end_time}}')"
 ),
 
-results_per_tx as (
-    select * from "query_3427730(start_time='{{start_time}}',end_time='{{end_time}}',cte_name='results_per_tx')"
-
-),
-
 solver_slippage as (
     select
         solver_address as solver,
-        sum(eth_slippage_wei) * 1.0 / pow(10, 18) as slippage
-    from results_per_tx
-    group by solver_address
+        slippage_wei * 1.0 / pow(10, 18) as slippage
+    from "query_4070065(blockchain='ethereum',start_time='{{start_time}}',end_time='{{end_time}}',slippage_table_name='slippage_per_solver')"
 ),
 
 named_results as (

@@ -36,8 +36,8 @@ slippage_per_transaction as (
         sum(slippage_wei) as slippage_wei
     from "query_4059683(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}',raw_slippage_table_name='raw_slippage_per_transaction')" as rs
     inner join cow_protocol_{{blockchain}}.batches as b
-        on s.tx_hash = b.tx_hash
-    where s.tx_hash not in (select tx_hash from excluded_batches)
+        on rs.tx_hash = b.tx_hash
+    where rs.tx_hash not in (select tx_hash from excluded_batches)
     group by 1, 2, 3
     having bool_and(slippage_wei is not null or slippage_atoms = 0)
 ),
