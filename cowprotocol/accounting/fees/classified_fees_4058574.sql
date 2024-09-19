@@ -13,9 +13,9 @@
 -- - token_address: address of token with a balance change. contract address for erc20 tokens,
 --   0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee for native token
 -- - amount: value of fee in atoms of the token
--- - transfer_type: 'protocol_fee' for the total protocol fee (including partner fee), 'network_fee' for network fees
+-- - type: 'protocol_fee' for the total protocol fee (including partner fee), 'network_fee' for network fees
 
-with fee_data as (
+with raw_fee_data as (
     select
         block_time,
         t.tx_hash,
@@ -38,8 +38,8 @@ protocol_fee_balance_changes as (
         tx_hash,
         protocol_fee_token_address as token_address,
         protocol_fee as amount,
-        'protocol_fee' as transfer_type
-    from fee_data
+        'protocol_fee' as type
+    from raw_fee_data
 ),
 
 network_fee_balance_changes as (
@@ -47,12 +47,12 @@ network_fee_balance_changes as (
         block_time,
         tx_hash,
         sell_token_address as token_address,
-        'network_fee' as transfer_type,
         case
             when sell_token_address = protocol_fee_token_address then surplus_fee - protocol_fee
             else surplus_fee - cast(1.0 * protocol_fee * (atoms_sold - surplus_fee) / atoms_bought as int256)
-        end as amount
-    from fee_data
+        end as amount,
+        'network_fee' as type
+    from raw_fee_data
 )
 
 select * from protocol_fee_balance_changes
