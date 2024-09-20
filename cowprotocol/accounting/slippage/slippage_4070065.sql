@@ -34,7 +34,7 @@ slippage_per_transaction as (
         solver_address,
         sum(slippage_usd) as slippage_usd,
         sum(slippage_wei) as slippage_wei
-    from "query_4059683(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}',raw_slippage_table_name='raw_slippage_per_transaction')" as rs
+    from "query_4059683(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}',raw_slippage_table_name='raw_slippage_breakdown')" as rs
     inner join cow_protocol_{{blockchain}}.batches as b
         on rs.tx_hash = b.tx_hash
     where rs.tx_hash not in (select tx_hash from excluded_batches)
