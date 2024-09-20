@@ -2,7 +2,7 @@
 -- Parameters
 --  {{token_a}} - either token of the pool
 --  {{token_b}} - other token of the pool
---  {{blockchain} - chain for which the query is running
+--  {{blockchain}} - chain for which the query is running
 
 with cow_amm_pool as (
     select

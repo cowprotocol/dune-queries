@@ -3,7 +3,7 @@
 --  {{token_a}} - either token of the desired uni pool
 --  {{token_b}} - other token of the desired uni pool
 --  {{start}} - date as of which the analysis should run
---  {{blockchain} - chain for which the query is
+--  {{blockchain}} - chain for which the query is
 
 -- Given that we might not have records every day in the source data (e.g. not every day the lp supply may change), 
 -- but still want to visualize development on a per day basis,  we create an auxiliary table with one record per 

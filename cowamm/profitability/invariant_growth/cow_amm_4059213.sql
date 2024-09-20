@@ -3,7 +3,7 @@
 --  {{token_a}} - either token of the desired uni pool
 --  {{token_b}} - other token of the desired uni pool
 --  {{start}} - date as of which the analysis should run
---  {{blockchain} - chain for which the query is running
+--  {{blockchain}} - chain for which the query is running
 
 -- Finds the CoW AMM pool address given tokens specified in query parameters (regardless of order) 
 with cow_amm_pool as (
