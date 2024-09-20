@@ -90,7 +90,6 @@ raw_slippage_per_transaction as (
         sum(slippage_wei) as slippage_wei
     from raw_slippage_breakdown
     group by 1, 2
-    having bool_and(slippage_wei is not null or slippage_atoms = 0)
 )
 
 select * from {{raw_slippage_table_name}}
