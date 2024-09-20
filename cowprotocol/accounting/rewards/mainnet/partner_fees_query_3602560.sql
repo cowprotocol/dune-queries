@@ -53,7 +53,7 @@ per_trade_partner_fees as (
         raw_integrator_fee_in_eth > 0
 ),
 
-aggregate_per_recipient as (
+per_recipient_partner_fees as (
     select
         partner_recipient,
         case
