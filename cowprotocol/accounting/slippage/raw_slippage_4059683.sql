@@ -38,7 +38,7 @@ with raw_token_imbalances as (
     from "query_4021644(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')"
 ),
 
-fee_balance_changes as (
+fees as (
     select -- noqa: ST06
         block_time,
         tx_hash,
@@ -52,7 +52,7 @@ fee_balance_changes as (
 imbalances as (
     select * from raw_token_imbalances
     union all
-    select * from fee_balance_changes
+    select * from fees
 ),
 
 prices as (

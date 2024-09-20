@@ -33,7 +33,7 @@ with raw_fee_data as (
     where block_time >= cast('{{start_time}}' as timestamp) and block_time < cast('{{end_time}}' as timestamp)
 ),
 
-protocol_fee_balance_changes as (
+protocol_fees as (
     select
         block_time,
         tx_hash,
@@ -44,10 +44,11 @@ protocol_fee_balance_changes as (
     from raw_fee_data
 ),
 
-network_fee_balance_changes as (
+network_fees as (
     select -- noqa: ST06
         block_time,
         tx_hash,
+        order_uid,
         sell_token_address as token_address,
         case
             when sell_token_address = protocol_fee_token_address then surplus_fee - protocol_fee
@@ -57,6 +58,6 @@ network_fee_balance_changes as (
     from raw_fee_data
 )
 
-select * from protocol_fee_balance_changes
+select * from protocol_fees
 union all
-select * from network_fee_balance_changes
+select * from network_fees
