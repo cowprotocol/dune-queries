@@ -57,11 +57,10 @@ aggregate_per_recipient as (
     select
         partner_recipient,
         case
-            when partner_recipient = '0x63695Eee2c3141BDE314C5a6f89B98E62808d716' then sum(0.9 * raw_integrator_fee_in_eth)  -- this is for the Safe integration
-            else sum(0.85 * raw_integrator_fee_in_eth)
+            when partner_recipient = '0x63695Eee2c3141BDE314C5a6f89B98E62808d716' then sum(0.9 * raw_integrator_fee_in_eth)
         end as partner_fee_part,
         case
-            when partner_recipient = '0x63695Eee2c3141BDE314C5a6f89B98E62808d716' then sum(0.1 * raw_integrator_fee_in_eth)  -- this is for the Safe integratio
+            when partner_recipient = '0x63695Eee2c3141BDE314C5a6f89B98E62808d716' then sum(0.1 * raw_integrator_fee_in_eth)
             else sum(0.15 * raw_integrator_fee_in_eth)
         end as cow_dao_partner_fee_part
     from
