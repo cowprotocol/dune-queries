@@ -3,6 +3,7 @@
 --  {{token_a}} - either token of the desired uni pool
 --  {{token_b}} - other token of the desired uni pool
 --  {{start}} - date as of which the analysis should run
+--  {{blockchain} - chain for which the query is running
 
 -- Note: not using a simpler recursive approach due to Dune's recursion depth limitation.
 -- Current value of initial investment can be computed as the product of cumulative price changes per day, since
@@ -31,26 +32,26 @@ daily_price_change as (
         on
             p1.day = ds.day
             and p1.contract_address = {{token_a}}
-            and p1.blockchain = 'ethereum'
+            and p1.blockchain = '{{blockchain}}'
     left join prices.usd_daily as previous_p1
         on
             previous_p1.day = ds.day - interval '1' day
             -- avoid computing price change on first day
             and previous_p1.day >= date(timestamp '{{start}}')
             and previous_p1.contract_address = {{token_a}}
-            and previous_p1.blockchain = 'ethereum'
+            and previous_p1.blockchain = '{{blockchain}}'
     inner join prices.usd_daily as p2
         on
             p2.day = ds.day
             and p2.contract_address = {{token_b}}
-            and p2.blockchain = 'ethereum'
+            and p2.blockchain = '{{blockchain}}'
     left join prices.usd_daily as previous_p2
         on
             previous_p2.day = ds.day - interval '1' day
             -- avoid computing price change on first day
             and previous_p2.day >= date(timestamp '{{start}}')
             and previous_p2.contract_address = {{token_b}}
-            and previous_p2.blockchain = 'ethereum'
+            and previous_p2.blockchain = '{{blockchain}}'
 )
 
 -- For each day multiply initial investment with cumulative product of average price change of the two assets
