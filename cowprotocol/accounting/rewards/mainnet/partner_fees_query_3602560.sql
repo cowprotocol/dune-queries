@@ -6,7 +6,7 @@
 --  {{result}} - two views of the result, one aggregated and one on a per tx basis
 
 with
-per_settlement_prelim as (
+per_trade_protocol_fees as (
     select
         t.block_time,
         t.block_number,
@@ -19,15 +19,11 @@ per_settlement_prelim as (
         r.data.protocol_fee_token,  -- noqa: RF01
         json_extract(a.encode, '$.metadata.partnerFee.bps') as patnerFeeBps,
         json_extract(a.encode, '$.metadata.widget.appCode') as app_code,
-        cast(
-            usd_value * cast(
-                json_extract(a.encode, '$.metadata.partnerFee.bps') as double
-            ) as double
+        usd_value * cast(
+            json_extract(a.encode, '$.metadata.partnerFee.bps') as double
         ) / 10000 as est_partner_revenue,
-        cast(
-            usd_value * cast(
-                json_extract(a.encode, '$.metadata.partnerFee.bps') as double
-            ) as double
+        usd_value * cast(
+            json_extract(a.encode, '$.metadata.partnerFee.bps') as double
         ) / 10000 * 0.15 as est_cow_revenue,
         cast(
             cast(
@@ -49,10 +45,10 @@ per_settlement_prelim as (
         t.block_time desc
 ),
 
-per_settlement as (
+per_trade_partner_fees as (
     select *
     from
-        per_settlement_prelim
+        per_trade_protocol_fees
     where
         raw_integrator_fee_in_eth > 0
 ),
@@ -69,7 +65,7 @@ aggregate_per_recipient as (
             else sum(0.15 * raw_integrator_fee_in_eth)
         end as cow_dao_partner_fee_part
     from
-        per_settlement
+        per_trade_partner_fees
     group by
         partner_recipient
 )
