@@ -10,6 +10,7 @@
 -- The columns of the result are
 -- - block_time: time of settlement transaction
 -- - tx_hash: settlement transaction hash
+-- - order_uid: order uid of the trade with a fee
 -- - token_address: address of token with a balance change. contract address for erc20 tokens,
 --   0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee for native token
 -- - amount: value of fee in atoms of the token
@@ -36,6 +37,7 @@ protocol_fee_balance_changes as (
     select
         block_time,
         tx_hash,
+        order_uid,
         protocol_fee_token_address as token_address,
         protocol_fee as amount,
         'protocol_fee' as fee_type
