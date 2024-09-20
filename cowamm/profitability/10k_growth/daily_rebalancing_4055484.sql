@@ -1,7 +1,7 @@
 -- Computes the balances and current value of a counterfactual portfolio that invests 10k evenly into two tokens and re-balances once a day to keep a 50:50 exposure
 -- Parameters
---  {{token_a}} - either token of the desired uni pool
---  {{token_b}} - other token of the desired uni pool
+--  {{token_a}} - either token
+--  {{token_b}} - other token
 --  {{start}} - date as of which the analysis should run
 
 -- Note: not using a simpler recursive approach due to Dune's recursion depth limitation.
