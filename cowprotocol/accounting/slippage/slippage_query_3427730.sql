@@ -2,7 +2,7 @@ select
     solver_address,
     concat(environment, '-', name) as solver_name,
     slippage_usd as usd_value,
-    slippage_wei as eth_slippage_wei,
+    1.0 * slippage_wei as eth_slippage_wei,
     concat(
         '<a href="https://dune.com/queries/4070065',
         '&blockchain=ethereum',
