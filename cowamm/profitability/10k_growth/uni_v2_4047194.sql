@@ -17,15 +17,43 @@ with date_range as (
 ),
 
 -- Finds the uniswap v2 pool address given tokens specified in query parameters (regardless of order)
-pool as (
+pools as (
     select
-        pool as contract_address,
-        token0,
-        token1
-    from uniswap_ethereum.pools
+        substr(data, 13, 20) as contract_address,
+        substr(topic1, 13, 20) as token0,
+        substr(topic2, 13, 20) as token1
+    from {{blockchain}}.logs
     where
-        ((token0 = {{token_a}} and token1 = {{token_b}}) or (token1 = {{token_a}} and token0 = {{token_b}}))
-        and version = 'v2'
+        topic0 = 0x0d3648bd0f6ba80134a33ba9275ac585d9d315f0ad8355cddefde31afa28d0e9 -- PairCreated
+        -- topic1: 0x0...0<token0>, topic2: 0x0...0<token1>
+        and ((substr(topic1, 13, 20) = {{token_a}} and substr(topic2, 13, 20) = {{token_b}}) or (substr(topic2, 13, 20) = {{token_a}} and substr(topic1, 13, 20) = {{token_b}}))
+),
+
+syncs as (
+    select
+        tx_hash as evt_tx_hash,
+        index as evt_index,
+        block_time as evt_block_time,
+        block_number as evt_block_number,
+        contract_address,
+        varbinary_to_uint256(substr(data, 1, 32)) as reserve0,
+        varbinary_to_uint256(substr(data, 33, 32)) as reserve1,
+        rank() over (partition by (contract_address) order by block_time desc) as latest
+    from {{blockchain}}.logs
+    where
+        topic0 = 0x1c411e9a96e071241c2f21f7726b17ae89e3cab4c78be50e062b03a9fffbbad1 -- Sync
+        and contract_address in (select contract_address from pools)
+),
+
+-- select the pool with the largest latest k
+pool as (
+    select pools.*
+    from pools
+    inner join syncs
+        on
+            pools.contract_address = syncs.contract_address
+            and latest = 1
+    order by (reserve0 * reserve1) desc
     limit 1
 ),
 
@@ -34,11 +62,11 @@ lp_supply_delta as (
     select
         date(evt_block_time) as "day",
         sum(case when "from" = 0x0000000000000000000000000000000000000000 then value else -value end) as delta
-    from erc20_ethereum.evt_transfer
+    from erc20_{{blockchain}}.evt_transfer
     where
         contract_address = (select contract_address from pool)
         and ("from" = 0x0000000000000000000000000000000000000000 or "to" = 0x0000000000000000000000000000000000000000)
-    group by 1
+    group by date(evt_block_time)
 ),
 
 -- per day lp token total supply by summing up all deltas (may have missing records for some days)
@@ -89,11 +117,11 @@ latest_syncs_per_day as (
         token1,
         reserve1,
         rank() over (partition by (date_range.day) order by (evt_block_number, evt_index) desc) as latest
-    from uniswap_v2_ethereum.Pair_evt_Sync as sync
+    from syncs
     inner join date_range
         on day >= date(evt_block_time)
     inner join pool
-        on sync.contract_address = pool.contract_address
+        on syncs.contract_address = pool.contract_address
 ),
 
 -- Get reserve balances of token_a and token_b per day, by looking at the last `Sync` emitted event for each day
@@ -136,10 +164,10 @@ tvl as (
     ) as balances
     left join prices.usd_daily as prices
         on
-            blockchain = 'ethereum'
+            blockchain = '{{blockchain}}'
             and balances.token = prices.contract_address
             and balances.day = prices.day
-    group by 1, 2
+    group by balances.day, balances.contract_address
 ),
 
 -- With this we can plot the lp token price (tvl/lp total supply) over time
@@ -167,4 +195,4 @@ select
         where day = timestamp '{{start}}'
     ) * lp_token_price as current_value_of_investment
 from lp_token_price
-order by 1 desc
+order by day desc
