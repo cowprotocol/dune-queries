@@ -1,6 +1,6 @@
 -- This query computes how much surplus has been provided to CoW AMMs, when trading with other user orders
 -- as part of a CoW. For that, a CoW detector query is used (4025739(). Finally, the query computes the 
--- distribution of an amount {{budget}} of COW tokens to solvers, proportionally to the surplus generated 
+-- distribution of an amount {{cow_budget}} of COW tokens to solvers, proportionally to the surplus generated 
 -- via CoWs and pushed to CoW AMMs.
 -- Parameters:
 --  {{start_time}} - the start date timestamp for the accounting period  (inclusively)
