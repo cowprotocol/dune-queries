@@ -1,4 +1,4 @@
--- Computes the balances and their dollar value of a all CoW AMM pools for a specific token pair at every transaction where it changed
+-- Computes the balances and their dollar value of all CoW AMM pools for a specific token pair at every transaction where it changed
 -- Parameters
 --  {{token_a}} - either token of the pool
 --  {{token_b}} - other token of the pool

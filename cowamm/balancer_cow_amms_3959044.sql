@@ -1,5 +1,5 @@
 -- This is part of a base query for monitoring Balancer CoW AMMs
--- It indexes all Balancer CoW AMMs on ethereum and gnosis
+-- It indexes all Balancer CoW AMMs on ethereum and gnosis and arbitrum
 --
 -- the final table has columns
 -- - created_at: the creation timestamp
