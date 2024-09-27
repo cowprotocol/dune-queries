@@ -70,7 +70,7 @@ cowamm_creations_arbitrum as (
         contract_address in (0xe0e2ba143ee5268da87d529949a2521115987302)
         and topic0 = 0x0d03834d0d86c7f57e877af40e26f176dc31bd637535d4ba153d1ac9de88a7ea
     )
-    and block_time >= cast('2024-09-10 00:00:00' as timestamp)
+    and block_time >= cast('2024-09-01 00:00:00' as timestamp)
 ),
 
 cowamms_arbitrum as (
