@@ -85,7 +85,7 @@ cowamms_arbitrum as (
     where
         contract_address in (select address from cowamm_creations_arbitrum)
         and topic0 = 0xe4e1e53800000000000000000000000000000000000000000000000000000000
-        and block_time >= cast('2024-09-10 00:00:00' as timestamp)
+        and block_time >= cast('2024-09-01 00:00:00' as timestamp)
     group by 1, 2
 ),
 
