@@ -31,26 +31,22 @@ daily_price_change as (
         on
             p1.day = ds.day
             and p1.contract_address = {{token_a}}
-            and p1.blockchain = 'ethereum'
     left join prices.usd_daily as previous_p1
         on
             previous_p1.day = ds.day - interval '1' day
             -- avoid computing price change on first day
             and previous_p1.day >= date(timestamp '{{start}}')
             and previous_p1.contract_address = {{token_a}}
-            and previous_p1.blockchain = 'ethereum'
     inner join prices.usd_daily as p2
         on
             p2.day = ds.day
             and p2.contract_address = {{token_b}}
-            and p2.blockchain = 'ethereum'
     left join prices.usd_daily as previous_p2
         on
             previous_p2.day = ds.day - interval '1' day
             -- avoid computing price change on first day
             and previous_p2.day >= date(timestamp '{{start}}')
             and previous_p2.contract_address = {{token_b}}
-            and previous_p2.blockchain = 'ethereum'
 )
 
 -- For each day multiply initial investment with cumulative product of average price change of the two assets

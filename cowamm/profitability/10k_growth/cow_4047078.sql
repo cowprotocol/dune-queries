@@ -3,6 +3,7 @@
 --  {{token_a}} - either token of the desired uni pool
 --  {{token_b}} - other token of the desired uni pool
 --  {{start}} - date as of which the analysis should run
+--  {{blockchain}} - chain for which the query is
 
 -- Given that we might not have records every day in the source data (e.g. not every day the lp supply may change), 
 -- but still want to visualize development on a per day basis,  we create an auxiliary table with one record per 
@@ -32,7 +33,7 @@ lp_balance_delta as (
     select
         date(evt_block_time) as "day",
         sum(case when "from" = 0x0000000000000000000000000000000000000000 then value else -value end) as lp_supply
-    from erc20_ethereum.evt_transfer
+    from erc20_{{blockchain}}.evt_transfer
     where
         contract_address in (select address from cow_amm_pool)
         and ("from" = 0x0000000000000000000000000000000000000000 or "to" = 0x0000000000000000000000000000000000000000)
@@ -79,7 +80,7 @@ tvl_by_tx as (
     select
         *,
         rank() over (partition by date(block_time) order by block_time desc) as latest
-    from "query_4059700(token_a='{{token_a}}', token_b='{{token_b}}')"
+    from "query_4059700(token_a='{{token_a}}', token_b='{{token_b}}', blockchain='{{blockchain}}')"
     where pool = (select address from cow_amm_pool)
     -- performance optimisation: this assumes one week prior to start there was at least one tvl change event
     and block_time >= timestamp '{{start}}' - interval '7' day
@@ -110,12 +111,12 @@ tvl as (
         on
             tvl_complete.day = p1.day
             and p1.contract_address = token1
-            and p1.blockchain = 'ethereum'
+            and p1.blockchain = '{{blockchain}}'
     inner join prices.usd_daily as p2
         on
             tvl_complete.day = p2.day
             and p2.contract_address = token2
-            and p2.blockchain = 'ethereum'
+            and p2.blockchain = '{{blockchain}}'
     where latest = 1
 ),
 

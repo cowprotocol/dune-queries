@@ -1,7 +1,8 @@
--- Computes the balances and their dollar value of a all CoW AMM pools for a specific token pair at every transaction where it changed
+-- Computes the balances and their dollar value of all CoW AMM pools for a specific token pair at every transaction where it changed
 -- Parameters
 --  {{token_a}} - either token of the pool
 --  {{token_b}} - other token of the pool
+--  {{blockchain}} - chain for which the query is running
 
 with cow_amm_pool as (
     select
@@ -22,7 +23,7 @@ reserves_delta as (
         MAX(evt_block_number) as evt_block_number,
         MAX(evt_index) as evt_index,
         SUM(case when "from" = p.address then -value else value end) as amount
-    from erc20_ethereum.evt_transfer as t
+    from erc20_{{blockchain}}.evt_transfer as t
     inner join cow_amm_pool as p
         on
             t."from" = p.address
