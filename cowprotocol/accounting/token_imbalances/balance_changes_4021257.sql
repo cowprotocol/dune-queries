@@ -62,6 +62,7 @@ native_transfers as (
 -- special treatmet of
 -- 2.1.1) WETH
 -- 2.1.2) sDAI
+-- 2.1.3) MKR
 
 -- 2.1.1) all deposit and withdrawal events for WETH
 weth_deposits_withdrawals_ethereum as (
@@ -101,7 +102,7 @@ sdai_deposits_withdraws_ethereum as (
         contract_address as token_address,
         0x0000000000000000000000000000000000000000 as sender,
         0x9008d19f58aabd9ed0d60971565aa8510560ab41 as receiver,
-        shares as amount_wei
+        shares as amount
     from maker_ethereum.SavingsDai_evt_Deposit
     where
         evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
@@ -114,23 +115,53 @@ sdai_deposits_withdraws_ethereum as (
         contract_address as token_address,
         0x9008d19f58aabd9ed0d60971565aa8510560ab41 as sender,
         0x0000000000000000000000000000000000000000 as receiver,
-        shares as amount_wei
+        shares as amount
     from maker_ethereum.SavingsDai_evt_Withdraw
     where
         evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and owner = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
 ),
 
+-- 2.1.3) all mint and burn events for MKR
+mkr_mint_burn_ethereum as (
+    -- deposits
+    select
+        evt_block_time as block_time,
+        evt_tx_hash as tx_hash,
+        contract_address as token_address,
+        0x0000000000000000000000000000000000000000 as sender,
+        0x9008d19f58aabd9ed0d60971565aa8510560ab41 as receiver,
+        wad as amount
+    from maker_ethereum.mkr_evt_Mint
+    where
+        evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
+        and guy = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
+    union distinct
+    -- withdraws
+    select
+        evt_block_time as block_time,
+        evt_tx_hash as tx_hash,
+        contract_address as token_address,
+        0x9008d19f58aabd9ed0d60971565aa8510560ab41 as sender,
+        0x0000000000000000000000000000000000000000 as receiver,
+        wad as amount
+    from maker_ethereum.mkr_evt_Burn
+    where
+        evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
+        and guy = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
+),
+
 special_balance_changes_ethereum as (
     select * from weth_deposits_withdrawals_ethereum
     union all
     select * from sdai_deposits_withdraws_ethereum
+    union all
+    select * from mkr_mint_burn_ethereum
 ),
 
 -- 2.2) gnosis
 -- special treatmet of
 -- 2.2.1) WXDAI
--- 2.2.2) sDAI
 
 -- 2.2.1) all deposit and withdrawal events for WXDAI
 wxdai_deposits_withdrawals_gnosis as (
@@ -161,39 +192,8 @@ wxdai_deposits_withdrawals_gnosis as (
         and src = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
 ),
 
--- 2.2.2) all deposit and withdrawal events for sDAI
-sdai_deposits_withdraws_gnosis as (
-    -- deposits
-    select
-        evt_block_time as block_time,
-        evt_tx_hash as tx_hash,
-        contract_address as token_address,
-        0x0000000000000000000000000000000000000000 as sender,
-        0x9008d19f58aabd9ed0d60971565aa8510560ab41 as receiver,
-        shares as amount_wei
-    from sdai_gnosis.SavingsXDai_evt_Deposit
-    where
-        evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
-        and owner = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
-    union distinct
-    -- withdraws
-    select
-        evt_block_time as block_time,
-        evt_tx_hash as tx_hash,
-        contract_address as token_address,
-        0x9008d19f58aabd9ed0d60971565aa8510560ab41 as sender,
-        0x0000000000000000000000000000000000000000 as receiver,
-        shares as amount_wei
-    from sdai_gnosis.SavingsXDai_evt_Withdraw
-    where
-        evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
-        and owner = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
-),
-
 special_balance_changes_gnosis as ( -- noqa: ST03
     select * from wxdai_deposits_withdrawals_gnosis
-    union all
-    select * from sdai_deposits_withdraws_gnosis
 ),
 
 -- 2.3) arbitrum
