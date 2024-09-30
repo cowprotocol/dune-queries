@@ -40,19 +40,41 @@ pool as (
             and l2.token_address = {{token_b}}
     order by tvl desc
     limit 1
+),
+
+-- compute $ tvl using the same price feed we use for other reference pools 
+-- (as the price feed that balance uses seems inaccurate)
+tvl as (
+    select
+        l.day,
+        l.pool_address,
+        l.blockchain,
+        sum(token_balance * price_close) as tvl
+    from balancer.liquidity as l
+    inner join pool
+        on
+            l.pool_address = pool.pool_address
+            and l.blockchain = pool.blockchain
+    left join prices.usd_daily as p1
+        on
+            l.blockchain = p1.blockchain
+            and l.token_address = p1.contract_address
+            and l.day = p1.day
+    group by l.day, l.pool_address, l.blockchain
 )
 
 select
-    day,
+    dr.day,
     swap_amount_usd as volume,
     fee_amount_usd as absolute_invariant_growth,
-    tvl_usd as tvl,
-    fee_amount_usd / tvl_usd as pct_invariant_growth
+    tvl,
+    fee_amount_usd / tvl as pct_invariant_growth
 from date_range as dr
-cross join pool
+left join tvl
+    on dr.day = tvl.day
 left join balancer.pools_metrics_daily as bal
     on
         dr.day = bal.block_date
-        and project_contract_address = pool_address
-        and pool.blockchain = bal.blockchain
-order by day desc
+        and project_contract_address = tvl.pool_address
+        and tvl.blockchain = bal.blockchain
+order by dr.day desc

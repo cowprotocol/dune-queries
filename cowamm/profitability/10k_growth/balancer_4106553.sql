@@ -92,19 +92,33 @@ lp_total_supply as (
     where latest = 1
 ),
 
+-- Get tvl by multiplying day end reserves with their token's closing price
+tvl as (
+    select
+        l.day,
+        sum(token_balance * price_close) as tvl
+    from balancer.liquidity as l
+    inner join pool
+        on
+            l.pool_address = pool.pool_address
+            and l.blockchain = pool.blockchain
+    left join prices.usd_daily as p1
+        on
+            l.blockchain = p1.blockchain
+            and l.token_address = p1.contract_address
+            and l.day = p1.day
+    group by 1
+),
+
 lp_token_price as (
     select
         dr.day,
-        tvl_usd as tvl,
+        tvl,
         total_lp,
-        tvl_usd / total_lp as lp_token_price
+        tvl / total_lp as lp_token_price
     from date_range as dr
-    cross join pool
-    left join balancer.pools_metrics_daily as tvl
-        on
-            dr.day = tvl.block_date
-            and project_contract_address = pool_address
-            and pool.blockchain = tvl.blockchain
+    left join tvl
+        on dr.day = tvl.day
     left join lp_total_supply as lp
         on dr.day = lp.day
 )
