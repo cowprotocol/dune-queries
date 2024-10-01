@@ -16,16 +16,12 @@ with date_range as (
         )) t (day) --noqa: AL01
 ),
 
--- Finds the uniswap v2 pool address given tokens specified in query parameters (regardless of order)
+-- select the pool with the largest latest k
 pool as (
-    select
-        pool as contract_address,
-        token0,
-        token1
-    from uniswap_ethereum.pools
-    where
-        ((token0 = {{token_a}} and token1 = {{token_b}}) or (token1 = {{token_a}} and token0 = {{token_b}}))
-        and version = 'v2'
+    select contract_address, token0, token1
+    from "query_4117043(blockchain='{{blockchain}}',token_a='{{token_a}}',token_b='{{token_b}}')"
+    where latest = 1
+    order by (reserve0 * reserve1) desc
     limit 1
 ),
 
@@ -34,11 +30,11 @@ lp_supply_delta as (
     select
         date(evt_block_time) as "day",
         sum(case when "from" = 0x0000000000000000000000000000000000000000 then value else -value end) as delta
-    from erc20_ethereum.evt_transfer
+    from erc20_{{blockchain}}.evt_transfer
     where
         contract_address = (select contract_address from pool)
         and ("from" = 0x0000000000000000000000000000000000000000 or "to" = 0x0000000000000000000000000000000000000000)
-    group by 1
+    group by date(evt_block_time)
 ),
 
 -- per day lp token total supply by summing up all deltas (may have missing records for some days)
@@ -84,16 +80,16 @@ latest_syncs_per_day as (
     select
         day,
         pool.contract_address,
-        token0,
+        pool.token0,
         reserve0,
-        token1,
+        pool.token1,
         reserve1,
         rank() over (partition by (date_range.day) order by (evt_block_number, evt_index) desc) as latest
-    from uniswap_v2_ethereum.Pair_evt_Sync as sync
+    from "query_4117043(blockchain='{{blockchain}}',token_a='{{token_a}}',token_b='{{token_b}}')" syncs
     inner join date_range
         on day >= date(evt_block_time)
     inner join pool
-        on sync.contract_address = pool.contract_address
+        on syncs.contract_address = pool.contract_address
 ),
 
 -- Get reserve balances of token_a and token_b per day, by looking at the last `Sync` emitted event for each day
@@ -136,10 +132,10 @@ tvl as (
     ) as balances
     left join prices.usd_daily as prices
         on
-            blockchain = 'ethereum'
+            blockchain = '{{blockchain}}'
             and balances.token = prices.contract_address
             and balances.day = prices.day
-    group by 1, 2
+    group by balances.day, balances.contract_address
 ),
 
 -- With this we can plot the lp token price (tvl/lp total supply) over time
@@ -167,4 +163,4 @@ select
         where day = timestamp '{{start}}'
     ) * lp_token_price as current_value_of_investment
 from lp_token_price
-order by 1 desc
+order by day desc
