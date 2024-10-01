@@ -18,7 +18,10 @@ with date_range as (
 
 -- select the pool with the largest latest k
 pool as (
-    select contract_address, token0, token1
+    select
+        contract_address,
+        token0,
+        token1
     from "query_4117043(blockchain='{{blockchain}}',token_a='{{token_a}}',token_b='{{token_b}}')"
     where latest = 1
     order by (reserve0 * reserve1) desc
@@ -85,7 +88,7 @@ latest_syncs_per_day as (
         pool.token1,
         reserve1,
         rank() over (partition by (date_range.day) order by (evt_block_number, evt_index) desc) as latest
-    from "query_4117043(blockchain='{{blockchain}}',token_a='{{token_a}}',token_b='{{token_b}}')" syncs
+    from "query_4117043(blockchain='{{blockchain}}',token_a='{{token_a}}',token_b='{{token_b}}')" as syncs
     inner join date_range
         on day >= date(evt_block_time)
     inner join pool

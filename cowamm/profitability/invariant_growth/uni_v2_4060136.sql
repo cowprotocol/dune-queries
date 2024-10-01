@@ -16,7 +16,10 @@ with date_range as (
 
 -- select the pool with the largest latest k
 pool as (
-    select contract_address, token0, token1
+    select
+        contract_address,
+        token0,
+        token1
     from "query_4117043(blockchain='{{blockchain}}',token_a='{{token_a}}',token_b='{{token_b}}')"
     where latest = 1
     order by (reserve0 * reserve1) desc
@@ -48,7 +51,7 @@ tvl_volume_per_swap as (
         (amount0In * p0.price / pow(10, p0.decimals)) + (amount1In * p1.price / pow(10, p1.decimals)) as volume_in,
         (amount0Out * p0.price / pow(10, p0.decimals)) + (amount1Out * p1.price / pow(10, p1.decimals)) as volume_out,
         (reserve0 * p0.price / pow(10, p0.decimals)) + (reserve1 * p1.price / pow(10, p1.decimals)) as tvl
-    from "query_4117043(blockchain='{{blockchain}}',token_a='{{token_a}}',token_b='{{token_b}}')" syncs
+    from "query_4117043(blockchain='{{blockchain}}',token_a='{{token_a}}',token_b='{{token_b}}')" as syncs
     inner join swaps
         on
             syncs.evt_tx_hash = swaps.evt_tx_hash
@@ -59,11 +62,11 @@ tvl_volume_per_swap as (
     inner join prices.usd as p0
         on
             date_trunc('minute', syncs.evt_block_time) = p0.minute
-            and p0.contract_address = syncs.token0
+            and syncs.token0 = p0.contract_address
     inner join prices.usd as p1
         on
             date_trunc('minute', syncs.evt_block_time) = p1.minute
-            and p1.contract_address = syncs.token1
+            and syncs.token1 = p1.contract_address
     where syncs.evt_block_time >= date(timestamp '{{start}}')
 )
 
