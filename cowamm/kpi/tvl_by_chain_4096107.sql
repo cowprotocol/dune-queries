@@ -9,6 +9,7 @@ with pools as (
         token_2_address,
         address
     from query_3959044
+    where blockchain = '{{blockchain}}'
 ),
 
 date_range as (
