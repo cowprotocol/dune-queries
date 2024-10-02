@@ -30,7 +30,8 @@ starting_balance as (
 select
     ds.day,
     token_a_start * p1.price_close + token_b_start * p2.price_close as current_value_of_investment
-from starting_balance, date_series as ds
+from starting_balance
+cross join date_series as ds
 inner join prices.usd_daily as p1
     on
         ds.day = p1.day
