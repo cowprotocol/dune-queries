@@ -1,6 +1,12 @@
 -- In the event that there are any results for this query,
 -- "oncall" can manually perform refunds via:
 -- https://github.com/cowprotocol/manual-ethflow-refunder
+--
+-- Parameters:
+--  {{start_time}} - the order validity timestamp for which the analysis should start (inclusive)
+--  {{end_time}} - the order validity timestamp for which the analysis should end (inclusive)
+--  {{grace_period}} - a global shift of start and end time to account for delays in refunds
+
 with
 join_with_trade_events as (
     select
@@ -38,8 +44,6 @@ cancellations as (
     group by orderUid, evt_tx_hash, evt_block_time, evt_block_number
 ),
 
--- select * from cancellations
-
 refunds as (
     select
         evt_tx_hash as refund_tx,
@@ -56,8 +60,6 @@ refunds as (
     where evt_block_time > now() - interval '1' day
     group by orderUid, evt_tx_hash, evt_block_time, refunder, evt_block_number
 ),
-
--- select * from refunds
 
 unfilled_orders as (
     select
