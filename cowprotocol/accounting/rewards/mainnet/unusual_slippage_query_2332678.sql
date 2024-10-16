@@ -15,7 +15,7 @@ select  --noqa: ST06
     concat(environment, '-', name) as solver_name,
     concat(
         '<a href="https://dune.com/queries/4070065',
-        '&blockchain=ethereum',
+        '?blockchain=ethereum',
         '&start_time={{start_time}}',
         '&end_time={{end_time}}',
         '&slippage_table_name=raw_slippage_breakdown',
