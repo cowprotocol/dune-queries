@@ -14,7 +14,7 @@ select  --noqa: ST06
     rpt.block_time,
     concat(environment, '-', name) as solver_name,
     concat(
-        '<a href="https://dune.com/queries/4070065',
+        '<a href="https://dune.com/queries/4059683',
         '?blockchain=ethereum',
         '&start_time={{start_time}}',
         '&end_time={{end_time}}',
