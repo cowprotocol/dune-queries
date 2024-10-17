@@ -30,4 +30,4 @@ join active_solvers barn
     on prod.name = barn.name
     and prod.environment = 'prod'
     and barn.environment = 'barn'
-order by prod.name
+order by greatest(prod.latest_settlement, barn.latest_settlement) desc
