@@ -207,4 +207,4 @@ select ROW_NUMBER() OVER (
     -- average_surplus
 from info_results ir
     -- join surplus_results sr on ir.solver_name = sr.solver_name
-order by rk
+order by rk 
