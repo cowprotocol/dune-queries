@@ -1,19 +1,19 @@
 WITH 
 settlement_transactions AS (
     SELECT 
-        date_trunc('hour', block_time) as hour,
+        date_trunc('{{Frequence}}', block_time) as time,
         "from" as solver,
         sum(CASE WHEN success THEN 1 ELSE 0 END) as successes,
         sum(CASE WHEN NOT success THEN 1 ELSE 0 END) as failures
     FROM ethereum.transactions
-    WHERE block_time > NOW() - INTERVAL '7' day
+    WHERE block_time > NOW() - INTERVAL '{{LastNDays}}' day
     AND to = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
     AND position('0x13d79a0b' in cast(data as varchar)) > 0 --! settle method ID
-    group by "from", date_trunc('hour', block_time)
+    group by "from", date_trunc('{{Frequence}}', block_time)
 ),
 results as (
     SELECT 
-        hour,
+        time,
         name as solver,
         environment,
         successes,
@@ -25,4 +25,4 @@ results as (
 )
 SELECT * FROM results
 WHERE environment in ('prod', 'barn')
-order by hour desc
+order by time desc
