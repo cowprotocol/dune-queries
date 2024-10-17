@@ -14,6 +14,7 @@ settlement_transactions AS (
 results as (
     SELECT 
         hour,
+        name as solver,
         environment,
         successes,
         failures,
@@ -24,3 +25,4 @@ results as (
 )
 SELECT * FROM results
 WHERE environment in ('prod', 'barn')
+order by hour desc
