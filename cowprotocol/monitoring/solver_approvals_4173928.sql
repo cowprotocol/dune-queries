@@ -9,17 +9,19 @@ ranked as (
         a.value,
         rank() over (partition by spender, contract_address order by evt_block_number desc, evt_index desc) as rk
     from erc20_ethereum.evt_Approval as a
-    left outer join ethereum.transactions on evt_tx_hash = hash and "to" = 0x9008D19f58AAbD9eD0D60971565AA8510560ab41
+    inner join ethereum.transactions on evt_tx_hash = hash
     where owner = 0x9008D19f58AAbD9eD0D60971565AA8510560ab41
 )
 
 select --noqa: ST06
-    tx_hash,
     block_time,
-    coalesce(cast(tx_sender as varchar), 'NON-SOLVER') as responsible_solver,
+    tx_hash,
+    tx_sender as responsible_address,
+    coalesce(concat(environment, '-', name), 'NON-SOLVER') as responsible_solver,
     spender,
     token,
     value
-from ranked
+from ranked as r
+left outer join cow_protocol_ethereum.solvers as s on r.tx_sender = s.address
 where rk = 1 and value > 0
 order by block_time desc
