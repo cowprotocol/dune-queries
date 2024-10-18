@@ -26,5 +26,5 @@ select --noqa: ST06
     value
 from ranked as r
 left outer join cow_protocol_ethereum.solvers as s on r.responsible_address = s.address
-where rk = 1 and value > 0 and responsible_address != 0x05C5494572E4aB2d48D3AB3aAF6bD4e7b1c98382 -- exclude proposer account
+where rk = 1 and value > 0
 order by block_time desc
