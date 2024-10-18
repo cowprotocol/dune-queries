@@ -10,10 +10,10 @@ SELECT date_trunc('{{Aggregate by}}', block_date) as day,
     avg(batch_value) as average_batch_volume,
     avg(num_trades) as average_batch_size,
     1.0 * sum(gas_used) / sum(num_trades) as average_gas_per_trade,
-    1.0 * sum(dex_swaps) / sum(num_trades) as average_dex_swaps_per_trade,
+    1.0 * sum(dex_swaps) / sum(num_trades) as average_dex_swaps_per_trade
     FROM cow_protocol_ethereum.batches
     JOIN cow_protocol_ethereum.solvers ON solver_address = address
-WHERE environment in ('prod', 'barn')
+WHERE environment = 'prod'
     AND block_date > now() - interval '{{LastNDays}}' day
     AND active = True
 GROUP BY name,
