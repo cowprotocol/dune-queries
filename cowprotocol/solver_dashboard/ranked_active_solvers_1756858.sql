@@ -14,8 +14,8 @@ WITH solver_info as (
         avg(num_trades) as average_batch_size,
         1.0 * sum(gas_used) / sum(num_trades) as average_gas_per_trade,
         1.0 * sum(dex_swaps) / sum(num_trades) as average_dex_swaps_per_trade
-    FROM cow_protocol_ethereum.batches b
-    JOIN cow_protocol_ethereum.solvers 
+    FROM cow_protocol_{{blockchain}}.batches b
+    JOIN cow_protocol_{{blockchain}}.solvers 
         ON solver_address = address
     WHERE environment not in ('test', 'service')
     and block_date > now() - interval '{{LastNDays}}' day
