@@ -2,7 +2,7 @@
 -- More details can be found on https://dune.com/docs/query/dunesql-changes/
 WITH solver_info as (
     SELECT 
-        name,
+        name as solver_name,
         -- concat(environment, '-', name) as name,
         max(block_time) last_solution,
         count(*) as batches_solved,
@@ -11,7 +11,9 @@ WITH solver_info as (
         sum(gas_used) as gas_used,
         sum(batch_value) as total_batch_value,
         avg(batch_value) as average_batch_volume,
-        avg(num_trades) as average_batch_size
+        avg(num_trades) as average_batch_size,
+        1.0 * sum(gas_used) / sum(num_trades) as average_gas_per_trade,
+        1.0 * sum(dex_swaps) / sum(num_trades) as average_dex_swaps_per_trade
     FROM cow_protocol_ethereum.batches b
     JOIN cow_protocol_ethereum.solvers 
         ON solver_address = address
@@ -19,20 +21,6 @@ WITH solver_info as (
     and block_date > now() - interval '{{LastNDays}}' day
     and active = True
     GROUP BY name
-),
-info_results as (
-    SELECT 
-        name as solver_name,        
-        last_solution,
-        batches_solved,
-        num_trades,
-        dex_swaps,
-        total_batch_value,
-        1.0 * gas_used / num_trades as average_gas_per_trade,
-        1.0 * dex_swaps / num_trades as average_dex_swaps_per_trade,
-        average_batch_size,
-        average_batch_volume
-    FROM solver_info
     ORDER BY num_trades DESC
 )
 
@@ -203,8 +191,8 @@ info_results as (
 select ROW_NUMBER() OVER (
         ORDER BY average_gas_per_trade
     ) AS rk,
-    ir.*
+    si.*
     -- average_surplus
-from info_results ir
-    -- join surplus_results sr on ir.solver_name = sr.solver_name
+from solver_info si
+    -- join surplus_results sr on si.solver_name = sr.solver_name
 order by rk 
