@@ -18,7 +18,7 @@ results as (
         environment,
         successes,
         failures,
-        (case when successes = 0 then 0 else 1.0 * failures / (successes + failures) end) as failure_rate
+        (case when successes = 0 then 0 else 1.00 * failures / (successes + failures) end) as failure_rate
     FROM settlement_transactions
         JOIN cow_protocol_ethereum.solvers 
             ON solver = address
