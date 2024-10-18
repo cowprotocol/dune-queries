@@ -17,7 +17,10 @@ select --noqa: ST06
     block_time,
     tx_hash,
     responsible_address,
-    coalesce(concat(environment, '-', name), 'NON-SOLVER') as responsible_solver,
+    case
+        when responsible_address = 0x05C5494572E4aB2d48D3AB3aAF6bD4e7b1c98382 then 'PROPOSER-ACCOUNT'
+        else coalesce(concat(environment, '-', name), 'NON-SOLVER')
+    end as responsible_solver,
     spender,
     token,
     value
