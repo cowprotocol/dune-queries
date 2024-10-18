@@ -18,7 +18,7 @@ select --noqa: ST06
     tx_hash,
     responsible_address,
     case
-        when responsible_address = 0x05C5494572E4aB2d48D3AB3aAF6bD4e7b1c98382 then 'PROPOSER-ACCOUNT'
+        when responsible_address = 0x05C5494572E4aB2d48D3AB3aAF6bD4e7b1c98382 or responsible_address = 0xd8ca5fe380b68171155c7069b8df166db28befdd then 'PROPOSER-ACCOUNT'
         else coalesce(concat(environment, '-', name), 'NON-SOLVER')
     end as responsible_solver,
     spender,
