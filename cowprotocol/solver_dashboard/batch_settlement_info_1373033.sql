@@ -36,11 +36,11 @@ SELECT
     gas_price / pow(10, 9) as gas_price,
     gas_used,
     tx_cost_usd,
-    fee_value,
+    --fee_value,
     call_data_size,
     unwraps,
-    token_approvals,
-    case when tx_cost_usd > 0 then fee_value / tx_cost_usd else null end as coverage 
+    token_approvals
+    --case when tx_cost_usd > 0 then fee_value / tx_cost_usd else null end as coverage 
 FROM cow_protocol_{{blockchain}}.batches b
 JOIN num_tokens_traded
     ON hash = tx_hash
