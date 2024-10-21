@@ -1,3 +1,6 @@
+--First get the nb of failures and successes for each solver
+--Then get each solver's name and compute the success rate
+--Finally, display the stats for prod and barn solvers
 WITH 
 settlement_transactions AS (
     SELECT 
