@@ -1,3 +1,5 @@
+--aggregate different metrics on settlements depending on the solver
+
 SELECT date_trunc('{{Aggregate by}}', block_date) as day,
     name as solver_name,
     -- concat(environment, '-', name) as name,
