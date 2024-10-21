@@ -1,16 +1,32 @@
+-- This query computes the total amount of COW distributed as rewards
+-- it uses all of the outgoing transactions from the rewards safe
+-- and the price is converted to USD using the latest price from the prices.usd_latest table
+-- the inception date is defined as 2022-03-01
+
+-- finally the query calculates the daily payout and the project budget for the year
+-- the first table addresses contains the parameters for each blockchain: COW token address and rewards safe address
+-- To add a new blockchain, add a new row to the addresses table with the correct info
+
 with 
+addresses as(
+    SELECT 'ethereum' as blockchain, 0xDEf1CA1fb7FBcDC777520aa7f396b4E015F497aB as token, 0xa03be496e67ec29bc62f01a428683d7f9c204930 as rewards_safe
+    union
+    SELECT 'arbitrum' as blockchain, 0xcb8b5CD20BdCaea9a010aC1F8d835824F5C87A04 as token, 0x as rewards_safe
+    union
+    SELECT 'gnosis' as blockchain, 0x177127622c4A00F3d409B75571e12cB3c8973d3c as token, 0x as rewards_safe),
 
 latest_cow_price as (
     select price from prices.usd_latest 
-    where blockchain = 'ethereum' 
-    and contract_address = 0xDEf1CA1fb7FBcDC777520aa7f396b4E015F497aB
+    where blockchain = '{{chain}}'
+    and contract_address = (select token from addresses where blockchain = '{{chain}}')
 ),
 
 solver_cow_rewards as (
     select 
         sum(value) / pow(10, 18) as cow_amount
-    from cow_protocol_ethereum.CowProtocolToken_evt_Transfer
-    where "from" = 0xa03be496e67ec29bc62f01a428683d7f9c204930 -- Rewards Payout Safe
+    from erc20_ethereum.evt_transfer
+    where "from" =(select rewards_safe from addresses where blockchain = '{{blockchain}}')
+    and contract_address = (select token from addresses where blockchain = '{{blockchain}}')
 ),
 
 grand_totals as (
