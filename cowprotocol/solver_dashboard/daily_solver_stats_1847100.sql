@@ -1,4 +1,8 @@
 --aggregate different metrics on settlements depending on the solver
+-- Parameters:
+--   {{LastNDays}}: int the number of days to look back
+--   {{Aggregate by}}: string the time period to aggregate by for each solver
+--   {{blockchain}}: string the blockchain to query
 
 SELECT date_trunc('{{Aggregate by}}', block_date) as day,
     name as solver_name,
