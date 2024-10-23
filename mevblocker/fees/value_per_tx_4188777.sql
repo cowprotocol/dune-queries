@@ -1,4 +1,4 @@
--- Computes the value MEV Blocker transactions contribute for each block
+-- Computes the value each MEV Blocker transactions contributes
 -- Parameters:
 --  {{start}} - the timestamp for which the analysis should start (inclusively)
 --  {{end}} - the timestamp for which the analysis should end (exclusively)
