@@ -30,7 +30,7 @@ mev_blocker_filtered AS (
     WHERE
         blocknumber >= (SELECT start_block FROM block_range)
         AND blocknumber < (SELECT end_block FROM block_range)
-        AND COALESCE(referrer, 'No referrer') like '{{referrer}}'
+        AND COALESCE(referrer, 'No referrer') LIKE '{{referrer}}'
 ),
 
 -- perfomance optimisation: relevant ethereum transactions during that timeframe
@@ -144,21 +144,22 @@ user_txs AS (
 )
 
 -- coalesce is needed because of the outer join
-select
-  coalesce(user.block_time, kickback.block_time) as block_time,
-  coalesce(user.block_number, kickback.block_number) as block_number,
-  coalesce(user.hash, kickback.target_tx) as hash,
-  array_agg(searcher.search_tx) as searcher_txs,
-  array_agg(kickback.hash) as kickback_txs,
-  coalesce(user_tip_wei, 0) as user_tip_wei,
-  coalesce(sum(backrun_value_wei), 0) as backrun_value_wei,
-  coalesce(sum(backrun_tip_wei), 0) as backrun_tip_wei,
-  CAST(0.2 * (coalesce(user_tip_wei, 0) + coalesce(sum(backrun_tip_wei), 0) + (coalesce(sum(backrun_value_wei), 0) / 9)) AS UINT256) AS tx_mevblocker_fee_wei
-from user_txs user
-left join searcher_txs searcher
-  on user.hash = searcher.tx_1
+SELECT
+    COALESCE(u.block_time, kickback.block_time) AS block_time,
+    COALESCE(u.block_number, kickback.block_number) AS block_number,
+    COALESCE(u.hash, kickback.target_tx) AS hash,
+    ARRAY_AGG(searcher.search_tx) AS searcher_txs,
+    ARRAY_AGG(kickback.hash) AS kickback_txs,
+    COALESCE(user_tip_wei, 0) AS user_tip_wei,
+    COALESCE(SUM(backrun_value_wei), 0) AS backrun_value_wei,
+    COALESCE(SUM(backrun_tip_wei), 0) AS backrun_tip_wei,
+    CAST(0.2 * (COALESCE(user_tip_wei, 0) + COALESCE(SUM(backrun_tip_wei), 0) + (COALESCE(SUM(backrun_value_wei), 0) / 9)) AS UINT256) AS tx_mevblocker_fee_wei
+FROM user_txs AS u
+LEFT JOIN searcher_txs AS searcher
+    ON u.hash = searcher.tx_1
 -- outer join is needed here since kickbacks that stem from mev blocker backrund should count even if the target tx was shared in the public mempool
-full join kickback_txs kickback
-  on user.hash = kickback.target_tx
-  and searcher.search_tx = kickback.search_tx
-group by 1,2,3,6
+FULL JOIN kickback_txs AS kickback
+    ON
+        u.hash = kickback.target_tx
+        AND searcher.search_tx = kickback.search_tx
+GROUP BY 1, 2, 3, 6
