@@ -1,3 +1,5 @@
+-- plots the different strategies against each other
+
 select 
     cow.day, 
     cow.current_value_of_investment as "CoW AMM",

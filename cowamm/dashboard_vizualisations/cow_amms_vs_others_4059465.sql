@@ -1,4 +1,7 @@
 with prep as (
+-- computes comparison between different strategies since beginning
+-- output is a percentage
+
 select 
     cow.day, 
     cow.current_value_of_investment as cow_current_value_of_investment,
