@@ -40,7 +40,6 @@ SELECT
     gas_price / pow(10, 9) as gas_price,
     gas_used,
     tx_cost_usd,
-    --fee_value,
     call_data_size,
     unwraps,
     token_approvals
