@@ -1,4 +1,7 @@
 -- The fee value and cost coverage is no longer used in the current mechanism
+-- Parameters
+-- {{blockchain}} - blockchain name
+
 WITH 
 num_tokens_traded as (
     select 
