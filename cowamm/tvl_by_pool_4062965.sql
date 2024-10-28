@@ -1,4 +1,4 @@
--- Computes the balances and their dollar value of a all CoW AMM pools for a specific token pair at every transaction where it changed
+-- Computes the dollar value of all CoW AMM pools and their surplus over 1d, 7d, 30d
 -- Parameters
 --  {{token_a}} - either token of the pool
 --  {{token_b}} - other token of the pool
@@ -14,8 +14,7 @@ select
         RANK() OVER (PARTITION BY token_1_address,token_2_address ORDER BY created_at DESC) as ranking
 
     from query_3959044
-    ) where ranking=1
-    -- and token_1_address!=token_2_address
+    ) where ranking=1 --we only want the most recent pool
 ),
 
 -- Computes the token balance changes of the relevant token per transaction
