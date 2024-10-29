@@ -22,6 +22,16 @@ colocated_solvers as (
         timestamp '2024-07-25 07:42:00' as joined_on,
         from_hex('0xc5Dc06423f2dB1B11611509A5814dD1b242268dd') as pool,
         from_hex('0x008300082C3000009e63680088f8c7f4D3ff2E87') as solver
+    union all
+    select
+        from_hex('0x0deb0ae9c4399c51289adb1f3ed83557a56df657') as pool_address,
+        'Rizzolver' as pool_name,
+        from_hex('0x607DBe787C242e20A4897680357336E37954b3F0') as initial_funder
+    union all
+    select
+        from_hex('0x3075F6aab29D92F8F062A83A0318c52c16E69a60') as pool_address,
+        'Furucombo' as pool_name,
+        from_hex('0x539B3640c26D9159c9Ea9B7e2a1aa69D89Db6ee1') as initial_funder
 ),
 
 bonding_pools as (
