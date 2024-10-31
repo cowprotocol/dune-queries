@@ -24,21 +24,42 @@ colocated_solvers as (
         from_hex('0x008300082C3000009e63680088f8c7f4D3ff2E87') as solver
     union all
     select
-        'Rizzolver' as solver_name,
+        'prod-Rizzolver' as solver_name,
         'Reduced-Bonding' as pool_name,
         timestamp '2024-10-10 02:03:00' as joined_on,
         from_hex('0x0deb0ae9c4399c51289adb1f3ed83557a56df657') as pool_address,
         from_hex('0x607DBe787C242e20A4897680357336E37954b3F0') as initial_funder
     union all
     select
-        'Furucombo' as solver_name,
+        'barn-Rizzolver' as solver_name,
+        'Reduced-Bonding' as pool_name,
+        timestamp '2024-10-10 02:03:00' as joined_on,
+        from_hex('0x0deb0ae9c4399c51289adb1f3ed83557a56df657') as pool_address,
+        from_hex('0x607DBe787C242e20A4897680357336E37954b3F0') as initial_funder
+    union all
+    select
+        'prod-Portus' as solver_name,
         'Reduced-Bonding' as pool_name,
         timestamp '2024-10-21 03:33:00' as joined_on,
         from_hex('0x3075F6aab29D92F8F062A83A0318c52c16E69a60') as pool_address,
         from_hex('0x539B3640c26D9159c9Ea9B7e2a1aa69D89Db6ee1') as initial_funder
     union all
     select
-        'Fractal' as solver_name,
+        'barn-Portus' as solver_name,
+        'Reduced-Bonding' as pool_name,
+        timestamp '2024-10-21 03:33:00' as joined_on,
+        from_hex('0x3075F6aab29D92F8F062A83A0318c52c16E69a60') as pool_address,
+        from_hex('0x539B3640c26D9159c9Ea9B7e2a1aa69D89Db6ee1') as initial_funder
+    union all
+    select
+        'prod-Fractal' as solver_name,
+        'Reduced-Bonding' as pool_name,
+        timestamp '2024-10-29 11:57:00' as joined_on,
+        from_hex('0xDdb0a7BeBF71Fb5d3D7FB9B9B0804beDdf9C1C88') as pool_address,
+        from_hex('0xd4676B4DE3a982A429a8DBE90D4A7e7cfB4769A5') as initial_funder
+    union all
+    select
+        'barn-Fractal' as solver_name,
         'Reduced-Bonding' as pool_name,
         timestamp '2024-10-29 11:57:00' as joined_on,
         from_hex('0xDdb0a7BeBF71Fb5d3D7FB9B9B0804beDdf9C1C88') as pool_address,
