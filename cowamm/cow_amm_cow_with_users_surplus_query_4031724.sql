@@ -39,10 +39,28 @@ cow_surplus_per_batch_gnosis as (
     where trades.trader in (select address from query_3959044 where blockchain = 'gnosis')
 ),
 
+cow_surplus_per_batch_arbitrum as (
+    select
+        'arbitrum' as blockchain,
+        cow_per_batch.block_time,
+        cow_per_batch.tx_hash,
+        solvers.name as solver_name,
+        naive_cow,  -- fraction of batch volume traded within a CoW
+        trades.surplus_usd as surplus_in_usd,  -- surplus of the executed CoW AMM order, expressed in USD
+        naive_cow * trades.surplus_usd as realized_cow_surplus_in_usd -- surplus of the CoW AMM that is assumed to be generated via a CoW.
+    from "query_4025739(blockchain='arbitrum',start_time='{{start_time}}',end_time='{{end_time}}')" as cow_per_batch
+    inner join cow_protocol_arbitrum.trades as trades on cow_per_batch.tx_hash = trades.tx_hash
+    inner join cow_protocol_arbitrum.batches as batches on cow_per_batch.tx_hash = batches.tx_hash
+    inner join cow_protocol_arbitrum.solvers as solvers on batches.solver_address = solvers.address and solvers.active
+    where trades.trader in (select address from query_3959044 where blockchain = 'arbitrum')
+),
+
 cow_surplus_per_batch as (
     select * from cow_surplus_per_batch_ethereum
     union all
     select * from cow_surplus_per_batch_gnosis
+    union all
+    select * from cow_surplus_per_batch_arbitrum
 ),
 
 
