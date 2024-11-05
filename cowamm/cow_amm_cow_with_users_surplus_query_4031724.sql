@@ -91,6 +91,7 @@ final_results_per_solver as (
         {{cow_budget}} * a.total_cow_surplus_in_usd / (select sum(total_cow_surplus_in_usd) from aggregate_result_per_solver) as total_cow_reward
     from aggregate_result_per_solver as a
     inner join reward_addresses as b on a.solver_name = b.solver_name
+    where a.total_cow_surplus_in_usd > 0
 )
 
-select * from {{results}} where total_cow_reward > 0
+select * from {{results}}
