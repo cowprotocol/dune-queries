@@ -3,7 +3,7 @@
 -- Input: blockchain
 select r.contract_address,
 sum(amount_usd) as volume,
-365*greatest(0,sum(amount_usd*fee/tvl)) as apr,
+365*sum(amount_usd*fee/tvl) as apr,
 avg(fee) as fee,
 avg(tvl) as tvl
 from "query_4232976(blockchain='{{blockchain}}')" r
@@ -11,6 +11,8 @@ left join curve.trades t
 on r.contract_address = t.project_contract_address
 and r.tx_hash = t.tx_hash
 where t.block_time>=date_add('day', -1, now())
+-- This test avoids any possible issue with reconstructing the reserves of the pool
+and tvl >0
 group by r.contract_address
 
 union
