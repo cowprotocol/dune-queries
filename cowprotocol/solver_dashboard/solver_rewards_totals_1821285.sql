@@ -1,5 +1,4 @@
 with 
-
 --- The initial launch of solver rewards was March 2022.
 --- Solvers were awarded 100 COW tokens per settled batch.
 pre_cip_10 as (
@@ -86,6 +85,7 @@ final_tally as (
     group by name
     order by total_cow_rewarded desc
 )
+
 --- Now to fetch the latest USD prices.
 select 
     *, 

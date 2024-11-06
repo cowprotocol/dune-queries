@@ -41,9 +41,6 @@ left outer join unmodified_rewards r
     on s.solver = r.solver
 order by latest_batch desc
 
-
-
-
 -- select solver,
 --     solver_name,
 --     first_batch,

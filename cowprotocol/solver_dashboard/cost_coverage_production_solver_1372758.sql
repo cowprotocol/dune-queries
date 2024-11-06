@@ -1,60 +1,64 @@
-WITH 
+with 
 fee_and_cost_per_batch as (
-    SELECT 
+    select 
         block_time,
         tx_hash,
         fee_value as fee,
         tx_cost_usd as gas_cost,
         environment as solver_env,
         name as solver_name
-    FROM cow_protocol_ethereum.batches
+    from cow_protocol_ethereum.batches
         JOIN cow_protocol_ethereum.solvers 
             ON address = solver_address
-    WHERE tx_hash not in (
+    where tx_hash not in (
         0x84d57d1d57e01dd34091c763765ddda6ff713ad67840f39735f0bf0cced11f02,
         0x918eacff2b6c1fdbb14920473974dd471301f9f305c010baa3085b9ed59c33a6,
         0x4ef7702110e9ae27615970e92226462083c6a3811468890e0bd94c48655b5752
     )
 ),
+
 failed_settlements as (
-    SELECT 
+    select 
         block_time,
         hash as tx_hash,
         0 as fee,
         (gas_used * gas_price * p.price) / pow(10, 18) as gas_cost,
         environment as solver_env,
         name as solver_name
-    FROM ethereum.transactions
-        JOIN prices.usd as p 
-            ON p.minute = date_trunc('minute', block_time)
+    from ethereum.transactions
+        join prices.usd as p 
+            on p.minute = date_trunc('minute', block_time)
             and blockchain = 'ethereum'
             and contract_address = 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2
-        JOIN cow_protocol_ethereum.solvers 
-            ON "from" = address
-            AND position('0x13d79a0b' in cast(data as varchar)) > 0 --! settle method ID
-            AND success = false
+        join cow_protocol_ethereum.solvers 
+            on "from" = address
+            and position('0x13d79a0b' in cast(data as varchar)) > 0 --! settle method ID
+            and success = false
 ),
+
 results as (
-    SELECT 
+    select 
         date_trunc('hour', block_time) as hour,
         solver_env,
         solver_name,
         sum(fee) / sum(gas_cost) cost_coverage
-    FROM (
-        SELECT * FROM fee_and_cost_per_batch
-        UNION
-        SELECT * FROM failed_settlements
+    from (
+        select * from fee_and_cost_per_batch
+        union
+        select * from failed_settlements
     ) as _
-    GROUP by date_trunc('hour', block_time), solver_env, solver_name
+    goup by date_trunc('hour', block_time), solver_env, solver_name
 ),
+
 production_coverage as (
-    SELECT 
+    select 
         hour,
         solver_name,
         cost_coverage
-    FROM results
-    WHERE solver_env = '{{SolverEnv}}'
+    from results
+    where solver_env = '{{SolverEnv}}'
 ),
+
 result_average as (
     select 
         hour,
@@ -63,13 +67,14 @@ result_average as (
     from production_coverage
     group by hour
 )
-SELECT *
-FROM (
-        SELECT *
-        FROM production_coverage
-        UNION
-        SELECT *
-        FROM result_average
+
+select *
+from (
+        select *
+        from production_coverage
+        union
+        select *
+        from result_average
     ) as _
-WHERE hour > NOW() - INTERVAL '{{Interval Length}}' {{Units}}
-ORDER BY cost_coverage DESC
+where hour > NOW() - INTERVAL '{{Interval Length}}' {{Units}}
+order by cost_coverage desc

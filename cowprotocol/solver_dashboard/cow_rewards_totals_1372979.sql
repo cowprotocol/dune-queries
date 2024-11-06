@@ -9,11 +9,11 @@
 
 with 
 addresses as(
-    SELECT 'ethereum' as blockchain, 0xDEf1CA1fb7FBcDC777520aa7f396b4E015F497aB as token, 0xa03be496e67ec29bc62f01a428683d7f9c204930 as rewards_safe
+    select 'ethereum' as blockchain, 0xDEf1CA1fb7FBcDC777520aa7f396b4E015F497aB as token, 0xa03be496e67ec29bc62f01a428683d7f9c204930 as rewards_safe
     union
-    SELECT 'arbitrum' as blockchain, 0xcb8b5CD20BdCaea9a010aC1F8d835824F5C87A04 as token, 0x as rewards_safe
+    select 'arbitrum' as blockchain, 0xcb8b5CD20BdCaea9a010aC1F8d835824F5C87A04 as token, 0x as rewards_safe
     union
-    SELECT 'gnosis' as blockchain, 0x177127622c4A00F3d409B75571e12cB3c8973d3c as token, 0x as rewards_safe),
+    select 'gnosis' as blockchain, 0x177127622c4A00F3d409B75571e12cB3c8973d3c as token, 0x as rewards_safe),
 
 latest_cow_price as (
     select price from prices.usd_latest 
