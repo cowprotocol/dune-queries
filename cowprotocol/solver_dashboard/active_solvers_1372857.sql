@@ -1,6 +1,6 @@
 -- This query finds all the active (i.e. whitelisted) solvers
--- First we find the firest settlement for each solver
--- Then we fet the environment and name of the solver for the prod and barn environments
+-- First we find the latest settlement for each solver
+-- Then we fetch the environment and name of the solver for the prod and barn environments
 -- Finally we display the name of the solver with both of its addresses
 -- Note: if a solver has x barn address and y prod address, we will display x*y rows for that solver
 -- Parameters
@@ -26,7 +26,6 @@ active_solvers as (
     where environment not in ('test', 'service')
     and active = true
 )
-
 
 select 
     prod.name as name,
