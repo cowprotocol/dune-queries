@@ -8,7 +8,7 @@ with pools as (
     where
         topic0 = 0x0d3648bd0f6ba80134a33ba9275ac585d9d315f0ad8355cddefde31afa28d0e9 -- PairCreated
         -- topic1: 0x0...0<token0>, topic2: 0x0...0<token1>
-        and substr(data, 13, 20) in (select pool_address from query_4223063)
+        and substr(data, 13, 20) in (select pool_address from "query_4223063(blockchain='{{blockchain}}')")
 )
 
 select
