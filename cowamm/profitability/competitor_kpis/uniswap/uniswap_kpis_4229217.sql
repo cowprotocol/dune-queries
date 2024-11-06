@@ -2,7 +2,7 @@
 -- APR is measured as the fees earned per $ invested, over the last 24 hours, projected over 1 year
 -- Input: blockchain
 
-with 
+with
 -- select the pool with the largest latest k
 pool as (
     select
@@ -33,7 +33,7 @@ swaps as (
 -- gets the swapped volume and tvl at the time of the swap for each swap
 tvl_volume_per_swap as (
     select
-        syncs.contract_address as contract_address,
+        syncs.contract_address,
         syncs.evt_block_time,
         syncs.evt_tx_hash,
         (amount0In * p0.price / pow(10, p0.decimals)) + (amount1In * p1.price / pow(10, p1.decimals)) as volume_in,
@@ -62,16 +62,16 @@ select
     contract_address,
     sum((volume_in + volume_out) / 2) as volume,
     avg(tvl) as tvl,
-    365*sum((volume_in + volume_out) / 2 / tvl) * 0.003 as apr,
+    365 * sum((volume_in + volume_out) / 2 / tvl) * 0.003 as apr,
     0.003 as fee
 from tvl_volume_per_swap
-    where evt_block_time >= date_add('day', -1, now())
+where evt_block_time >= date_add('day', -1, now())
 group by contract_address
 
-union
-select 
-    pool_address as contract_address, 
-    0 as volume, 
+union distinct
+select
+    pool_address as contract_address,
+    0 as volume,
     tvl,
     0 as apr,
     0.003 as fee

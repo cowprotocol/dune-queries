@@ -63,4 +63,3 @@ inner join prices.usd as p0
             date_trunc('minute', time) = p1.minute
             and token1 = p1.contract_address 
 where row_num = 1
-
