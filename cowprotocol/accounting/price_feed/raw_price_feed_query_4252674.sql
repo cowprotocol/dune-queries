@@ -5,7 +5,7 @@ with imported_prices as (
         cast(price as double) as price_unit_eth,
         decimals,
         source
-    from dune.cowprotocol.dataset_price_feed_ethereum
+    from dune.cowprotocol.dataset_price_feed_{{blockchain}}
 ),
 
 imported_prices_per_minute as (
