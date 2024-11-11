@@ -1,3 +1,18 @@
+-- This query parses the raw price_feed table that we sync on Dune,
+-- and returns a view that is based on hourly prices, similar to
+-- how the Dune price feed is used for slippage accounting
+--
+-- Parameters:
+--  {{blockchain}} - network to run the analysis on; currently it only works for mainnet
+--
+-- The columns of the result are
+-- - token_address: a token
+-- - hour: the hour for which a price is computed
+-- - decimals: the decimals of the token
+-- - source: the source from which this price was computed,
+--   price_unit: the price, in USD, of one unit of the token
+-- - price_atom: the price, in USD, of one atom of the token
+
 with imported_prices as (
     select
         token_address,
