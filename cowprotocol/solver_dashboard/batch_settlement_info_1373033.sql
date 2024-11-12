@@ -1,6 +1,3 @@
--- Parameters
--- {{blockchain}} - blockchain name
-
 with 
 num_tokens_traded as (
     select 
@@ -27,7 +24,7 @@ select
         CONCAT('<a href="https://gnosisscan.io/address/', cast(solver_address as varchar), '" target="_blank">', concat(environment, '-', name),  '</a>') 
         when '{{blockchain}}'='arbitrum' then
         CONCAT('<a href="https://arbiscan.io/address/', cast(solver_address as varchar), '" target="_blank">', concat(environment, '-', name),  '</a>') 
-    end as solver,
+        end as solver,
     
     case when '{{blockchain}}'='ethereum' then
         CONCAT('<a href="https://etherscan.io/tx/', cast(b.tx_hash as varchar), '" target="_blank">', cast(b.tx_hash as varchar),  '</a>') 
@@ -39,9 +36,11 @@ select
     gas_price / pow(10, 9) as gas_price,
     gas_used,
     tx_cost_usd,
+    fee_value,
     call_data_size,
     unwraps,
-    token_approvals
+    token_approvals,
+    case when tx_cost_usd > 0 then fee_value / tx_cost_usd else null end as coverage 
 from cow_protocol_{{blockchain}}.batches b
 join num_tokens_traded n
     on n.tx_hash = b.tx_hash

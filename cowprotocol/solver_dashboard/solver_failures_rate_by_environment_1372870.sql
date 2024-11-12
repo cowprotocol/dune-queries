@@ -24,7 +24,7 @@ results as (
         failures,
         (case when successes = 0 then 0 else 1.00 * failures / (successes + failures) end) as failure_rate
     from settlement_transactions
-        join cow_protocol_{{blockchain}}.solvers 
+    inner join cow_protocol_{{blockchain}}.solvers 
             on solver = address
 )
 

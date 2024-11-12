@@ -4,7 +4,7 @@ with solver_info as (
     select 
         name as solver_name,
         -- concat(environment, '-', name) as name,
-        max(block_time) last_solution,
+        max(b.block_time) last_solution,
         count(*) as batches_solved,
         sum(dex_swaps) as dex_swaps,
         sum(num_trades) as num_trades,
@@ -21,7 +21,7 @@ with solver_info as (
     join cow_protocol_{{blockchain}}.trades t
         on b.tx_hash = t.tx_hash
     where environment not in ('test', 'service')
-    and block_date > now() - interval '{{LastNDays}}' day
+    and t.block_date > now() - interval '{{LastNDays}}' day
     and active = True
     group by name
     order by num_trades desc

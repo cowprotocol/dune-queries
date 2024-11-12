@@ -47,7 +47,7 @@ results as (
         union
         select * from failed_settlements
     ) as _
-    goup by date_trunc('hour', block_time), solver_env, solver_name
+    group by date_trunc('hour', block_time), solver_env, solver_name
 ),
 
 production_coverage as (

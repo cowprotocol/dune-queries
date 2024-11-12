@@ -1,7 +1,7 @@
-with 
+with
 solver_first_rewarded_batch as (
-    select 
-        solver_address as solver, 
+    select
+        solver_address as solver,
         concat(environment, '-', name) as solver_name,
         count(*) as num_batches,
         sum(num_trades) as num_trades,
@@ -11,23 +11,24 @@ solver_first_rewarded_batch as (
         -- DuneSQL
         date_diff('day', min(block_time), now()) as days_since_first_batch
     from cow_protocol_ethereum.batches
-    join cow_protocol_ethereum.solvers
+    inner join cow_protocol_ethereum.solvers
         on address = solver_address
-    where block_time > cast('2022-03-01' as timestamp)
-    and environment in ('barn', 'prod')
+    where
+        block_time > cast('2022-03-01' as timestamp)
+        and environment in ('barn', 'prod')
     group by solver_address, environment, name
 ),
 
 unmodified_rewards as (
-    select 
-        from_hex(solver) as solver, 
+    select
+        from_hex(solver) as solver,
         sum(data.amount) as cow_reward
     from cowswap.raw_order_rewards
     group by solver
 )
 
 
-select 
+select
     s.solver,
     solver_name,
     num_batches,
@@ -36,8 +37,8 @@ select
     latest_batch,
     days_since_first_batch,
     coalesce(cow_reward, 0) as approx_cow_reward
-from solver_first_rewarded_batch s
-left outer join unmodified_rewards r
+from solver_first_rewarded_batch as s
+left outer join unmodified_rewards as r
     on s.solver = r.solver
 order by latest_batch desc
 
