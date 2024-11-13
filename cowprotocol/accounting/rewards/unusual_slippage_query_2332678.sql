@@ -24,6 +24,7 @@ select  --noqa: ST06
     concat(
         '<a href="https://dune.com/queries/4059683',
         '?blockchain={{blockchain}}',
+        '&price_feed=dune_price_feed'
         '&start_time={{start_time}}',
         '&end_time={{end_time}}',
         '&slippage_table_name=raw_slippage_breakdown',

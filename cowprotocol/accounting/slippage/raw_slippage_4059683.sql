@@ -46,7 +46,7 @@ fees as (
         -amount as amount,
         fee_type as slippage_type,
         date_trunc('hour', block_time) as hour --noqa: RF04
-    from "query_4058574(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')"
+    from "query_4058574(blockchain='{{blockchain}}',price_feed='{{price_feed}}',start_time='{{start_time}}',end_time='{{end_time}}')"
 ),
 
 imbalances as (
