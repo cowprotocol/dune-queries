@@ -25,8 +25,47 @@ with token_times as (
     group by 1, 2
 ),
 
+imported_price_feed as (
+    select *
+    from "query_4252674"
+    where price_unit < 10000000 -- here we filter all tokens with price more than $1M, as these are probably bogus prices
+),
+
+coingecko_price_feed as (
+    select
+        ipf.hour,
+        ipf.token_address,
+        ipf.decimals,
+        ipf.price_unit,
+        ipf.price_atom
+    from imported_price_feed as ipf inner join token_times as tt on ipf.hour = tt.hour and ipf.token_address = tt.token_address
+    where source = 'coingecko'
+),
+
+moralis_price_feed as (
+    select
+        ipf.hour,
+        ipf.token_address,
+        ipf.decimals,
+        ipf.price_unit,
+        ipf.price_atom
+    from imported_price_feed as ipf inner join token_times as tt on ipf.hour = tt.hour and ipf.token_address = tt.token_address
+    where source = 'moralis'
+),
+
+auction_price_feed as (
+    select
+        ipf.hour,
+        ipf.token_address,
+        ipf.decimals,
+        ipf.price_unit,
+        ipf.price_atom
+    from imported_price_feed as ipf inner join token_times as tt on ipf.hour = tt.hour and ipf.token_address = tt.token_address
+    where source = 'native'
+),
+
 -- Precise prices are prices from the Dune price feed.
-precise_prices as (
+dune_price_feed as (
     select -- noqa: ST06
         date_trunc('hour', minute) as hour, --noqa: RF04
         token_address,
@@ -41,6 +80,35 @@ precise_prices as (
             and contract_address = token_address
             and blockchain = '{{blockchain}}'
     group by 1, 2, 3
+),
+
+multiple_price_feeds_pre as (
+    select *
+    from dune_price_feed
+    union all
+    select *
+    from coingecko_price_feed
+    union all
+    select *
+    from moralis_price_feed
+    union all
+    select *
+    from auction_price_feed
+),
+
+multiple_price_feeds as (
+    select
+        hour,
+        token_address,
+        decimals,
+        approx_percentile(price_unit, 0.5) as price_unit,
+        approx_percentile(price_atom, 0.5) as price_atom
+    from multiple_price_feeds_pre group by 1, 2, 3
+),
+
+precise_prices as (
+    select *
+    from {{price_feed}}
 ),
 
 -- Intrinsic prices are prices reconstructed from exchange rates from within the auction
