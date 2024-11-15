@@ -10,6 +10,7 @@ pools as (
         coin1 as token1,
         mid_fee * power(10, -10) as fee
     from curvefi_{{blockchain}}.view_pools
+    -- Curve pools can have more than 2 token, if coin2 = 0x00 it means there are 2 tokens at most
     where coin2 = 0x0000000000000000000000000000000000000000
 ),
 

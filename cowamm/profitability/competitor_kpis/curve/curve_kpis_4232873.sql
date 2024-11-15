@@ -5,8 +5,8 @@ select
     r.contract_address,
     sum(amount_usd) as volume,
     365 * sum(amount_usd * fee / tvl) as apr,
-    avg(fee) as fee,
-    avg(tvl) as tvl
+    fee,
+    tvl
 from "query_4232976(blockchain='{{blockchain}}')" as r
 left join curve.trades as t
     on
@@ -18,6 +18,7 @@ where
     and tvl > 0
 group by r.contract_address
 
+-- NOw include pools which did not trade during the specified timeframe
 union distinct
 select
     contract_address,
