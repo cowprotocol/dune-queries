@@ -9,34 +9,36 @@ fee_and_cost_per_batch as (
         name as solver_name
     from
         cow_protocol_ethereum.batches
-        inner join cow_protocol_ethereum.solvers on address = solver_address
+    inner join cow_protocol_ethereum.solvers on address = solver_address
     where
-        block_time > NOW() - interval '2' month
+        block_time > now() - interval '2' month
 ),
+
 failed_settlements as (
-    select
+    select --noqa: ST06
         block_time,
         hash as tx_hash,
         0 as fee,
-        (gas_used * gas_price * p.price) / POW(10, 18) as gas_cost,
+        (gas_used * gas_price * p.price) / pow(10, 18) as gas_cost,
         environment as solver_env,
         name as solver_name
     from
         ethereum.transactions
-        inner join prices.usd as p on p.minute = DATE_TRUNC('minute', block_time)
+    inner join prices.usd as p on p.minute = date_trun('minute', block_time) --noqa: LT02
         and blockchain = 'ethereum'
         and contract_address = 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2
-        inner join cow_protocol_ethereum.solvers on "from" = address
-        and POSITION('0x13d79a0b' in CAST(data as varchar)) > 0 --! settle method ID
+    inner join cow_protocol_ethereum.solvers on "from" = address --noqa: LT02
+        and position('0x13d79a0b' in cast(data as varchar)) > 0 --! settle method ID
         and success = false
     where
-        block_time > NOW() - interval '2' month
+        block_time > now() - interval '2' month
 ),
+
 results as (
     select
         solver_env,
-        DATE(block_time) as day,
-        SUM(fee) / SUM(gas_cost) as cost_coverage
+        date(block_time) as day, -- noqa
+        sum(fee) / sum(gas_cost) as cost_coverage
     from
         (
             select *
@@ -46,11 +48,10 @@ results as (
             select *
             from
                 failed_settlements
-        ) as _
-    group by
-        date (block_time),
-        solver_env
+        )
+    group by date(block_time), solver_env
 )
+
 select *
 from
     results

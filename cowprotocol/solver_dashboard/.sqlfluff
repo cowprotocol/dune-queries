@@ -1,3 +1,8 @@
 [sqlfluff:templater:jinja:context]
 blockchain='ethereum'
-
+solver_env=prod,barn
+interval_length=3
+units=day
+aggregate_by=week
+last_n_days=30
+frequency=hour

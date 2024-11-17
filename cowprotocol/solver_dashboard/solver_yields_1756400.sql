@@ -22,7 +22,7 @@ solver_first_rewarded_batch as (
 unmodified_rewards as (
     select
         from_hex(solver) as solver,
-        sum(data.amount) as cow_reward
+        sum(data.amount) as cow_reward --noqa: RF01, RF03
     from cowswap.raw_order_rewards
     group by solver
 )

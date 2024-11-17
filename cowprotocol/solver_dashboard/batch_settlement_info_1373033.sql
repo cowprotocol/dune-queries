@@ -41,13 +41,13 @@ select
     call_data_size,
     unwraps,
     token_approvals,
-    case
+    case -- noqa: ST01
         when tx_cost_usd > 0 then fee_value / tx_cost_usd
         else null
-    end as coverage 
-from cow_protocol_{{blockchain}}.batches b
-join num_tokens_traded n on n.tx_hash = b.tx_hash
-join cow_protocol_{{blockchain}}.solvers
+    end as coverage
+from cow_protocol_{{blockchain}}.batches as b
+inner join num_tokens_traded as n on n.tx_hash = b.tx_hash
+inner join cow_protocol_{{blockchain}}.solvers
     on solver_address = address
 where block_time > now() - interval '3' month
 order by block_time desc;
