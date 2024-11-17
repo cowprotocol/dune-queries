@@ -11,7 +11,7 @@ solver_latest_batches as (
     select
         solver_address,
         max(block_time) as latest_settlement
-    from cow_protocol_{{blockchain}}.batches 
+    from cow_protocol_{{blockchain}}.batches
     group by solver_address
 ),
 
@@ -22,10 +22,11 @@ active_solvers as (
         name,
         coalesce(latest_settlement, timestamp '1970-01-01') as latest_settlement
     from cow_protocol_{{blockchain}}.solvers
-    full outer join solver_latest_batches 
+    full outer join solver_latest_batches
         on address = solver_address
-    where environment not in ('test', 'service')
-    and active = true
+    where
+        environment not in ('test', 'service')
+        and active = true
 )
 
 select
