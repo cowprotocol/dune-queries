@@ -1,6 +1,11 @@
 --First get the nb of failures and successes for each solver
 --Then get each solver's name and compute the success rate
 --Finally, display the stats for prod and barn solvers
+-- Parameters
+--   {{last_n_days}}: int the number of days to look back
+--   {{frequency}}: string the time period to aggregate by for each solver
+--   {{blockchain}}: string the blockchain to query
+
 with
 settlement_transactions as (
     select

@@ -1,4 +1,4 @@
--- This query gets all the rewards awarded to each solver.
+-- This query gets all the rewards awarded to each solver, up untill the cip 20 rules
 -- It is decomposed by the different environments
 
 
