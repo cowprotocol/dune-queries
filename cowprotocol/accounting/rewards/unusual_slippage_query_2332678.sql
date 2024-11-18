@@ -2,9 +2,10 @@
 -- Parameters:
 --  {{start_time}} - the start date timestamp for the accounting period  (inclusively)
 --  {{end_time}} - the end date timestamp for the accounting period (exclusively)
--- {{min_absolute_slippage_tolerance}} -- the minimum absolute threshold above which a tx is may be flagged as high-slippage
--- {{relative_slippage_tolerance}} -- the minimum relative threshold (wrt batch value) above which a tx may be flagged as high-slippage
+--  {{min_absolute_slippage_tolerance}} -- the minimum absolute threshold above which a tx is may be flagged as high-slippage
+--  {{relative_slippage_tolerance}} -- the minimum relative threshold (wrt batch value) above which a tx may be flagged as high-slippage
 --  {{significant_slippage_value}} -- the absolute threshold above which a tx is always flagged as high-slippage
+--  {{price_feed}} -- option to user either the dune_price_feed (which has been used up till now) or the median of multiple_price_feeds
 with
 results_per_tx as (
     select * from "query_4070065(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}',slippage_table_name='slippage_per_transaction')"

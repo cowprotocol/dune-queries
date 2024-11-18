@@ -6,6 +6,7 @@
 --  {{blockchain}} - network to run the analysis on
 --  {{raw_slippage_table_name}} - raw_slippage_breakdown for a detailed per token breakdown of
 --    slippage; raw_slippage_per_transaction for aggregated values per transaction
+--  {{price_feed}} -- option to user either the dune_price_feed (which has been used up till now) or the median of multiple_price_feeds
 --
 -- The columns of raw_slippage_breakdown are
 -- - block_time: time of settlement transaction
