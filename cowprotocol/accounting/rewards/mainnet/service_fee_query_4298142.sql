@@ -81,5 +81,5 @@ select
     case
         when e.creation_date > date_add('month', -3, cast('{{time}}' as timestamp)) then false
         else d.service_fee_flag
-    end as service_fee_flag
+    end as service_fee
 from active_cow_dao_solvers_service_fee as d left outer join reduced_bonds as e on d.solver_address = e.solver_address
