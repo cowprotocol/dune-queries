@@ -7,6 +7,7 @@
 --  {{blockchain}} - network to run the analysis on
 --  {{slippage_table_name}} - slippage_per_transaction for aggregated values per transaction;
 --    slippage_per_solver for aggregated values per transaction
+--  {{price_feed}} -- option to user either the dune_price_feed (which has been used up till now) or the median of multiple_price_feeds
 --
 -- The columns of slippage_per_transaction are
 -- - block_time: time of settlement transaction
