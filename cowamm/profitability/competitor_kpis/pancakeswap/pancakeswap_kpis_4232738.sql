@@ -1,10 +1,10 @@
 -- Computes volume, tvl and APR for Pancakeswap pools
 -- APR is measured as the fees earned per $ invested, over the last 24 hours, projected over 1 year
--- Input: blockchain
+-- Parameters:
+-- {{blockchain}}: The blockchain to query
 
-with 
 -- select the pool with the largest latest k
-pool as (
+with pool as (
     select
         contract_address,
         token0,
@@ -62,18 +62,20 @@ select
     contract_address,
     sum((volume_in + volume_out) / 2) as volume,
     avg(tvl) as tvl,
-    365*sum((volume_in + volume_out) / 2 / tvl) * 0.003 as apr,
+    365 * sum((volume_in + volume_out) / 2 / tvl) * 0.003 as apr,
     0.003 as fee
 from tvl_volume_per_swap
-    where evt_block_time >= date_add('day', -1, now())
+where evt_block_time >= date_add('day', -1, now())
 group by contract_address
 
+-- Now include pools which did not trade during the specified timeframe
+-- This allows to include a performance metric for every pool even the less active ones
 union
-select 
-    pool_address as contract_address, 
-    0 as volume, 
+select
+    pool_address as contract_address,
+    0 as volume,
     tvl,
     0 as apr,
     0.003 as fee
-from "query_4232597(blockchain='{{blockchain}}')"
+from "query_4232597(blockchain='{{blockchain}}', number_of_pools = '500')"
 where pool_address not in (select contract_address from tvl_volume_per_swap)

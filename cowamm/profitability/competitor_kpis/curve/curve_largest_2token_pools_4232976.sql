@@ -1,5 +1,7 @@
 -- Finds all the curve pools with 2 tokens and their TVLs
--- Input: blockchain
+-- Parameters:
+--  {{blockchain}}: The blockchain to query
+--  {{number_of_pools}}: The number of largest pools to return
 
 with
 -- filters pools with 2 tokens

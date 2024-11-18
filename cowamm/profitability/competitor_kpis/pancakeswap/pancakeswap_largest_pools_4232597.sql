@@ -1,13 +1,15 @@
 -- Computes the TVL for every Pancakeswap pool
 -- Then returns the top {{number_of_pools}} pools by TVL
--- Input: blockchain, number_of_pools to return
+-- Parameters:
+--  {{blockchain}}: The blockchain to query
+--  {{number_of_pools}}: The number of largest pools to return
 
 with
 -- finds the pools which have been active since 2024-10-01
 data as (
     select
         p.contract_address as pool_address,
-        p.call_block_time as time,
+        p.call_block_time as block_time,
         p.output__reserve0 as balance0,
         p.output__reserve1 as balance1,
         rank() over (partition by p.contract_address order by p.call_block_time desc) as latest
@@ -35,6 +37,7 @@ t1 as (
 --computes the tvl for each pool
 -- for each pool we could get multiple balance values if the function was called multiple times in a same block
 -- we arbitrarily choose the maximum value for each pool
+-- This decision does not have much impact on metrics, as it is just to rank the pools.
 recent_tvl as (
     select
         pool_address,
@@ -56,7 +59,7 @@ recent_tvl as (
     inner join prices.usd_latest as p1
         on token1 = p1.contract_address
     where latest = 1
-    group by 1, 2, 4
+    group by pool_address, token0, token1
 )
 
 select * from recent_tvl

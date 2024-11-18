@@ -1,4 +1,8 @@
--- Finds the pancakeswap v2 pool address given tokens specified in query parameters (regardless of order)
+-- This query finds all the sync event which happens after a swap and reference the new reserves of the pool
+-- Parameters:
+-- {{blockchain}}: The blockchain to query
+
+-- Finds the pools with the largest tvl
 with pools as (
     select
         substr(data, 13, 20) as contract_address,
@@ -8,7 +12,7 @@ with pools as (
     where
         topic0 = 0x0d3648bd0f6ba80134a33ba9275ac585d9d315f0ad8355cddefde31afa28d0e9 -- PairCreated
         -- topic1: 0x0...0<token0>, topic2: 0x0...0<token1>
-        and substr(data, 13, 20) in (select pool_address from "query_4232597(blockchain='{{blockchain}}')")
+        and substr(data, 13, 20) in (select pool_address from "query_4232597(blockchain='{{blockchain}}', number_of_pools = '500')")
 )
 
 select

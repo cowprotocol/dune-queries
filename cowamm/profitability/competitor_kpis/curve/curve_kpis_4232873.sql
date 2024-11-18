@@ -1,6 +1,7 @@
 -- Computes volume, tvl and APR for Curve pools
 -- APR is measured as the fees earned per $ invested, over the last 24 hours, projected over 1 year
--- Input: blockchain
+-- Parameters:
+-- {{blockchain}}: The blockchain to query
 select
     r.contract_address,
     sum(amount_usd) as volume,
@@ -18,7 +19,8 @@ where
     and tvl > 0
 group by r.contract_address
 
--- NOw include pools which did not trade during the specified timeframe
+-- Now include pools which did not trade during the specified timeframe
+-- This allows to include a performance metric for every pool even the less active ones
 union distinct
 select
     contract_address,
