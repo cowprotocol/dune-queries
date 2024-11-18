@@ -76,7 +76,7 @@ reduced_bonds as (
 
 select
     coalesce(e.solver_name, concat(environment, '-', d.solver_name)) as solver_name,
-    coalesce(e.solver_address, d.solver_address) as solver_address,
+    coalesce(e.solver_address, d.solver_address) as solver,
     coalesce(e.pool_name, d.pool_name) as pool_name,
     case
         when e.creation_date > date_add('month', -3, cast('{{time}}' as timestamp)) then false
