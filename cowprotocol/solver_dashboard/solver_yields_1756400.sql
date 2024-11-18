@@ -43,13 +43,3 @@ from solver_first_rewarded_batch as s
 left outer join unmodified_rewards as r
     on s.solver = r.solver
 order by latest_batch desc
-
--- select solver,
---     solver_name,
---     first_batch,
---     cow_amount,
---     total_value_earned,
---     total_value_earned / days_since_first_batch as average_daily_income, 
---     365.0 * total_value_earned / days_since_first_batch as estimated_annual_income
--- from solver_totals
--- order by average_daily_income desc
