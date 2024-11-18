@@ -1,6 +1,6 @@
-with 
+with
 fee_and_cost_per_batch as (
-    select 
+    select
         block_time,
         tx_hash,
         fee_value as fee,
@@ -8,8 +8,7 @@ fee_and_cost_per_batch as (
         environment as solver_env,
         name as solver_name
     from cow_protocol_ethereum.batches
-        JOIN cow_protocol_ethereum.solvers 
-            ON address = solver_address
+    inner join cow_protocol_ethereum.solvers on address = solver_address
     where tx_hash not in (
         0x84d57d1d57e01dd34091c763765ddda6ff713ad67840f39735f0bf0cced11f02,
         0x918eacff2b6c1fdbb14920473974dd471301f9f305c010baa3085b9ed59c33a6,
@@ -18,7 +17,7 @@ fee_and_cost_per_batch as (
 ),
 
 failed_settlements as (
-    select 
+    select --noqa: ST06
         block_time,
         hash as tx_hash,
         0 as fee,
@@ -26,41 +25,39 @@ failed_settlements as (
         environment as solver_env,
         name as solver_name
     from ethereum.transactions
-        join prices.usd as p 
-            on p.minute = date_trunc('minute', block_time)
-            and blockchain = 'ethereum'
-            and contract_address = 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2
-        join cow_protocol_ethereum.solvers 
-            on "from" = address
-            and position('0x13d79a0b' in cast(data as varchar)) > 0 --! settle method ID
-            and success = false
+    inner join prices.usd as p on p.minute = date_trunc('minute', block_time) --noqa: LT02
+        and blockchain = 'ethereum'
+        and contract_address = 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2
+    inner join cow_protocol_ethereum.solvers on "from" = address --noqa: LT02
+        and position('0x13d79a0b' in cast(data as varchar)) > 0 --! settle method ID
+        and success = false
 ),
 
 results as (
-    select 
-        date_trunc('hour', block_time) as hour,
+    select --noqa: ST06
+        date_trunc('hour', block_time) as hour, --noqa: RF04
         solver_env,
         solver_name,
-        sum(fee) / sum(gas_cost) cost_coverage
+        sum(fee) / sum(gas_cost) as cost_coverage
     from (
         select * from fee_and_cost_per_batch
-        union
+        union all
         select * from failed_settlements
-    ) as _
+    )
     group by date_trunc('hour', block_time), solver_env, solver_name
 ),
 
 production_coverage as (
-    select 
+    select
         hour,
         solver_name,
         cost_coverage
     from results
-    where solver_env = '{{SolverEnv}}'
+    where solver_env = '{{solver_env}}'
 ),
 
 result_average as (
-    select 
+    select
         hour,
         'average' as solver_name,
         avg(cost_coverage) as cost_coverage
@@ -70,11 +67,11 @@ result_average as (
 
 select *
 from (
-        select *
-        from production_coverage
-        union
-        select *
-        from result_average
-    ) as _
-where hour > NOW() - INTERVAL '{{Interval Length}}' {{Units}}
+    select *
+    from production_coverage
+    union all
+    select *
+    from result_average
+)
+where hour > now() - interval '{{interval_length}}' {{units}}
 order by cost_coverage desc
