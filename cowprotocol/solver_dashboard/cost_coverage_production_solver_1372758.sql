@@ -1,3 +1,11 @@
+-- This query computes how much cost the sovlers covered
+-- It takes into account the fee and the gas cost of the transactions
+-- The query is not up to date with the new reporting of fees
+-- Parameters:
+--  {{solver_env}}: string the environment of the solver
+--  {{interval_length}}: string the length of the interval to look back
+--  {{units}}: string the units of the interval to look back
+
 with
 fee_and_cost_per_batch as (
     select

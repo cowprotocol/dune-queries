@@ -1,5 +1,8 @@
--- This query used incompatible data types from Dune SQL alpha and may need to be updated.
--- More details can be found on https://dune.com/docs/query/dunesql-changes/
+-- This query provides various metrics to compare the different operating solvers.
+-- It looks back over a period of LastNDays Days
+-- Parameters:
+--   {{last_n_days}}: int the number of days to look back
+
 with solver_info as (
     select
         name as solver_name,

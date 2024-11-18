@@ -1,3 +1,7 @@
+-- This query computes how much cost the sovlers covered per environment
+-- It takes into account the fee and the gas cost of the transactions
+-- The query is not up to date with the new reporting of fees
+
 with
 fee_and_cost_per_batch as (
     select

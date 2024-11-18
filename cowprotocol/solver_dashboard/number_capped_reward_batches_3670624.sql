@@ -1,3 +1,5 @@
+-- This query finds the number of transactions where the rewards reached the upper bound
+
 with
 batch_rewards as (
     select

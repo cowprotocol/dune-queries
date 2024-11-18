@@ -1,3 +1,7 @@
+-- This query gets the main info for every batch settlement of CoW Swap
+-- Parameters
+-- {{blockchain}}: string the blockchain to query
+
 with
 num_tokens_traded as (
     select

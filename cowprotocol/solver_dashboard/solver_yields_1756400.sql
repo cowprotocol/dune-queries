@@ -1,3 +1,5 @@
+-- This query get the rewards per solver base on the uploaded table raw_order_rewards
+
 with
 solver_first_rewarded_batch as (
     select

@@ -1,3 +1,7 @@
+-- This query gets all the rewards awarded to each solver.
+-- It is decomposed by the different environments
+
+
 with
 --- The initial launch of solver rewards was March 2022.
 --- Solvers were awarded 100 COW tokens per settled batch.

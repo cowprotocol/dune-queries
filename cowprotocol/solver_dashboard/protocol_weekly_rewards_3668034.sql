@@ -1,3 +1,5 @@
+-- This query computes all the rewards distributed to the solvers per week
+-- The rewards are split into 3 categories: performance, consistency and quote
 select
     week_start,
     sum(performance_reward) as performance_reward,
