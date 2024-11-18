@@ -27,7 +27,7 @@ select
     num_tokens,
     dex_swaps,
     batch_value,
-    gas_used / num_trades as gas_per_trade,
+    gas_used / num_trades as avg_gas_units_per_trade,
     case
         when '{{blockchain}}' = 'ethereum' then concat('<a href="https://etherscan.io/address/', cast(solver_address as varchar), '" target="_blank">', concat(environment, '-', name), '</a>')
         when '{{blockchain}}' = 'gnosis' then concat('<a href="https://gnosisscan.io/address/', cast(solver_address as varchar), '" target="_blank">', concat(environment, '-', name), '</a>')
