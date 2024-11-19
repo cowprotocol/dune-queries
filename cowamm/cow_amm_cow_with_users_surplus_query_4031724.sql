@@ -8,11 +8,14 @@
 -- {{cow_budget}} -- the amount of COW that needs to be distributed
 
 with cow_surplus_per_batch_ethereum as (
-    select
+    select --noqa: ST06
         'ethereum' as blockchain,
         cow_per_batch.block_time,
         cow_per_batch.tx_hash,
-        solvers.name as solver_name,
+        case
+            when solvers.environment = 'new' then cast(solvers.address as varchar)
+            else solvers.name
+        end as solver_name,
         naive_cow,  -- fraction of batch volume traded within a CoW
         trades.surplus_usd as surplus_in_usd,  -- surplus of the executed CoW AMM order, expressed in USD
         naive_cow * trades.surplus_usd as realized_cow_surplus_in_usd -- surplus of the CoW AMM that is assumed to be generated via a CoW.
@@ -24,11 +27,14 @@ with cow_surplus_per_batch_ethereum as (
 ),
 
 cow_surplus_per_batch_gnosis as (
-    select
+    select --noqa: ST06
         'gnosis' as blockchain,
         cow_per_batch.block_time,
         cow_per_batch.tx_hash,
-        solvers.name as solver_name,
+        case
+            when solvers.environment = 'new' then cast(solvers.address as varchar)
+            else solvers.name
+        end as solver_name,
         naive_cow,  -- fraction of batch volume traded within a CoW
         trades.surplus_usd as surplus_in_usd,  -- surplus of the executed CoW AMM order, expressed in USD
         naive_cow * trades.surplus_usd as realized_cow_surplus_in_usd -- surplus of the CoW AMM that is assumed to be generated via a CoW.
@@ -40,11 +46,14 @@ cow_surplus_per_batch_gnosis as (
 ),
 
 cow_surplus_per_batch_arbitrum as (
-    select
+    select --noqa: ST06
         'arbitrum' as blockchain,
         cow_per_batch.block_time,
         cow_per_batch.tx_hash,
-        solvers.name as solver_name,
+        case
+            when solvers.environment = 'new' then cast(solvers.address as varchar)
+            else solvers.name
+        end as solver_name,
         naive_cow,  -- fraction of batch volume traded within a CoW
         trades.surplus_usd as surplus_in_usd,  -- surplus of the executed CoW AMM order, expressed in USD
         naive_cow * trades.surplus_usd as realized_cow_surplus_in_usd -- surplus of the CoW AMM that is assumed to be generated via a CoW.
@@ -79,7 +88,10 @@ reward_addresses as (
     select
         solver as solver_address,
         reward_target,
-        substring(solver_name, 6, 100) as solver_name
+        case
+            when solver_name = 'new-Uncatalogued' then cast(solver as varchar)
+            else substring(solver_name, 6, 100)
+        end as solver_name
     from "query_1541516(end_time='{{end_time}}',vouch_cte_name='named_results')"
 ),
 
