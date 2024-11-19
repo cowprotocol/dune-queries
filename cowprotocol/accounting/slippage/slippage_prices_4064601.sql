@@ -6,6 +6,7 @@
 --  {{start_time}} - the timestamp for which the analysis should start (inclusively)
 --  {{end_time}} - the timestamp for which the analysis should end (exclusively)
 --  {{blockchain}} - network to run the analysis on
+--  {{price_feed}} -- option to user either the dune_price_feed (which has been used up till now) or the median of multiple_price_feeds
 --
 -- The columns of the result are
 -- - hour: hour for which a price is valid
