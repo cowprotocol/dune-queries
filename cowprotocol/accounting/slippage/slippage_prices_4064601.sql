@@ -86,6 +86,8 @@ multiple_price_feeds as (
     group by 1, 2, 3
 ),
 
+-- We now define the precise_prices table, which refers to prices that 
+-- we have directly computed from various price feeds.
 precise_prices as (
     select *
     from {{price_feed}}
@@ -128,8 +130,8 @@ intrinsic_prices as (
     group by 1, 2, 3
 ),
 
--- The final price is the Dune price if it exists and the intrinsic price otherwise. If both prices
--- are not available, the price is null.
+-- The final price is the precise price if it exists and the intrinsic price otherwise.
+-- If both prices are not available, the price is null.
 prices as (
     select
         tt.hour,
@@ -157,6 +159,8 @@ prices as (
             and tt.token_address = intrinsic.token_address
 ),
 
+-- We also want to have the prices of the native token of each chain
+-- so we define this intermediate table to help with that
 wrapped_native_token as (
     select
         case '{{blockchain}}'
@@ -184,5 +188,5 @@ native_token_prices as (
 )
 
 select * from prices
-union all
+union distinct
 select * from native_token_prices
