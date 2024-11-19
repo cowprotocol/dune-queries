@@ -33,7 +33,7 @@ swaps as (
 -- gets the swapped volume and tvl at the time of the swap for each swap
 tvl_volume_per_swap as (
     select
-        syncs.contract_address as contract_address,
+        syncs.contract_address,
         syncs.evt_block_time,
         syncs.evt_tx_hash,
         (amount0In * p0.price / pow(10, p0.decimals)) + (amount1In * p1.price / pow(10, p1.decimals)) as volume_in,
@@ -70,7 +70,7 @@ group by contract_address
 
 -- Now include pools which did not trade during the specified timeframe
 -- This allows to include a performance metric for every pool even the less active ones
-union
+union distinct
 select
     pool_address as contract_address,
     0 as volume,

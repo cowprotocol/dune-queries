@@ -42,8 +42,8 @@ recent_tvl as (
     select
         pool_address,
         token0,
-        max(balance0) as balance0,
         token1,
+        max(balance0) as balance0,
         max(balance1) as balance1,
         max(
             least(balance0, balance1) * greatest(p0.price / pow(10, p0.decimals), p1.price / pow(10, p1.decimals))
