@@ -27,46 +27,14 @@ with token_times as (
 ),
 
 -- Fetching all additional price feeds that are synced to Dune
-imported_price_feeds_raw as (
-    select *
-    from "query_4252674"
-    where price_unit < 10000000 -- here we filter all tokens with price more than $1M, as these are probably bogus prices
-),
-
--- The next four tables decompose the imported_price_feeds_raw table by source, in a format that can then be used for slippage acounting
--- Currently, four price feeds are used: coingecko, moralis, the auction prices provided by the backend, and dune prices.
-
--- the coingecko price feed
-coingecko_price_feed as (
+imported_price_feeds as (
     select
-        ipfr.hour,
-        ipfr.token_address,
-        ipfr.decimals,
-        ipfr.price_unit
-    from imported_price_feeds_raw as ipfr inner join token_times as tt on ipfr.hour = tt.hour and ipfr.token_address = tt.token_address
-    where source = 'coingecko'
-),
-
--- the moralis price feed
-moralis_price_feed as (
-    select
-        ipfr.hour,
-        ipfr.token_address,
-        ipfr.decimals,
-        ipfr.price_unit
-    from imported_price_feeds_raw as ipfr inner join token_times as tt on ipfr.hour = tt.hour and ipfr.token_address = tt.token_address
-    where source = 'moralis'
-),
-
--- the auction prices feed
-auction_price_feed as (
-    select
-        ipfr.hour,
-        ipfr.token_address,
-        ipfr.decimals,
-        ipfr.price_unit
-    from imported_price_feeds_raw as ipfr inner join token_times as tt on ipfr.hour = tt.hour and ipfr.token_address = tt.token_address
-    where source = 'native'
+        a.hour,
+        a.token_address,
+        a.decimals,
+        a.price_unit
+    from "query_4252674" as a inner join token_times as tt on a.hour = tt.hour and a.token_address = tt.token_address
+    where a.price_unit < 10000000 -- here we filter all tokens with price more than $1M, as these are probably bogus prices
 ),
 
 -- the Dune price feed; note that this is computed on Dune and is not part of the imported_price_feeds_raw table.
@@ -100,11 +68,7 @@ intermediate_compute_median_table as (
     from (
         select * from dune_price_feed
         union all
-        select * from coingecko_price_feed
-        union all
-        select * from moralis_price_feed
-        union all
-        select * from auction_price_feed
+        select * from imported_price_feeds
     )
 ),
 
