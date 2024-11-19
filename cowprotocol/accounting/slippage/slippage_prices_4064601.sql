@@ -25,53 +25,56 @@ with token_times as (
     group by 1, 2
 ),
 
-imported_price_feed as (
+-- Fetching all additional price feeds that are synced to Dune
+imported_price_feeds_raw as (
     select *
     from "query_4252674"
     where price_unit < 10000000 -- here we filter all tokens with price more than $1M, as these are probably bogus prices
 ),
 
+-- The next four tables decompose the imported_price_feeds_raw table by source, in a format that can then be used for slippage acounting
+-- Currently, four price feeds are used: coingecko, moralis, the auction prices provided by the backend, and dune prices.
+
+-- the coingecko price feed
 coingecko_price_feed as (
     select
-        ipf.hour,
-        ipf.token_address,
-        ipf.decimals,
-        ipf.price_unit,
-        ipf.price_atom
-    from imported_price_feed as ipf inner join token_times as tt on ipf.hour = tt.hour and ipf.token_address = tt.token_address
+        ipfr.hour,
+        ipfr.token_address,
+        ipfr.decimals,
+        ipfr.price_unit
+    from imported_price_feeds_raw as ipfr inner join token_times as tt on ipfr.hour = tt.hour and ipfr.token_address = tt.token_address
     where source = 'coingecko'
 ),
 
+-- the moralis price feed
 moralis_price_feed as (
     select
-        ipf.hour,
-        ipf.token_address,
-        ipf.decimals,
-        ipf.price_unit,
-        ipf.price_atom
-    from imported_price_feed as ipf inner join token_times as tt on ipf.hour = tt.hour and ipf.token_address = tt.token_address
+        ipfr.hour,
+        ipfr.token_address,
+        ipfr.decimals,
+        ipfr.price_unit
+    from imported_price_feeds_raw as ipfr inner join token_times as tt on ipfr.hour = tt.hour and ipfr.token_address = tt.token_address
     where source = 'moralis'
 ),
 
+-- the auction prices feed
 auction_price_feed as (
     select
-        ipf.hour,
-        ipf.token_address,
-        ipf.decimals,
-        ipf.price_unit,
-        ipf.price_atom
-    from imported_price_feed as ipf inner join token_times as tt on ipf.hour = tt.hour and ipf.token_address = tt.token_address
+        ipfr.hour,
+        ipfr.token_address,
+        ipfr.decimals,
+        ipfr.price_unit
+    from imported_price_feeds_raw as ipfr inner join token_times as tt on ipfr.hour = tt.hour and ipfr.token_address = tt.token_address
     where source = 'native'
 ),
 
--- Precise prices are prices from the Dune price feed.
+-- the Dune price feed; note that this is computed on Dune and is not part of the imported_price_feeds_raw table.
 dune_price_feed as (
     select -- noqa: ST06
         date_trunc('hour', minute) as hour, --noqa: RF04
         token_address,
         decimals,
-        avg(price) as price_unit,
-        avg(price) / pow(10, decimals) as price_atom
+        avg(price) as price_unit
     from
         prices.usd
     inner join token_times
@@ -82,28 +85,40 @@ dune_price_feed as (
     group by 1, 2, 3
 ),
 
-multiple_price_feeds_pre as (
-    select *
-    from dune_price_feed
-    union all
-    select *
-    from coingecko_price_feed
-    union all
-    select *
-    from moralis_price_feed
-    union all
-    select *
-    from auction_price_feed
+-- we are now ready to define a new price feed that is the median of all price feeds defined above
+-- there are 2 tables for this purpose, and the code for the median is based on the No.2 section
+-- of this article: https://medium.com/learning-sql/how-to-calculate-median-the-right-way-in-postgresql-f7b84e9e2df7
+intermediate_compute_median_table as (
+    select
+        hour,
+        token_address,
+        decimals,
+        price_unit,
+        row_number() over (partition by hour, token_address, decimals order by price_unit asc) as rn_asc,
+        count(*) over (partition by hour, token_address, decimals) as ct
+    from (
+        select * from dune_price_feed
+        union all
+        select * from coingecko_price_feed
+        union all
+        select * from moralis_price_feed
+        union all
+        select * from auction_price_feed
+    )
 ),
 
+-- this is the final table generated, that uses the median of all price feeds
+-- to compute a final price.
 multiple_price_feeds as (
     select
         hour,
         token_address,
         decimals,
-        approx_percentile(price_unit, 0.5) as price_unit,
-        approx_percentile(price_atom, 0.5) as price_atom
-    from multiple_price_feeds_pre group by 1, 2, 3
+        avg(price_unit) as price_unit,
+        avg(price_unit) / pow(10, decimals) as price_atom
+    from intermediate_compute_median_table
+    where rn_asc between ct / 2.0 and ct / 2.0 + 1
+    group by 1, 2, 3
 ),
 
 precise_prices as (
@@ -187,7 +202,7 @@ wrapped_native_token as (
         end as native_token_address
 ),
 
--- The price of the native token is reconstructed from it chain-dependent wrapped version.
+-- The price of the native token is reconstructed from its chain-dependent wrapped version.
 native_token_prices as (
     select -- noqa: ST06
         date_trunc('hour', minute) as hour, --noqa: RF04
