@@ -147,7 +147,7 @@ combined_data_after_service_fee as (
         cd.slippage_eth,
         cd.slippage_per_tx,
         cd.name,
-        sff.service_fee as service_fee_enabled
+        coalesce(sff.service_fee, false) as service_fee_enabled
     from combined_data as cd left outer join service_fee_flag as sff on cd.solver = sff.solver
 ),
 
