@@ -4,10 +4,10 @@
 -- {{blockchain}}: The blockchain to query
 select
     r.contract_address,
-    sum(amount_usd) as volume,
-    365 * sum(amount_usd * fee / tvl) as apr,
     fee,
-    tvl
+    tvl,
+    sum(amount_usd) as volume,
+    365 * sum(amount_usd * fee / tvl) as apr
 from "query_4232976(blockchain='{{blockchain}}')" as r
 left join curve.trades as t
     on
@@ -18,17 +18,3 @@ where
     -- This test avoids any possible issue with reconstructing the reserves of the pool
     and tvl > 0
 group by r.contract_address
-
--- Now include pools which did not trade during the specified timeframe
--- This allows to include a performance metric for every pool even the less active ones
-union distinct
-select
-    contract_address,
-    0 as volume,
-    0 as apr,
-    fee,
-    tvl
-from "query_4232976(blockchain='{{blockchain}}')"
-where
-    time < date_add('day', -1, now())
-    and latest = 1
