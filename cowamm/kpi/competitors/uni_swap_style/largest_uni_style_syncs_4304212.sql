@@ -5,14 +5,10 @@
 -- Finds the pools with the largest tvl
 with pools as (
     select
-        substr(data, 13, 20) as contract_address,
-        substr(topic1, 13, 20) as token0,
-        substr(topic2, 13, 20) as token1
-    from {{blockchain}}.logs
-    where
-        topic0 = 0x0d3648bd0f6ba80134a33ba9275ac585d9d315f0ad8355cddefde31afa28d0e9 -- PairCreated
-        -- topic1: 0x0...0<token0>, topic2: 0x0...0<token1>
-        and substr(data, 13, 20) in (select pool_address from "query_4232597(blockchain='{{blockchain}}', number_of_pools = '500')")
+        pool_address,
+        token0,
+        token1
+    from "query_4303563(blockchain='{{blockchain}}', number_of_pools = '{{number_of_pools}}')"
 )
 
 select
@@ -26,6 +22,7 @@ select
     rank() over (partition by (logs.contract_address) order by block_time desc) as latest
 from {{blockchain}}.logs
 inner join pools
-    on logs.contract_address = pools.contract_address
+    on logs.contract_address = pools.pool_address
 where
     topic0 = 0x1c411e9a96e071241c2f21f7726b17ae89e3cab4c78be50e062b03a9fffbbad1 -- Sync
+    and block_time >= date(date_add('day', -1, now()))
