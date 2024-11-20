@@ -5,7 +5,8 @@
 -- that it's fast anyways, we decided to go with this.
 
 -- Parameters:
--- {{time}}: the end date of an accounting week
+-- {{start_time}}: the start date of an accounting week
+-- {{end_time}}: the end date of an accounting week
 
 with
 -- we first compute all active solvers of the CoW DAO bonding pool (this includes the ones that have their own reduced subpool)
@@ -22,7 +23,7 @@ active_cow_dao_solver_names as (
         solver as solver_address,
         pool_name
     from
-        "query_1541516(vouch_cte_name='named_results',end_time='{{time}}')"
+        "query_1541516(vouch_cte_name='named_results',end_time='{{end_time}}')"
     where
         pool_address = 0x5d4020b9261f01b6f8a45db929704b0ad6f5e9e6 -- CoW DAO bonding pool address
 ),
@@ -63,7 +64,7 @@ active_cow_dao_solvers_service_fee as (
         a.solver_address,
         a.pool_name,
         case
-            when c.join_time > date_add('day', -7, date_add('month', -6, cast('{{time}}' as timestamp))) then false
+            when c.join_time > date_add('month', -6, cast('{{start_time}}' as timestamp)) then false
             else true
         end as service_fee_flag,
         c.join_time
@@ -79,7 +80,7 @@ select
     coalesce(e.solver_address, d.solver_address) as solver,
     coalesce(e.pool_name, d.pool_name) as pool_name,
     case
-        when e.creation_date > date_add('month', -3, cast('{{time}}' as timestamp)) then false
+        when e.creation_date > date_add('month', -3, cast('{{start_time}}' as timestamp)) then false
         else d.service_fee_flag
     end as service_fee
 from active_cow_dao_solvers_service_fee as d left outer join reduced_bonds as e on d.solver_address = e.solver_address
