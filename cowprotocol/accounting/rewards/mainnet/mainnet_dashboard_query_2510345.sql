@@ -133,7 +133,7 @@ service_fee_flag as (
             when service_fee then 0.85
             else 1
         end as service_fee_factor
-    from "query_4298142(time='{{end_time}}')"
+    from "query_4298142(start_time='{{start_time}}', end_time='{{end_time}}')"
 ),
 
 combined_data_after_service_fee as (
