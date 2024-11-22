@@ -18,7 +18,7 @@ left join curve.trades as t
         r.contract_address = t.project_contract_address
         and r.tx_hash = t.tx_hash
 where
-    t.block_time >= date_add('day', -1, (case when '{{end_time}}' = 'now' then now() else timestamp '{{end_time}}' end))
+    t.block_time >= date_add('day', -1, (case when '{{end_time}}' = '2024-01-01' then now() else timestamp '{{end_time}}' end))
     and r1.latest = 1
     -- This test avoids any possible issue with reconstructing the reserves of the pool
     and r1.tvl > 0
