@@ -1,4 +1,6 @@
--- Finds all the curve pools with 2 tokens and their TVLs
+-- Finds all the curve pools with 2 tokens and their TVLs at every moment in time
+-- For every pool that is currently one of the {{number_of_pools}} largest by TVL:
+-- It returns their TVL at every moment in time
 -- Parameters:
 --  {{blockchain}}: The blockchain to query
 --  {{number_of_pools}}: The number of largest pools to return
