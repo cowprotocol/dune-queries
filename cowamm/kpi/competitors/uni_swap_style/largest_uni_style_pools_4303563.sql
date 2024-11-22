@@ -7,10 +7,21 @@ with pools as (
     select
         substr(data, 13, 20) as contract_address,
         substr(topic1, 13, 20) as token0,
-        substr(topic2, 13, 20) as token1
+        substr(topic2, 13, 20) as token1,
+        case
+            when contract_address = 0x1097053Fd2ea711dad45caCcc45EfF7548fCB362 then 'pancakeswap'
+            when contract_address = 0xDBf403764Ba35552b8Be25d1583Bd1BB540d1d8a then 'uniswap'
+            when contract_address = 0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac then 'sushiswap'
+        end as project
     from {{blockchain}}.logs
     where
         topic0 = 0x0d3648bd0f6ba80134a33ba9275ac585d9d315f0ad8355cddefde31afa28d0e9
+        and contract_address in
+        (
+            0x1097053Fd2ea711dad45caCcc45EfF7548fCB362,
+            0xDBf403764Ba35552b8Be25d1583Bd1BB540d1d8a,
+            0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac
+        )
 ),
 
 syncs as (
@@ -32,6 +43,7 @@ syncs as (
 
 select distinct
     s.contract_address as pool_address,
+    project,
     token0,
     token1,
     reserve0,
