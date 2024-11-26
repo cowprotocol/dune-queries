@@ -16,6 +16,9 @@ purchased_eth as (
         and trader in (0x84e5c8518c248de590d5302fd7c32d2ae6b0123c, 0x9008D19f58AAbD9eD0D60971565AA8510560ab41)
         and receiver = 0xa03be496e67ec29bc62f01a428683d7f9c204930
         and block_date between (timestamp '{{start_time}}' + interval '12' hour) and (timestamp '{{end_time}}' + interval '12' hour)
+        -- fee withdrawals are currently executed daily at midnight UTC. However, the fee withdrawal at the end of an accounting period
+        -- should not be included in the next accounting period, this is why we add a shift of 12 hours, in order to ensure that the
+        -- last withdrawal for an accounting period is indeed mapped to that accounting period and not to the one that follows
     group by block_time
 ),
 
