@@ -10,7 +10,7 @@ with pools as (
         substr(topic2, 13, 20) as token1,
         case
             when contract_address = 0x1097053Fd2ea711dad45caCcc45EfF7548fCB362 then 'pancakeswap'
-            when contract_address = 0xDBf403764Ba35552b8Be25d1583Bd1BB540d1d8a then 'uniswap'
+            when contract_address = 0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f then 'uniswap'
             when contract_address = 0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac then 'sushiswap'
         end as project
     from {{blockchain}}.logs
@@ -19,7 +19,7 @@ with pools as (
         and contract_address in
         (
             0x1097053Fd2ea711dad45caCcc45EfF7548fCB362,
-            0xDBf403764Ba35552b8Be25d1583Bd1BB540d1d8a,
+            0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f,
             0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac
         )
 ),
