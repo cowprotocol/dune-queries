@@ -4,22 +4,22 @@
 with
 batch_rewards as (
     select
-        winning_solver as solver,
-        participating_solvers,
-        date_add('day', 1, date_trunc('week', date_add('day', -1, time))) as week_start,
+        bs.winning_solver as solver,
+        bs.participating_solvers,
+        date_add('day', 1, date_trunc('week', date_add('day', -1, eb.time))) as week_start,
         case
-            when time >= cast('2024-03-19 12:00:00' as timestamp) then reward -- switch to CIP-38
-            else reward - execution_cost
+            when eb.time >= cast('2024-03-19 12:00:00' as timestamp) then reward -- switch to CIP-38
+            else bs.reward - bs.execution_cost
         end as reward,
         case
-            when time >= cast('2024-07-23 00:00:00' as timestamp) then 'CIP-48' -- switch to CIP-48
-            when time >= cast('2024-03-19 12:00:00' as timestamp) then 'CIP-38' -- switch to CIP-38
-            when time >= cast('2024-02-06 00:00:00' as timestamp) then 'CIP-36' -- switch to CIP-36
+            when eb.time >= cast('2024-07-23 00:00:00' as timestamp) then 'CIP-48' -- switch to CIP-48
+            when eb.time >= cast('2024-03-19 12:00:00' as timestamp) then 'CIP-38' -- switch to CIP-38
+            when eb.time >= cast('2024-02-06 00:00:00' as timestamp) then 'CIP-36' -- switch to CIP-36
             else 'CIP-27'
         end as cip
-    from
-        query_2777544 as bs
-    join ethereum.blocks as eb on bs.block_deadline = eb.number
+    from query_2777544 as bs
+    join ethereum.blocks as eb --noqa: AM05
+        on bs.block_deadline = eb.number
     where
         eb.time >= cast('2023-07-18 00:00:00' as timestamp) -- start of analysis
 ),
@@ -29,7 +29,7 @@ participation_data as (
         week_start,
         participant
     from batch_rewards as br
-    cross join unnest(br.participating_solvers) as t (participant)
+    cross join unnest(br.participating_solvers) as t (participant) --noqa: AL05
 ),
 
 participation_counts as (
@@ -51,7 +51,10 @@ batch_rewards_aggregate as (
         max(cip) as cip -- there is only one value and the maximum selects it
     from
         batch_rewards as br
-    join participation_counts as pc on br.week_start = pc.week_start and br.solver = pc.solver
+    join participation_counts as pc --noqa: AM05
+        on
+            br.week_start = pc.week_start
+            and br.solver = pc.solver
     group by
         br.week_start, br.solver
 ),
@@ -128,10 +131,9 @@ order_quotes as (
     select
         quote_solver as solver,
         date_add('day', 1, date_trunc('week', date_add('day', -1, time))) as week_start
-        
     from
         query_3373259
-    join ethereum.blocks as e on query_3373259.block_number = e.number
+    join ethereum.blocks as e on query_3373259.block_number = e.number --noqa: AM05
     where
         time >= cast('2023-07-18 00:00:00' as timestamp) -- start of analysis
         and quote_solver != 0x0000000000000000000000000000000000000000
@@ -163,7 +165,7 @@ results as (
         ) * batch_rewards_aggregate.num_participating_batches / week_data_with_caps.num_participating_batches as consistency_reward,
         least(quote_reward_cow, quote_cap_eth * eth_price / cow_price) * num_quotes as quote_reward
     from
-        batch_rewards_aggregate
+        batch_rewards_aggregate --noqa: ST09
     left outer join quote_numbers
         on
             quote_numbers.week_start = batch_rewards_aggregate.week_start
