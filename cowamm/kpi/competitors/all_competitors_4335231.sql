@@ -1,4 +1,6 @@
 --Groups all competitors in one query
+-- Parameters:
+-- {{blockchain}}: The blockchain to query
 
 -- Uniswap, PancakeSwap, Sushiwap
 select
@@ -10,7 +12,8 @@ select
     project,
     case
         when '{{blockchain}}' = 'ethereum' then 1
-        when '{{blockchain}}' = 'ethereum' then 100
+        when '{{blockchain}}' = 'gnosis' then 100
+        when '{{blockchain}}' = 'arbitrum' then 8453
         when '{{blockchain}}' = 'arbitrum' then 42161
     end as chain_id
 from "query_4304295(blockchain='{{blockchain}}')"
@@ -28,6 +31,7 @@ select
     case
         when '{{blockchain}}' = 'ethereum' then 1
         when '{{blockchain}}' = 'gnosis' then 100
+        when '{{blockchain}}' = 'arbitrum' then 8453
         when '{{blockchain}}' = 'arbitrum' then 42161
     end as chain_id
 from "query_4232873(blockchain='{{blockchain}}')"
