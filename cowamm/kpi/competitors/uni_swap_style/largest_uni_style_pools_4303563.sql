@@ -60,5 +60,5 @@ inner join prices.usd as p1
         token1 = p1.contract_address
         and p1.minute = evt_block_time
 where latest = 1
-order by 7 desc
+order by tvl desc
 limit {{number_of_pools}}

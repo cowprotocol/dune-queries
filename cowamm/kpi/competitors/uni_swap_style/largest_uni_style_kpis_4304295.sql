@@ -1,10 +1,9 @@
 -- Computes volume, tvl and APR for Uni Swap style pools (Uni, Pancake, Sushi)
 -- APR is measured as the fees earned per $ invested, over the last 24 hours, projected over 1 year
--- The type of pool (Uni/Pancake/Sushi) is not specified
 -- Parameters:
 -- {{blockchain}}: The blockchain to query
 -- {{number_of_pools}}: The number of largest pools to return
--- {{end_time}}: The end time of the time window (end_time - 1 day; end_time), defaults to now()
+-- {{competitor_end_time}}: The end time of the time window (end_time - 1 day; end_time), defaults to now()
 
 -- select the pool with the largest latest k
 with pool as (
@@ -31,7 +30,7 @@ syncs as (
     inner join pool
         on logs.contract_address = pool.contract_address
     where
-        block_time >= date_add('day', -1, (case when '{{end_time}}' = '2024-01-01' then now() else timestamp '{{end_time}}' end))
+        block_time >= date_add('day', -1, (case when '{{competitor_end_time}}' = '2100-01-01' then now() else timestamp '{{competitor_end_time}}' end))
         and topic0 = 0x1c411e9a96e071241c2f21f7726b17ae89e3cab4c78be50e062b03a9fffbbad1 -- Sync        
 ),
 
@@ -89,9 +88,9 @@ select
     end as fee,
     coalesce(sum((volume_in + volume_out) / 2), 0) as volume,
     -- the average pool is conceptually unnecessary because the table pool has only one tvl per pool
-    -- but it is necessary for the group by statement
+    -- but it is necessary for the group by statement 
     avg(pool.tvl) as tvl,
-    case 
+    case
         when project = 'pancakeswap' then coalesce(365 * sum((volume_in + volume_out) / 2 / t.tvl) * 0.0025, 0)
         else coalesce(365 * sum((volume_in + volume_out) / 2 / t.tvl) * 0.003, 0)
     end as apr

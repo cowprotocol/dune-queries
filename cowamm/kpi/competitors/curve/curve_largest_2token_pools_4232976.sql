@@ -58,8 +58,8 @@ reserves as (
         fee,
         sum(transfer0) over (partition by contract_address order by block_time, evt_index) as reserve0,
         sum(transfer1) over (partition by contract_address order by block_time, evt_index) as reserve1,
-        row_number() over (partition by tx_hash, contract_address order by evt_index desc) as row_num,
-        row_number() over (partition by contract_address order by block_time desc) as latest
+        row_number() over (partition by tx_hash, contract_address order by evt_index desc) as latest_per_tx,
+        row_number() over (partition by contract_address order by block_time desc) as latest_per_pool
     from transfers
 ),
 
@@ -74,7 +74,7 @@ recent_tvl as (
         reserve0,
         reserve1,
         fee,
-        latest,
+        latest_per_pool,
         (reserve0 * p0.price / pow(10, p0.decimals)) + (reserve1 * p1.price / pow(10, p1.decimals)) as tvl
     from reserves as r
     inner join prices.usd as p0
@@ -85,7 +85,7 @@ recent_tvl as (
         on
             date_trunc('minute', block_time) = p1.minute
             and token1 = p1.contract_address
-    where row_num = 1
+    where latest_per_tx = 1
 )
 
 
@@ -93,7 +93,7 @@ select * from recent_tvl
 where contract_address in (
     select contract_address
     from recent_tvl
-    where latest = 1
+    where latest_per_pool = 1
     order by tvl desc
     limit {{number_of_pools}}
 )
