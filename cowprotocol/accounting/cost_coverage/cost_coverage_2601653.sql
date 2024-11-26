@@ -1,3 +1,10 @@
+-- This query computes some simple cost coverage statistics
+-- for a week. Although time range can be specified by the user
+-- this query is aligned with the weekly payouts so its results
+-- are useful when start/end date aligns with an accounting period 
+-- Parameters:
+-- {{start_time}}: the start date of an accounting week
+-- {{end_time}}: the end date of an accounting week
 with
 purchased_eth as (
     select
@@ -22,8 +29,8 @@ transferred_eth as (
         "from" = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
         and to = 0xa03be496e67ec29bc62f01a428683d7f9c204930
         and contract_address = 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2
-        and evt_tx_hash not in (select tx_hash from cow_protocol_ethereum.trades where block_date between (timestamp '{{start_time}}' + interval '2' day) and (timestamp '{{end_time}}' + interval '2' day))
-        and evt_block_time between (timestamp '{{start_time}}' + interval '2' day) and (timestamp '{{end_time}}' + interval '2' day)
+        and evt_tx_hash not in (select tx_hash from cow_protocol_ethereum.trades where block_date between (timestamp '{{start_time}}' + interval '12' hour) and (timestamp '{{end_time}}' + interval '12' hour))
+        and evt_block_time between (timestamp '{{start_time}}' + interval '12' hour) and (timestamp '{{end_time}}' + interval '12' hour)
     group by evt_block_time
 ),
 
@@ -52,10 +59,6 @@ outgoing_eth as (
         and success = true
         and (lower(call_type) not in ('delegatecall', 'callcode', 'staticcall') or call_type is null)
         and block_time between (timestamp '{{start_time}}' + interval '2' day) and (timestamp '{{end_time}}' + interval '2' day)
-        -- Excluding 80 ETH transfer due to 
-        -- https://snapshot.org/#/cow.eth/proposal/0x79fdcc006030d50ab0ffe0ffd7c474a409eb70448d1c8eba58919af7559a876e
-        -- https://etherscan.io/tx/0x86f101b7ffa11c734ffe117bb2f0e4b377260f3fc3d8517e91d01126eed12980
-        and tx_hash != 0x86f101b7ffa11c734ffe117bb2f0e4b377260f3fc3d8517e91d01126eed12980
 ),
 
 outgoing_cow as (
@@ -64,7 +67,7 @@ outgoing_cow as (
     where
         contract_address = 0xdef1ca1fb7fbcdc777520aa7f396b4e015f497ab
         and "from" = 0xa03be496e67ec29bc62f01a428683d7f9c204930
-        and evt_block_time between (timestamp '{{start_time}}' + interval '2' day) and (timestamp '{{end_time}}' + interval '2' day) and evt_block_number != 19182562
+        and evt_block_time between (timestamp '{{start_time}}' + interval '2' day) and (timestamp '{{end_time}}' + interval '2' day)
 ),
 
 conversion_prices as (
