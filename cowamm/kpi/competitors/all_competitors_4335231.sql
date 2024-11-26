@@ -27,7 +27,7 @@ select
     'curve' as project,
     case
         when '{{blockchain}}' = 'ethereum' then 1
-        when '{{blockchain}}' = 'ethereum' then 100
+        when '{{blockchain}}' = 'gnosis' then 100
         when '{{blockchain}}' = 'arbitrum' then 42161
     end as chain_id
 from "query_4232873(blockchain='{{blockchain}}')"
