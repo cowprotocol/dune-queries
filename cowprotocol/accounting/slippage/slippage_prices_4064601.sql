@@ -188,5 +188,5 @@ native_token_prices as (
 )
 
 select * from prices
-union distinct
+union all
 select * from native_token_prices
