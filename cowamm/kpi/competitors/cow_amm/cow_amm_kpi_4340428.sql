@@ -11,7 +11,7 @@ select
     sum(usd_value) over (partition by contract_address order by latest_per_pool) as volume,
     365 * sum(surplus_usd / tvl) over (partition by contract_address order by latest_per_pool) as apr
 from "query_4340356(blockchain='{{blockchain}}')" as tvl
-inner join
+left join
     ( --noqa: ST05
         select *
         from cow_protocol_{{blockchain}}.trades
