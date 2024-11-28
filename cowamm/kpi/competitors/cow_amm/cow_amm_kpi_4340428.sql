@@ -6,7 +6,7 @@
 
 -- computes, surplus, tvl and thus relative surplus (per $100)
 select
-    contract_addres,
+    contract_address,
     tvl,
     sum(usd_value) over (partition by contract_address order by latest_per_pool) as volume,
     365 * sum(surplus_usd / tvl) over (partition by contract_address order by latest_per_pool) as apr
