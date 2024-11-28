@@ -34,7 +34,9 @@ select
         when '{{blockchain}}' = 'base' then 8453
         when '{{blockchain}}' = 'arbitrum' then 42161
     end as chain_id
-from "query_4232873(blockchain='{{blockchain}}', competitor_end_time='{{competitor_end_time}}')"
+from "query_4232873(blockchain='ethereum', competitor_end_time='{{competitor_end_time}}')"
+-- there are no significant curve pools on arbitrum/gnosis
+where {{blockchain}} = 'ethereum'
 
 union distinct
 
