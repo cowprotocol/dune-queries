@@ -8,17 +8,25 @@
 select
     contract_address,
     tvl,
-    sum(usd_value) over (partition by contract_address order by latest_per_pool) as volume,
-    365 * sum(surplus_usd / tvl) over (partition by contract_address order by latest_per_pool) as apr
-from "query_4340356(blockchain='{{blockchain}}')" as tvl
-left join
-    ( --noqa: ST05
-        select *
-        from cow_protocol_{{blockchain}}.trades
-        where
-            block_time >= date_add('day', -1, (case when '{{competitor_end_time}}' = '2100-01-01' then now() else timestamp '{{competitor_end_time}}' end))
-    ) as t
-    on
-        t.tx_hash = tvl.tx_hash
-        and tvl.contract_address = trader
+    volume,
+    apr
+from ( --noqa: ST05
+    select
+        contract_address,
+        tvl,
+        latest_per_pool,
+        sum(usd_value) over (partition by contract_address order by latest_per_pool desc) as volume,
+        365 * sum(surplus_usd / tvl) over (partition by contract_address order by latest_per_pool desc) as apr
+    from "query_4340356(blockchain='{{blockchain}}')" as tvl
+    left join
+        ( --noqa: ST05
+            select *
+            from cow_protocol_{{blockchain}}.trades
+            where
+                block_time >= date_add('day', -1, (case when '{{competitor_end_time}}' = '2100-01-01' then now() else timestamp '{{competitor_end_time}}' end))
+        ) as t
+        on
+            t.tx_hash = tvl.tx_hash
+            and tvl.contract_address = trader
+)
 where latest_per_pool = 1
