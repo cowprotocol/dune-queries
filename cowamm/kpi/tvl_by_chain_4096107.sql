@@ -73,7 +73,7 @@ tvl as (
     from reserves_by_day as r
     inner join prices.day as p
         on
-            r.day = p.day
+            r.day = p.timestamp
             and p.contract_address = token
     where latest = 1
 )

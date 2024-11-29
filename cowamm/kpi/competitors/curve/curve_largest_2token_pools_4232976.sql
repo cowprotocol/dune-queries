@@ -79,11 +79,11 @@ recent_tvl as (
     from reserves as r
     inner join prices.minute as p0
         on
-            date_trunc('minute', block_time) = p0.minute
+            date_trunc('minute', block_time) = p0.timestamp
             and token0 = p0.contract_address
     inner join prices.minute as p1
         on
-            date_trunc('minute', block_time) = p1.minute
+            date_trunc('minute', block_time) = p1.timestamp
             and token1 = p1.contract_address
     where latest_per_tx = 1
 )

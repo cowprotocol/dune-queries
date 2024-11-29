@@ -28,7 +28,7 @@ with token_times as (
 -- Precise prices are prices from the Dune price feed.
 precise_prices as (
     select -- noqa: ST06
-        date_trunc('hour', minute) as hour, --noqa: RF04
+        date_trunc('hour', timestamp) as hour, --noqa: RF04
         token_address,
         decimals,
         avg(price) as price_unit,
@@ -37,7 +37,7 @@ precise_prices as (
         prices.minute
     inner join token_times
         on
-            date_trunc('hour', minute) = hour
+            date_trunc('hour', timestamp) = hour
             and contract_address = token_address
             and blockchain = '{{blockchain}}'
     group by 1, 2, 3
@@ -121,7 +121,7 @@ wrapped_native_token as (
 -- The price of the native token is reconstructed from it chain-dependent wrapped version.
 native_token_prices as (
     select -- noqa: ST06
-        date_trunc('hour', minute) as hour, --noqa: RF04
+        date_trunc('hour', timestamp) as hour, --noqa: RF04
         0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee as token_address,
         18 as decimals,
         avg(price) as price_unit,
@@ -130,7 +130,7 @@ native_token_prices as (
     where
         blockchain = '{{blockchain}}'
         and contract_address = (select native_token_address from wrapped_native_token)
-        and minute >= cast('{{start_time}}' as timestamp) and minute < cast('{{end_time}}' as timestamp)
+        and timestamp >= cast('{{start_time}}' as timestamp) and timestamp < cast('{{end_time}}' as timestamp)
     group by 1, 2, 3
 )
 

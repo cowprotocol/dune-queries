@@ -109,12 +109,12 @@ tvl as (
     ) as tvl_complete
     inner join prices.day as p1
         on
-            tvl_complete.day = p1.day
+            tvl_complete.day = p1.timestamp
             and p1.contract_address = token1
             and p1.blockchain = '{{blockchain}}'
     inner join prices.day as p2
         on
-            tvl_complete.day = p2.day
+            tvl_complete.day = p2.timestamp
             and p2.contract_address = token2
             and p2.blockchain = '{{blockchain}}'
     where latest = 1

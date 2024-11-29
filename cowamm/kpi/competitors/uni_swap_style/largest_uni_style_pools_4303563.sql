@@ -54,11 +54,11 @@ from syncs as s
 inner join prices.minute as p0
     on
         token0 = p0.contract_address
-        and p0.minute = evt_block_time
+        and p0.timestamp = evt_block_time
 inner join prices.minute as p1
     on
         token1 = p1.contract_address
-        and p1.minute = evt_block_time
+        and p1.timestamp = evt_block_time
 where latest = 1
 order by tvl desc
 limit {{number_of_pools}}

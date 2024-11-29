@@ -137,7 +137,7 @@ tvl as (
         on
             blockchain = '{{blockchain}}'
             and balances.token = prices.contract_address
-            and balances.day = prices.day
+            and balances.day = prices.timestamp
     group by balances.day, balances.contract_address
 ),
 

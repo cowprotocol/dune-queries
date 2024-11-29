@@ -21,8 +21,8 @@ starting_balance as (
     from prices.day as p1
     inner join prices.day as p2
         on
-            p1.day = p2.day
-            and p1.day = date(timestamp '{{start}}')
+            p1.timestamp = p2.timestamp
+            and p1.timestamp = date(timestamp '{{start}}')
             and p1.contract_address = {{token_a}}
             and p2.contract_address = {{token_b}}
 )
@@ -34,10 +34,10 @@ from starting_balance
 cross join date_series as ds
 inner join prices.day as p1
     on
-        ds.day = p1.day
+        ds.day = p1.timestamp
         and p1.contract_address = {{token_a}}
 inner join prices.day as p2
     on
-        ds.day = p2.day
+        ds.day = p2.timestamp
         and p2.contract_address = {{token_b}}
 order by 1 desc

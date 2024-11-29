@@ -56,7 +56,7 @@ tvl as (
     from balances_by_tx as b
     inner join prices.minute as p
         on
-            p.minute = DATE_TRUNC('minute', evt_block_time)
+            p.timestamp = DATE_TRUNC('minute', evt_block_time)
             and b.token = p.contract_address
 )
 
