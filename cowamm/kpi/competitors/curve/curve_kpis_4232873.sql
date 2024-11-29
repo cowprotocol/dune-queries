@@ -3,7 +3,13 @@
 -- Parameters:
 -- {{blockchain}}: The blockchain to query
 -- {{competitor_end_time}}: The end time of the time window (end_time - 1 day; end_time), defaults to now()
-with temp as (
+select
+    contract_address,
+    tvl,
+    fee,
+    volume,
+    apr
+from (
     select
         contract_address,
         fee,
@@ -27,12 +33,4 @@ with temp as (
         -- This test avoids any possible issue with reconstructing the reserves of the pool
         tvl > 0
 )
-
-select
-    contract_address,
-    tvl,
-    fee,
-    volume,
-    apr
-from temp
 where latest_per_pool = 1
