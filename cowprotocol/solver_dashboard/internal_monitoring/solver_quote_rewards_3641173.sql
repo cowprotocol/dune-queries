@@ -107,7 +107,7 @@ conversion_prices as (
         (
             select avg(price)
             from
-                prices.usd
+                prices.minute
             where
                 blockchain = 'ethereum'
                 and contract_address = 0xdef1ca1fb7fbcdc777520aa7f396b4e015f497ab
@@ -116,7 +116,7 @@ conversion_prices as (
         (
             select avg(price)
             from
-                prices.usd
+                prices.minute
             where
                 blockchain = 'ethereum'
                 and contract_address = 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2

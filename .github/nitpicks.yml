@@ -1,0 +1,6 @@
+- markdown: |
+    Are you _sure_ you want to use the legacy `prices.minute` table? Consider using `prices.minute` (https://docs.dune.com/data-catalog/curated/prices/overview)
+  pathFilter:
+    - "**/*.sql"
+  contentFilter:
+    - '(prices\.usd)'

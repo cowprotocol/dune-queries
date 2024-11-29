@@ -42,7 +42,7 @@ imported_prices_per_minute_with_usd_prices as (
         ippm.price_unit_eth * p.price as price_unit,
         ippm.price_unit_eth * p.price / pow(10, ippm.decimals) as price_atom,
         source
-    from imported_prices_per_minute as ippm inner join prices.usd as p on ippm.minute = p.minute
+    from imported_prices_per_minute as ippm inner join prices.minute as p on ippm.minute = p.minute
     where p.contract_address = 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2 and blockchain = 'ethereum'
 )
 

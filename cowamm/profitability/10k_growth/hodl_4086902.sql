@@ -18,8 +18,8 @@ starting_balance as (
     select
         5000 / p1.price_close as token_a_start,
         5000 / p2.price_close as token_b_start
-    from prices.usd_daily as p1
-    inner join prices.usd_daily as p2
+    from prices.minute_daily as p1
+    inner join prices.minute_daily as p2
         on
             p1.day = p2.day
             and p1.day = date(timestamp '{{start}}')
@@ -32,11 +32,11 @@ select
     token_a_start * p1.price_close + token_b_start * p2.price_close as current_value_of_investment
 from starting_balance
 cross join date_series as ds
-inner join prices.usd_daily as p1
+inner join prices.minute_daily as p1
     on
         ds.day = p1.day
         and p1.contract_address = {{token_a}}
-inner join prices.usd_daily as p2
+inner join prices.minute_daily as p2
     on
         ds.day = p2.day
         and p2.contract_address = {{token_b}}

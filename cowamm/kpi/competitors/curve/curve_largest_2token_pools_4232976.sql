@@ -77,7 +77,7 @@ recent_tvl as (
         latest_per_pool,
         (reserve0 * p0.price / pow(10, p0.decimals)) + (reserve1 * p1.price / pow(10, p1.decimals)) as tvl
     from reserves as r
-    inner join prices.usd as p0
+    inner join prices.minute as p0
         on
             date_trunc('minute', block_time) = p0.minute
             and token0 = p0.contract_address

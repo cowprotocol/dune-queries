@@ -133,7 +133,7 @@ tvl as (
             token1 as token
         from reserve_balances
     ) as balances
-    left join prices.usd_daily as prices
+    left join prices.minute_daily as prices
         on
             blockchain = '{{blockchain}}'
             and balances.token = prices.contract_address

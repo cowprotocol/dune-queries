@@ -71,7 +71,7 @@ tvl as (
         balance,
         (balance * p.price_close) / pow(10, decimals) as tvl
     from reserves_by_day as r
-    inner join prices.usd_daily as p
+    inner join prices.minute_daily as p
         on
             r.day = p.day
             and p.contract_address = token

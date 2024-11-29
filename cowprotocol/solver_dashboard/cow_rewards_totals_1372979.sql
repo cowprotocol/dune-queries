@@ -1,6 +1,6 @@
 -- This query computes the total amount of COW distributed as rewards
 -- it uses all of the outgoing transactions from the rewards safe
--- and the price is converted to USD using the latest price from the prices.usd_latest table
+-- and the price is converted to USD using the latest price from the prices.minute_latest table
 -- the inception date is defined as 2022-03-01
 
 -- finally the query calculates the daily payout and the project budget for the year
@@ -26,7 +26,7 @@ addresses as (
 ),
 
 latest_cow_price as (
-    select price from prices.usd_latest
+    select price from prices.minute_latest
     where
         blockchain = '{{blockchain}}'
         and contract_address = (select token from addresses where blockchain = '{{blockchain}}')

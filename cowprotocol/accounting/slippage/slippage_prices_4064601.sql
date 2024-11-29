@@ -34,7 +34,7 @@ precise_prices as (
         avg(price) as price_unit,
         avg(price) / pow(10, decimals) as price_atom
     from
-        prices.usd
+        prices.minute
     inner join token_times
         on
             date_trunc('hour', minute) = hour
@@ -126,7 +126,7 @@ native_token_prices as (
         18 as decimals,
         avg(price) as price_unit,
         avg(price) / pow(10, 18) as price_atom
-    from prices.usd
+    from prices.minute
     where
         blockchain = '{{blockchain}}'
         and contract_address = (select native_token_address from wrapped_native_token)
