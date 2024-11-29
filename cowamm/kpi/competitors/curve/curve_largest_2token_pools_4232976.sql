@@ -47,7 +47,8 @@ transfers as (
 ),
 
 -- rebuilds the reserves from the transfers
--- ETH transfers are not considered  
+-- ETH transfers are not considered 
+-- prices.usd
 reserves as (
     select
         contract_address,
@@ -81,7 +82,7 @@ recent_tvl as (
         on
             date_trunc('minute', block_time) = p0.minute
             and token0 = p0.contract_address
-    inner join prices.usd as p1
+    inner join prices.minute as p1
         on
             date_trunc('minute', block_time) = p1.minute
             and token1 = p1.contract_address
