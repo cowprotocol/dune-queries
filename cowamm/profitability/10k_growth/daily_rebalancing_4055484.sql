@@ -27,21 +27,21 @@ daily_price_change as (
         p1.price_close / previous_p1.price_close as p1,
         p2.price_close / previous_p2.price_close as p2
     from date_series as ds
-    inner join prices.minute_daily as p1
+    inner join prices.day as p1
         on
             p1.day = ds.day
             and p1.contract_address = {{token_a}}
-    left join prices.minute_daily as previous_p1
+    left join prices.day as previous_p1
         on
             previous_p1.day = ds.day - interval '1' day
             -- avoid computing price change on first day
             and previous_p1.day >= date(timestamp '{{start}}')
             and previous_p1.contract_address = {{token_a}}
-    inner join prices.minute_daily as p2
+    inner join prices.day as p2
         on
             p2.day = ds.day
             and p2.contract_address = {{token_b}}
-    left join prices.minute_daily as previous_p2
+    left join prices.day as previous_p2
         on
             previous_p2.day = ds.day - interval '1' day
             -- avoid computing price change on first day

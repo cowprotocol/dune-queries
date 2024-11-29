@@ -48,7 +48,6 @@ transfers as (
 
 -- rebuilds the reserves from the transfers
 -- ETH transfers are not considered 
--- prices.usd
 reserves as (
     select
         contract_address,
