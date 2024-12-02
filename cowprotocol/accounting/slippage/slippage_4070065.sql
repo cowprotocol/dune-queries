@@ -7,6 +7,7 @@
 --  {{blockchain}} - network to run the analysis on
 --  {{slippage_table_name}} - slippage_per_transaction for aggregated values per transaction;
 --    slippage_per_solver for aggregated values per transaction
+--  {{price_feed}} -- option to user either the dune_price_feed (which has been used up till now) or the median of multiple_price_feeds
 --
 -- The columns of slippage_per_transaction are
 -- - block_time: time of settlement transaction
@@ -34,7 +35,7 @@ slippage_per_transaction as (
         solver_address,
         sum(slippage_usd) as slippage_usd,
         sum(slippage_wei) as slippage_wei
-    from "query_4059683(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}',raw_slippage_table_name='raw_slippage_breakdown')" as rs
+    from "query_4059683(blockchain='{{blockchain}}',price_feed='{{price_feed}}',start_time='{{start_time}}',end_time='{{end_time}}',raw_slippage_table_name='raw_slippage_breakdown')" as rs
     inner join cow_protocol_{{blockchain}}.batches as b
         on rs.tx_hash = b.tx_hash
     where rs.tx_hash not in (select tx_hash from excluded_batches)

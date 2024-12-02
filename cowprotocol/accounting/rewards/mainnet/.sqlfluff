@@ -10,3 +10,4 @@ min_absolute_slippage_tolerance=100
 relative_slippage_tolerance=0.3
 significant_slippage_value=1000
 time='2024-08-27 00:00:00'
+price_feed=dune_price_feed,multiple_price_feeds
