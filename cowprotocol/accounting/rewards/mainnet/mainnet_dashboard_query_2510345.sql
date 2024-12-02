@@ -1,7 +1,7 @@
 with
 
 block_range as (
-    select * from "query_3333356(start_time='{{start_time}}',end_time='{{end_time}}')"
+    select * from "query_3333356(blockchain='ethereum',start_time='{{start_time}}',end_time='{{end_time}}')"
 ),
 
 solver_slippage as (
