@@ -1,3 +1,7 @@
+-- This query provides data related to rewards/payouts on a per batch auction level
+-- for all auctions that had at least one winner.
+-- Parameters:
+-- {{blockchain}}: the chain for which we want to retrieve batch data
 with
 past_batch_data_ethereum as (
     select
@@ -53,7 +57,7 @@ past_batch_data_arbitrum as ( --noqa: ST03
         0 as capped_payment,
         0 as winning_score,
         0 as reference_score
-    where 1 = 0
+    where false
 )
 
 select
