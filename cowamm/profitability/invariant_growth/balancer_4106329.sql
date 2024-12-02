@@ -55,11 +55,11 @@ tvl as (
         on
             l.pool_address = pool.pool_address
             and l.blockchain = pool.blockchain
-    left join prices.usd_daily as p1
+    left join prices.day as p1
         on
             l.blockchain = p1.blockchain
             and l.token_address = p1.contract_address
-            and l.day = p1.day
+            and l.day = p1.timestamp
     group by l.day, l.pool_address, l.blockchain
 )
 

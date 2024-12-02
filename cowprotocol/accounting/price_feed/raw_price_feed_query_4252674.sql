@@ -26,7 +26,7 @@ with imported_prices as (
 imported_prices_per_minute as (
     select -- noqa: ST06
         token_address,
-        date_trunc('minute', time) as minute, --noqa: RF04
+        date_trunc('minute', time) as timestamp, --noqa: RF04
         decimals,
         source,
         avg(price_unit_eth) as price_unit_eth
@@ -42,13 +42,13 @@ imported_prices_per_minute_with_usd_prices as (
         ippm.price_unit_eth * p.price as price_unit,
         ippm.price_unit_eth * p.price / pow(10, ippm.decimals) as price_atom,
         source
-    from imported_prices_per_minute as ippm inner join prices.usd as p on ippm.minute = p.minute
+    from imported_prices_per_minute as ippm inner join prices.minute as p on ippm.timestamp = p.timestamp
     where p.contract_address = 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2 and blockchain = 'ethereum'
 )
 
 select -- noqa: ST06
     token_address,
-    date_trunc('hour', minute) as hour, --noqa: RF04
+    date_trunc('hour', timestamp) as hour, --noqa: RF04
     decimals,
     source,
     avg(price_unit) as price_unit,

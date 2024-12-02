@@ -16,3 +16,13 @@ jobs:
         run: pip install sqlfluff
       - name: Run SQLFluff
         run: sqlfluff lint .
+  nitpicker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: ethanis/nitpicker@v1
+        with:
+          nitpicks: ".github/nitpicks.yml"
+          token: "${{ secrets.GITHUB_TOKEN }}"

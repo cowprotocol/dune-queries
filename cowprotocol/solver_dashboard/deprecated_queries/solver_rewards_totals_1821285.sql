@@ -99,9 +99,11 @@ select
     *,
     total_cow_rewarded * (
         select price
-        from prices.usd_latest
+        from prices.minute
         where
             contract_address = 0xdef1ca1fb7fbcdc777520aa7f396b4e015f497ab
             and blockchain = 'ethereum'
+        order by timestamp desc
+        limit 1
     ) as cow_rewarded_usd
 from final_tally

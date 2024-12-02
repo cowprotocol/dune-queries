@@ -47,7 +47,7 @@ transfers as (
 ),
 
 -- rebuilds the reserves from the transfers
--- ETH transfers are not considered  
+-- ETH transfers are not considered 
 reserves as (
     select
         contract_address,
@@ -77,13 +77,13 @@ recent_tvl as (
         latest_per_pool,
         (reserve0 * p0.price / pow(10, p0.decimals)) + (reserve1 * p1.price / pow(10, p1.decimals)) as tvl
     from reserves as r
-    inner join prices.usd as p0
+    inner join prices.minute as p0
         on
-            date_trunc('minute', block_time) = p0.minute
+            date_trunc('minute', block_time) = p0.timestamp
             and token0 = p0.contract_address
-    inner join prices.usd as p1
+    inner join prices.minute as p1
         on
-            date_trunc('minute', block_time) = p1.minute
+            date_trunc('minute', block_time) = p1.timestamp
             and token1 = p1.contract_address
     where latest_per_tx = 1
 )

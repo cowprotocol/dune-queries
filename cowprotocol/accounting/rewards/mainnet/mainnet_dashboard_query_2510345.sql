@@ -50,18 +50,18 @@ fees_and_costs as (
 conversion_prices as (
     select
         (
-            select avg(price) from prices.usd
+            select avg(price) from prices.minute
             where
                 blockchain = 'ethereum'
                 and contract_address = 0xdef1ca1fb7fbcdc777520aa7f396b4e015f497ab
-                and date(minute) = cast('{{end_time}}' as timestamp) - interval '1' day
+                and date(timestamp) = cast('{{end_time}}' as timestamp) - interval '1' day
         ) as cow_price,
         (
-            select avg(price) from prices.usd
+            select avg(price) from prices.minute
             where
                 blockchain = 'ethereum'
                 and contract_address = 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2
-                and date(minute) = cast('{{end_time}}' as timestamp) - interval '1' day
+                and date(timestamp) = cast('{{end_time}}' as timestamp) - interval '1' day
         ) as eth_price
 ),
 

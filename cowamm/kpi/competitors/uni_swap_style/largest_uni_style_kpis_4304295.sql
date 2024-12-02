@@ -69,13 +69,13 @@ tvl_volume_per_swap as (
             and syncs.evt_index + 1 = swaps.evt_index
     inner join pool
         on syncs.contract_address = pool.contract_address
-    inner join prices.usd as p0
+    inner join prices.minute as p0
         on
-            date_trunc('minute', syncs.evt_block_time) = p0.minute
+            date_trunc('minute', syncs.evt_block_time) = p0.timestamp
             and syncs.token0 = p0.contract_address
-    inner join prices.usd as p1
+    inner join prices.minute as p1
         on
-            date_trunc('minute', syncs.evt_block_time) = p1.minute
+            date_trunc('minute', syncs.evt_block_time) = p1.timestamp
             and syncs.token1 = p1.contract_address
 )
 

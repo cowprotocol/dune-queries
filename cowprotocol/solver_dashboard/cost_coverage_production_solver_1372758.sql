@@ -33,7 +33,7 @@ failed_settlements as (
         environment as solver_env,
         name as solver_name
     from ethereum.transactions
-    inner join prices.usd as p on p.minute = date_trunc('minute', block_time) --noqa: LT02
+    inner join prices.minute as p on p.timestamp = date_trunc('minute', block_time) --noqa: LT02
         and blockchain = 'ethereum'
         and contract_address = 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2
     inner join cow_protocol_ethereum.solvers on "from" = address --noqa: LT02
