@@ -4,7 +4,7 @@
 -- Parameters:
 --  {{start_time}} - the start date timestamp for the accounting period  (inclusively)
 --  {{end_time}} - the end date timestamp for the accounting period (exclusively)
--- {{blockchain}} -- the corresponding chain
+--  {{blockchain}} -- the corresponding chain
 
 select
     min("number") as start_block,
