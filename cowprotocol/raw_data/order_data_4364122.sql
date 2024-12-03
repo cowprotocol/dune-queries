@@ -31,7 +31,7 @@ past_data_ethereum as (
         end as quote_gas_cost,
         case
             when cast(d.data.quote_sell_token_price as varchar) = 'NaN' then null --noqa: RF01
-            else cast(d.data.quote_sell_token_price as decimal(38,0)) --noqa: RF01
+            else cast(d.data.quote_sell_token_price as decimal(38, 0)) --noqa: RF01
         end as quote_sell_token_price,
         cast(d.data.partner_fee as decimal(38, 0)) as partner_fee, --noqa: RF01
         d.data.partner_fee_recipient, --noqa: RF01
