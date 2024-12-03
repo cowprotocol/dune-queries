@@ -17,8 +17,9 @@ per_trade_protocol_fees as (
         usd_value,
         cast(cast(r.data.protocol_fee as varchar) as int256) as protocol_fee,  -- noqa: RF01
         r.data.protocol_fee_token,  -- noqa: RF01
-        json_extract(a.encode, '$.metadata.partnerFee.bps') as patnerFeeBps,
-        json_extract(a.encode, '$.metadata.widget.appCode') as app_code,
+        json_extract(a.encode, '$.metadata.partnerFee.bps') as partnerFeeBps,
+        json_extract(a.encode, '$.metadata.widget.appCode') as widget_app_code,
+        json_extract(a.encode, '$.appCode') as app_code,
         usd_value * cast(
             json_extract(a.encode, '$.metadata.partnerFee.bps') as double
         ) / 10000 as est_partner_revenue,
@@ -56,6 +57,8 @@ per_trade_partner_fees as (
 per_recipient_partner_fees as (
     select
         partner_recipient,
+        app_code,
+        widget_app_code,
         case
             when partner_recipient = '0x63695Eee2c3141BDE314C5a6f89B98E62808d716' then sum(0.9 * raw_integrator_fee_in_eth)
         end as partner_fee_part,
@@ -66,7 +69,7 @@ per_recipient_partner_fees as (
     from
         per_trade_partner_fees
     group by
-        partner_recipient
+        partner_recipient, app_code, widget_app_code
 )
 
 select * from {{result}}
