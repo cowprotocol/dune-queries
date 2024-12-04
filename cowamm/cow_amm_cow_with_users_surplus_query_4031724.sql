@@ -92,7 +92,7 @@ reward_addresses as (
             when solver_name = 'new-Uncatalogued' then cast(solver as varchar)
             else substring(solver_name, 6, 100)
         end as solver_name
-    from "query_1541516(end_time='{{end_time}}',vouch_cte_name='named_results')"
+    from "query_1541516(blockchain='ethereum',end_time='{{end_time}}',vouch_cte_name='named_results')"
 ),
 
 final_results_per_solver as (
