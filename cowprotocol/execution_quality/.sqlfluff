@@ -4,5 +4,5 @@ project='cow_protocol'
 project_a='cow_protocol'
 project_b='cow_protocol'
 blockchain='ethereum'
-top_n_tokens=100
+top_n_pairs=100
 
