@@ -2,6 +2,8 @@
 -- and are properly vouched for by a full bonding pool
 -- Parameters:
 --  {{end_time}} - the end date timestamp for the accounting period (exclusively)
+--  {{vouch_cte_name}} - valid_vouches for the vouches only or named_results for additional information on solver and pool name
+
 with
 last_block_before_timestamp as (
     select end_block from "query_3333356(blockchain='ethereum',start_time='2018-01-01 00:00:00',end_time='{{end_time}}')"
