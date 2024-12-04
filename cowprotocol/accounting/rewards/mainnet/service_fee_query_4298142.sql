@@ -23,7 +23,7 @@ active_cow_dao_solver_names as (
         solver as solver_address,
         pool_name
     from
-        "query_1541516(vouch_cte_name='named_results',end_time='{{end_time}}')"
+        "query_1541516(blockchain='ethereum',vouch_cte_name='named_results',end_time='{{end_time}}')"
     where
         pool_address = 0x5d4020b9261f01b6f8a45db929704b0ad6f5e9e6 -- CoW DAO bonding pool address
 ),

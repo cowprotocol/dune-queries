@@ -12,7 +12,7 @@ solver_slippage as (
 ),
 
 named_results as (
-    select * from "query_1541516(end_time='{{end_time}}',vouch_cte_name='named_results')"
+    select * from "query_1541516(blockchain='ethereum',end_time='{{end_time}}',vouch_cte_name='named_results')"
 ),
 
 -- BEGIN SOLVER REWARDS
