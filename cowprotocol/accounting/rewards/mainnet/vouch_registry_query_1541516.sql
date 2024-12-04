@@ -2,11 +2,12 @@
 -- and are properly vouched for by a full bonding pool
 -- Parameters:
 --  {{end_time}} - the end date timestamp for the accounting period (exclusively)
+--  {{blockchain}} - network the query is run on
 --  {{vouch_cte_name}} - valid_vouches for the vouches only or named_results for additional information on solver and pool name
 
 with
 last_block_before_timestamp as (
-    select end_block from "query_3333356(blockchain='ethereum',start_time='2018-01-01 00:00:00',end_time='{{end_time}}')"
+    select end_block from "query_3333356(blockchain='{{blockchain}}',start_time='2018-01-01 00:00:00',end_time='{{end_time}}')"
 ),
 
 -- Query Logic Begins here!
@@ -19,7 +20,7 @@ vouches as (
         pool_address,
         initial_funder,
         True as active
-    from cow_protocol_ethereum.VouchRegister_evt_Vouch
+    from cow_protocol_{{blockchain}}.VouchRegister_evt_Vouch
     inner join query_4056263
         on
             pool_address = bondingPool
@@ -36,7 +37,7 @@ invalidations as (
         pool_address,
         initial_funder,
         False as active
-    from cow_protocol_ethereum.VouchRegister_evt_InvalidateVouch
+    from cow_protocol_{{blockchain}}.VouchRegister_evt_InvalidateVouch
     inner join query_4056263
         on
             pool_address = bondingPool
@@ -99,7 +100,7 @@ named_results as (
         bp.pool_name,
         concat(environment, '-', s.name) as solver_name
     from valid_vouches as vv
-    inner join cow_protocol_ethereum.solvers as s
+    inner join cow_protocol_{{blockchain}}.solvers as s
         on vv.solver = s.address
     inner join query_4056263 as bp
         on vv.pool_address = bp.pool_address
