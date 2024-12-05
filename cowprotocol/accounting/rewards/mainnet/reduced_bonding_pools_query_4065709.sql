@@ -61,7 +61,7 @@ reduced_bonding_pools as (
     select
         'barn-Rizzolver' as solver_name,
         'Reduced-CoW-DAO' as pool_name,
-        'ethereum' as blockchain,
+        'arbitrum' as blockchain,
         from_hex('0x0deb0ae9c4399c51289adb1f3ed83557a56df657') as pool_address,
         from_hex('0x26B5e3bF135D3Dd05A220508dD61f25BF1A47cBD') as solver_address,
         timestamp '2024-10-10 02:03:00' as creation_date
