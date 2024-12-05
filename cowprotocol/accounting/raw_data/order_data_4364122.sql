@@ -3,6 +3,27 @@
 -- Parameters:
 --  {{blockchain}}: the chain for which we want to retrieve batch data
 
+-- The output has the following columns:
+--    environment: varchar
+--    auction_id: integer
+--    block_number: integer
+--    order_uid: varbinary
+--    solver: varbinary
+--    quote_solver: varbinary
+--    tx_hash: varbinary
+--    surplus_fee: decimal(38, 0)
+--    amount: decimal(38, 0)
+--    protocol_fee: decimal(38, 0)
+--    protocol_fee_token: varbinary
+--    protocol_fee_native_price: decimal(38, 0)
+--    quote_sell_amount: decimal(38, 0)
+--    quote_buy_amount: decimal(38, 0)
+--    quote_gas_cost: decimal(38, 0)
+--    quote_sell_token_price: decimal(38, 0)
+--    partner_fee: decimal(38, 0)
+--    partner_fee_recipient: varbinary
+--    protocol_fee_kind: varchar
+
 with
 past_data_ethereum as (
     select
