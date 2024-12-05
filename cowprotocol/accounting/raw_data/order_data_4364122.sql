@@ -105,6 +105,9 @@ past_data_arbitrum as ( --noqa: ST03
     from dune.cowprotocol.dataset_cowswap_arbitrum_raw_order_rewards as d inner join cow_protocol_arbitrum.solvers as s on cast(d.solver as varchar) = cast(s.address as varchar)
 )
 
+select *
+from past_data_{{blockchain}}
+union all
 select
     environment,
     auction_id,
@@ -176,6 +179,3 @@ select
     partner_fee_recipient,
     protocol_fee_kind
 from dune.cowprotocol.dataset_order_data_{{blockchain}}_2024_12
-union all
-select *
-from past_data_{{blockchain}}
