@@ -32,7 +32,7 @@ active_cow_dao_solver_names as (
 -- we now take one step back and look at all solver accounts (not only the active ones)
 -- that have joined the CoW DAO bonding pool at some point,
 -- and we recover the date of them joining
-all_cow_dao_solvers_etherem as (
+all_cow_dao_solvers_ethereum as (
     select --noqa: ST06
         case
             when s.environment = 'new' then cast(v.solver as varchar)
@@ -76,7 +76,7 @@ all_cow_dao_solvers_arbitrum as (
 
 all_cow_dao_solvers_all_networks as (
     select *
-    from all_cow_dao_solvers_etherem
+    from all_cow_dao_solvers_ethereum
     union all
     select *
     from all_cow_dao_solvers_gnosis
