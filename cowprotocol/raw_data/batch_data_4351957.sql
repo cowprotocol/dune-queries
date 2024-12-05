@@ -2,15 +2,32 @@
 -- for all auctions that had at least one winner.
 -- Parameters:
 -- {{blockchain}}: the chain for which we want to retrieve batch data
+
+-- The output has the following columns:
+--    environment: varchar
+--    auction_id: integer
+--    block_number: integer
+--    block_deadline: integer
+--    tx_hash: varbinary
+--    solver: varbinary
+--    execution_cost: decimal(38, 0)
+--    surplus: decimal(38, 0)
+--    protocol_fee: decimal(38, 0)
+--    network_fee: decimal(38, 0)
+--    uncapped_payment_native_token: decimal(38, 0)
+--    capped_payment: decimal(38, 0)
+--    winning_score: decimal(38, 0)
+--    reference_score: decimal(38, 0)
+
 with
 past_batch_data_ethereum as (
     select
         s.environment,
-        -1 as auction_id,
+        null as auction_id,
         d.block_number,
         d.block_deadline,
-        d.tx_hash,
-        d.solver,
+        from_hex(d.tx_hash) as tx_hash,
+        from_hex(d.solver) as solver,
         cast(d.data.execution_cost as decimal(38, 0)) as execution_cost, --noqa: RF01
         cast(d.data.surplus as decimal(38, 0)) as surplus, --noqa: RF01
         cast(d.data.protocol_fee as decimal(38, 0)) as protocol_fee, --noqa: RF01
@@ -28,8 +45,8 @@ past_batch_data_gnosis as ( --noqa: ST03
         0 as auction_id,
         0 as block_number,
         0 as block_deadline,
-        '0x' as tx_hash,
-        '0x' as solver,
+        0x as tx_hash,
+        0x as solver,
         0 as execution_cost,
         0 as surplus,
         0 as protocol_fee,
@@ -47,8 +64,8 @@ past_batch_data_arbitrum as ( --noqa: ST03
         0 as auction_id,
         0 as block_number,
         0 as block_deadline,
-        '0x' as tx_hash,
-        '0x' as solver,
+        0x as tx_hash,
+        0x as solver,
         0 as execution_cost,
         0 as surplus,
         0 as protocol_fee,
@@ -60,13 +77,16 @@ past_batch_data_arbitrum as ( --noqa: ST03
     where false
 )
 
+select *
+from past_batch_data_{{blockchain}}
+union all
 select
     environment,
     auction_id,
     block_number,
     block_deadline,
-    cast(tx_hash as varchar) as tx_hash,
-    cast(solver as varchar) as solver,
+    tx_hash,
+    solver,
     cast(execution_cost as decimal(38, 0)) as execution_cost,
     cast(surplus as decimal(38, 0)) as surplus,
     cast(protocol_fee as decimal(38, 0)) as protocol_fee,
@@ -82,8 +102,8 @@ select
     auction_id,
     block_number,
     block_deadline,
-    cast(tx_hash as varchar) as tx_hash,
-    cast(solver as varchar) as solver,
+    tx_hash,
+    solver,
     cast(execution_cost as decimal(38, 0)) as execution_cost,
     cast(surplus as decimal(38, 0)) as surplus,
     cast(protocol_fee as decimal(38, 0)) as protocol_fee,
@@ -99,8 +119,8 @@ select
     auction_id,
     block_number,
     block_deadline,
-    cast(tx_hash as varchar) as tx_hash,
-    cast(solver as varchar) as solver,
+    tx_hash,
+    solver,
     cast(execution_cost as decimal(38, 0)) as execution_cost,
     cast(surplus as decimal(38, 0)) as surplus,
     cast(protocol_fee as decimal(38, 0)) as protocol_fee,
@@ -110,6 +130,3 @@ select
     cast(winning_score as decimal(38, 0)) as winning_score,
     cast(reference_score as decimal(38, 0)) as reference_score
 from dune.cowprotocol.dataset_batch_data_{{blockchain}}_2024_12
-union all
-select *
-from past_batch_data_{{blockchain}}
