@@ -12,7 +12,6 @@
 --    quote_solver: varbinary
 --    tx_hash: varbinary
 --    surplus_fee: decimal(38, 0)
---    amount: decimal(38, 0)
 --    protocol_fee: decimal(38, 0)
 --    protocol_fee_token: varbinary
 --    protocol_fee_native_price: decimal(38, 0)
@@ -35,7 +34,6 @@ past_data_ethereum as (
         from_hex(d.data.quote_solver) as quote_solver, --noqa: RF01
         from_hex(d.tx_hash) as tx_hash,
         cast(d.data.surplus_fee as decimal(38, 0)) as surplus_fee, --noqa: RF01
-        cast(d.data.amount as decimal(38, 0)) as amount, --noqa: RF01
         cast(d.data.protocol_fee as decimal(38, 0)) as protocol_fee, --noqa: RF01
         from_hex(d.data.protocol_fee_token) as protocol_fee_token, --noqa: RF01
         cast(d.data.protocol_fee_native_price as decimal(38, 0)) as protocol_fee_native_price, --noqa: RF01
@@ -72,7 +70,6 @@ past_data_gnosis as ( --noqa: ST03
         d.quote_solver,
         d.tx_hash,
         cast(d.surplus_fee as decimal(38, 0)) as surplus_fee,
-        cast(d.amount as decimal(38, 0)) as amount,
         cast(d.protocol_fee as decimal(38, 0)) as protocol_fee,
         d.protocol_fee_token,
         cast(d.protocol_fee_native_price as decimal(38, 0)) as protocol_fee_native_price,
@@ -103,7 +100,6 @@ past_data_arbitrum as ( --noqa: ST03
         d.quote_solver,
         d.tx_hash,
         cast(d.surplus_fee as decimal(38, 0)) as surplus_fee,
-        cast(d.amount as decimal(38, 0)) as amount,
         cast(d.protocol_fee as decimal(38, 0)) as protocol_fee,
         d.protocol_fee_token,
         case
@@ -138,7 +134,6 @@ select
     quote_solver,
     tx_hash,
     cast(surplus_fee as decimal(38, 0)) as surplus_fee,
-    cast(amount as decimal(38, 0)) as amount,
     cast(protocol_fee as decimal(38, 0)) as protocol_fee,
     protocol_fee_token,
     cast(protocol_fee_native_price as decimal(38, 0)) as protocol_fee_native_price,
@@ -163,7 +158,6 @@ select
     quote_solver,
     tx_hash,
     cast(surplus_fee as decimal(38, 0)) as surplus_fee,
-    cast(amount as decimal(38, 0)) as amount,
     cast(protocol_fee as decimal(38, 0)) as protocol_fee,
     protocol_fee_token,
     cast(protocol_fee_native_price as decimal(38, 0)) as protocol_fee_native_price,
@@ -188,7 +182,6 @@ select
     quote_solver,
     tx_hash,
     cast(surplus_fee as decimal(38, 0)) as surplus_fee,
-    cast(amount as decimal(38, 0)) as amount,
     cast(protocol_fee as decimal(38, 0)) as protocol_fee,
     protocol_fee_token,
     cast(protocol_fee_native_price as decimal(38, 0)) as protocol_fee_native_price,
