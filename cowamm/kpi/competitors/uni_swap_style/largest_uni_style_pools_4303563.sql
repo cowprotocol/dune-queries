@@ -72,14 +72,28 @@ select distinct
     evt_block_time,
     reserve0 * p0.price * power(10, -p0.decimals) + reserve1 * p1.price * power(10, -p1.decimals) as tvl
 from syncs as s
-inner join prices.minute as p0
+inner join prices.day as p0
     on
         token0 = p0.contract_address
-        and p0.timestamp = evt_block_time
-inner join prices.minute as p1
+        and p0.timestamp = date_trunc('day', case
+            when (
+                '{{end_time}}' = '2100-01-01'
+                or date('{{end_time}}') = date_trunc('day', now())
+            )
+                then now() - interval '1' day
+            else date('{{end_time}}')
+        end)
+inner join prices.day as p1
     on
         token1 = p1.contract_address
-        and p1.timestamp = evt_block_time
+        and p0.timestamp = date_trunc('day', case
+            when (
+                '{{end_time}}' = '2100-01-01'
+                or date('{{end_time}}') = date_trunc('day', now())
+            )
+                then now() - interval '1' day
+            else date('{{end_time}}')
+        end)
 where latest = 1
 order by tvl desc
 limit {{number_of_pools}}

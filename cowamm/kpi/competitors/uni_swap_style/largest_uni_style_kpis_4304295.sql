@@ -13,7 +13,7 @@ with pool as (
         token0,
         token1,
         tvl
-    from "query_4303563(blockchain='{{blockchain}}', number_of_pools = '{{number_of_pools}}')"
+    from "query_4303563(blockchain='{{blockchain}}', number_of_pools = '{{number_of_pools}}', end_time = '{{competitor_end_time}}')"
 ),
 
 syncs as (
