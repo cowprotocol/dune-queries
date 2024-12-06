@@ -77,6 +77,11 @@ tvl_volume_per_swap as (
         on
             date_trunc('minute', syncs.evt_block_time) = p1.timestamp
             and syncs.token1 = p1.contract_address
+    where
+        p0.timestamp >= date_add('day', -1, (case when '{{competitor_end_time}}' = '2100-01-01' then now() else timestamp '{{competitor_end_time}}' end))
+        and p0.timestamp <= (case when '{{competitor_end_time}}' = '2100-01-01' then now() else timestamp '{{competitor_end_time}}' end)
+        and p1.timestamp >= date_add('day', -1, (case when '{{competitor_end_time}}' = '2100-01-01' then now() else timestamp '{{competitor_end_time}}' end))
+        and p1.timestamp <= (case when '{{competitor_end_time}}' = '2100-01-01' then now() else timestamp '{{competitor_end_time}}' end)
 )
 
 select
