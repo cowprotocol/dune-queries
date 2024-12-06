@@ -150,3 +150,21 @@ where
     or tx_hash = 0x6f4638194282021a3ae2a80c778ff7829d4b269af6ac1cd612744a9d3dbd86fb
     -- for week of August 06, 2024 until August 13, 2024
     or tx_hash = 0xbd8cf4a21ad811cc3b9e49cff5e95563c3c2651b0ea41e0f8a7987818205c984
+    -- for week of September 24, 2024 until October 1, 2024
+    or tx_hash = 0x0ee0a609c54cb006d024a4d009db8751730c064b26524379793144c07c3575b3  -- one-off miscalculation of network fee for a jit order, thus it erroneously reported negative slippage
+    or tx_hash = 0x7087eb55854228a30c864a9ee4d6c4072d37d53bf4d0404f1064c5b33b7aa96d
+    or tx_hash = 0x84eb7aef07139e9558f08ac92b857b727f64c0f44d92a572078f45b7d77ebe74
+    -- for week of November 5, 2024 until November 12, 2024 -- UPDATE: commented out tokens so as not to affect follow-up weeks
+    or tx_hash = 0x7560b13901877f7d7ee5ddff01d41a5ea5ad2d36460a5c7f4d149db4d0b2bfe9
+    or tx_hash = 0x1ba38b8aad030febd89c8d2297f198f893c26097e13a988ef77afe9a8d8f1e9a
+    --or 0xf19308f923582a6f7c465e5ce7a9dc1bec6665b1 in (buy_token_address, sell_token_address)
+    --or 0x96a5399d07896f757bd4c6ef56461f58db951862 in (buy_token_address, sell_token_address)
+    --or 0xd7fa4cfc22ea07dfced53033fbe59d8b62b8ee9e in (buy_token_address, sell_token_address)
+    --or 0x66b5228cfd34d9f4d9f03188d67816286c7c0b74 in (buy_token_address, sell_token_address)
+    --or 0xCC42b2B6D90e3747c2b8E62581183A88E3Ca093a in (buy_token_address, sell_token_address)
+    --or 0x2614f29c39de46468a921fd0b41fdd99a01f2edf in (buy_token_address, sell_token_address)
+
+    -- for week of Nov 26 - Dec 3, 2024
+    or tx_hash = 0x7a56ca3e7f2a6a41f829fed953c321010a3ec3c655909f382bff676d39e18dd0
+    or tx_hash = 0x46c5c6768774b92af828fb18be81e88baa28d28292f7c2d048d8c3080ea9da5c -- involving token that basically couldn't trade afterwards
+    or tx_hash = 0x4b2abb45491995674442a041a82e94a863428bca4f4c956805f8ec9f802c9fba
