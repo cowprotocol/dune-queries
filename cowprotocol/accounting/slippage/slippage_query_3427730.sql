@@ -11,6 +11,6 @@ select
         '&slippage_table_name=slippage_per_transaction',
         '" target="_blank">link</a>'
     ) as slippage_per_transaction
-from "query_4070065(blockchain='ethereum',start_time='{{start_time}}',end_time='{{end_time}}',slippage_table_name='slippage_per_solver')"
-inner join cow_protocol_ethereum.solvers
+from "query_4070065(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}',slippage_table_name='slippage_per_solver')"
+inner join cow_protocol_{{blockchain}}.solvers
     on solver_address = address
