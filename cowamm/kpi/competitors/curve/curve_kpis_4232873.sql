@@ -11,6 +11,7 @@ with accumulated_kpis as (
         tvl,
         sum(amount_usd) over (partition by r.contract_address order by latest_per_pool desc) as volume,
         365 * sum(amount_usd * fee / (reserve0 * p0.price * power(10, -p0.decimals) + reserve1 * p1.price * power(10, -p1.decimals))) over (partition by r.contract_address order by latest_per_pool desc) as apr,
+        -- new index to make sure rows don't get lost in the filtering later
         row_number() over (partition by r.contract_address order by r.evt_block_time desc) as latest_per_pool
     from "query_4232976(blockchain='{{blockchain}}', number_of_pools = '{{number_of_pools}}', end_time = '{{competitor_end_time}}')" as r
     left join
