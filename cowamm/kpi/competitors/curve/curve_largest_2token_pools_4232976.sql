@@ -54,46 +54,41 @@ reserves as (
         token0,
         token1,
         tx_hash,
-        block_time,
+        block_time as evt_block_time,
         fee,
         sum(transfer0) over (partition by contract_address order by block_time, evt_index) as reserve0,
         sum(transfer1) over (partition by contract_address order by block_time, evt_index) as reserve1,
         row_number() over (partition by tx_hash, contract_address order by evt_index desc) as latest_per_tx,
-        row_number() over (partition by contract_address order by block_time desc) as latest_per_pool
+        row_number() over (partition by contract_address order by block_time desc, evt_index desc) as latest_per_pool
     from transfers
+    where block_time <= (case when '{{end_time}}' = '2100-01-01' then now() else timestamp '{{end_time}}' end)
 ),
 
 -- finds the TVL of the pools
-recent_tvl as (
+latest_tvl as (
     select
         r.contract_address,
         token0,
         token1,
-        block_time,
-        tx_hash,
-        reserve0,
-        reserve1,
-        fee,
-        latest_per_pool,
         (reserve0 * p0.price / pow(10, p0.decimals)) + (reserve1 * p1.price / pow(10, p1.decimals)) as tvl
     from reserves as r
-    inner join prices.minute as p0
+    inner join prices.day as p0
         on
-            date_trunc('minute', block_time) = p0.timestamp
+            p0.timestamp = date_trunc('day', case when ('{{end_time}}' = '2100-01-01' or date('{{end_time}}') = date_trunc('day', now())) then now() - interval '1' day else date('{{end_time}}') end)
             and token0 = p0.contract_address
-    inner join prices.minute as p1
+    inner join prices.day as p1
         on
-            date_trunc('minute', block_time) = p1.timestamp
+            p1.timestamp = date_trunc('day', case when ('{{end_time}}' = '2100-01-01' or date('{{end_time}}') = date_trunc('day', now())) then now() - interval '1' day else date('{{end_time}}') end)
             and token1 = p1.contract_address
-    where latest_per_tx = 1
-)
-
-
-select * from recent_tvl
-where contract_address in (
-    select contract_address
-    from recent_tvl
     where latest_per_pool = 1
     order by tvl desc
     limit {{number_of_pools}}
 )
+
+select
+    reserves.*,
+    tvl
+from reserves
+inner join latest_tvl
+    on reserves.contract_address = latest_tvl.contract_address
+where latest_per_tx = 1
