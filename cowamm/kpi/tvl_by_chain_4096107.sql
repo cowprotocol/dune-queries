@@ -75,6 +75,7 @@ tvl as (
         on
             r.day = p.timestamp
             and p.contract_address = token
+            and blockchain = '{{blockchain}}'
     where latest = 1
 )
 
