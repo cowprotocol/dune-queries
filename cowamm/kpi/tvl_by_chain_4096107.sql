@@ -69,7 +69,7 @@ tvl as (
         pool,
         token,
         balance,
-        (balance * p.price_close) / pow(10, decimals) as tvl
+        (balance * p.price) / pow(10, decimals) as tvl
     from reserves_by_day as r
     inner join prices.day as p
         on

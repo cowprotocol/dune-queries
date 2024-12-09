@@ -96,7 +96,7 @@ lp_total_supply as (
 tvl as (
     select
         l.day,
-        sum(token_balance * price_close) as tvl
+        sum(token_balance * price) as tvl
     from balancer.liquidity as l
     inner join pool
         on

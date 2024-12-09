@@ -116,7 +116,7 @@ tvl as (
     select
         balances.day,
         balances.contract_address,
-        sum(balance * price_close / pow(10, decimals)) as tvl
+        sum(balance * price / pow(10, decimals)) as tvl
     from (
         -- turns (date, balance0, balance1) into (date, balance0) + (date, balance1)
         select
