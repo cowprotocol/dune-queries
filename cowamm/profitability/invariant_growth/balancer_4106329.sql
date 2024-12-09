@@ -49,7 +49,7 @@ tvl as (
         l.day,
         l.pool_address,
         l.blockchain,
-        sum(token_balance * price_close) as tvl
+        sum(token_balance * price) as tvl
     from balancer.liquidity as l
     inner join pool
         on

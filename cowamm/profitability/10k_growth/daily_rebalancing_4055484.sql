@@ -24,8 +24,8 @@ with date_series as (
 daily_price_change as (
     select
         ds.day,
-        p1.price_close / previous_p1.price_close as p1,
-        p2.price_close / previous_p2.price_close as p2
+        p1.price / previous_p1.price as p1,
+        p2.price / previous_p2.price as p2
     from date_series as ds
     inner join prices.day as p1
         on
