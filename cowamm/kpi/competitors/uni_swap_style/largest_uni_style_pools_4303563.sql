@@ -54,7 +54,7 @@ syncs as (
         date_trunc('minute', block_time) as evt_block_time,
         varbinary_to_uint256(substr(data, 1, 32)) as reserve0,
         varbinary_to_uint256(substr(data, 33, 32)) as reserve1,
-        rank() over (partition by (logs.contract_address) order by block_time desc, index asc) as latest
+        rank() over (partition by (logs.contract_address) order by block_time desc, index desc) as latest
     from {{blockchain}}.logs
     inner join pools
         on logs.contract_address = pools.contract_address
@@ -75,25 +75,11 @@ from syncs as s
 inner join prices.day as p0
     on
         token0 = p0.contract_address
-        and p0.timestamp = date_trunc('day', case
-            when (
-                '{{end_time}}' = '2100-01-01'
-                or date('{{end_time}}') = date_trunc('day', now())
-            )
-                then now() - interval '1' day
-            else date('{{end_time}}')
-        end)
+        and p0.timestamp = date_trunc('day', case when ('{{end_time}}' = '2100-01-01' or date('{{end_time}}') = date_trunc('day', now())) then now() - interval '1' day else date('{{end_time}}') end)
 inner join prices.day as p1
     on
         token1 = p1.contract_address
-        and p0.timestamp = date_trunc('day', case
-            when (
-                '{{end_time}}' = '2100-01-01'
-                or date('{{end_time}}') = date_trunc('day', now())
-            )
-                then now() - interval '1' day
-            else date('{{end_time}}')
-        end)
+        and p0.timestamp = date_trunc('day', case when ('{{end_time}}' = '2100-01-01' or date('{{end_time}}') = date_trunc('day', now())) then now() - interval '1' day else date('{{end_time}}') end)
 where latest = 1
 order by tvl desc
 limit {{number_of_pools}}

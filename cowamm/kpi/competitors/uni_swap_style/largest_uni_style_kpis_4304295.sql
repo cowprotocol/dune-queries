@@ -31,6 +31,7 @@ syncs as (
         on logs.contract_address = pool.contract_address
     where
         block_time >= date_add('day', -1, (case when '{{competitor_end_time}}' = '2100-01-01' then now() else timestamp '{{competitor_end_time}}' end))
+        and block_time <= (case when '{{competitor_end_time}}' = '2100-01-01' then now() else timestamp '{{competitor_end_time}}' end)
         and topic0 = 0x1c411e9a96e071241c2f21f7726b17ae89e3cab4c78be50e062b03a9fffbbad1 -- Sync        
 ),
 
@@ -47,7 +48,8 @@ swaps as (
         varbinary_to_uint256(substr(data, 97, 32)) as amount1Out
     from {{blockchain}}.logs
     where
-        block_time >= date(date_add('day', -1, now()))
+        block_time >= date_add('day', -1, (case when '{{competitor_end_time}}' = '2100-01-01' then now() else timestamp '{{competitor_end_time}}' end))
+        and block_time <= (case when '{{competitor_end_time}}' = '2100-01-01' then now() else timestamp '{{competitor_end_time}}' end)
         and topic0 = 0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822 -- Swap
         and contract_address in (select contract_address from pool)
 ),
