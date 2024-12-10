@@ -90,7 +90,7 @@ tvl_by_tx as (
 tvl as (
     select
         tvl_complete.day,
-        balance1 * p1.price_close + balance2 * p2.price_close as tvl
+        balance1 * p1.price + balance2 * p2.price as tvl
     from (
         -- join full date range with potentially incomplete data. This results in many rows per day (all pool balances on or before that day)
         -- rank() is then used to order join candidates by recency (rank = 1 is the latest pool balances)

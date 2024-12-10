@@ -16,8 +16,8 @@ with date_series as (
 
 starting_balance as (
     select
-        5000 / p1.price_close as token_a_start,
-        5000 / p2.price_close as token_b_start
+        5000 / p1.price as token_a_start,
+        5000 / p2.price as token_b_start
     from prices.day as p1
     inner join prices.day as p2
         on
@@ -29,7 +29,7 @@ starting_balance as (
 
 select
     ds.day,
-    token_a_start * p1.price_close + token_b_start * p2.price_close as current_value_of_investment
+    token_a_start * p1.price + token_b_start * p2.price as current_value_of_investment
 from starting_balance
 cross join date_series as ds
 inner join prices.day as p1
