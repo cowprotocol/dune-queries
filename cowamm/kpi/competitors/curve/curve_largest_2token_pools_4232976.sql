@@ -4,6 +4,8 @@
 -- Parameters:
 --  {{blockchain}}: The blockchain to query
 --  {{number_of_pools}}: The number of largest pools to return
+-- {{start_time}}: The start time of the analysis. date '{{start_time}}' <= evt_block_time < date '{{start_time}}' + 1 day
+--      By default, we look at the past full day
 
 with
 -- filters pools with 2 tokens
@@ -61,7 +63,7 @@ reserves as (
         row_number() over (partition by tx_hash, contract_address order by evt_index desc) as latest_per_tx,
         row_number() over (partition by contract_address order by block_time desc, evt_index desc) as latest_per_pool
     from transfers
-    where block_time <= (case when '{{end_time}}' = '2100-01-01' then now() else timestamp '{{end_time}}' end)
+    where block_time <= least(date_add('day', 1, date('{{start_time}}')), date(now()))
 ),
 
 -- finds the TVL of the pools
@@ -75,11 +77,11 @@ latest_tvl as (
     --using the daily value to get a better representation of the TVL over the 24 hour period
     inner join prices.day as p0
         on
-            p0.timestamp = date_trunc('day', case when ('{{end_time}}' = '2100-01-01' or date('{{end_time}}') = date_trunc('day', now())) then now() - interval '1' day else date('{{end_time}}') end)
+            p0.timestamp = least(date('{{start_time}}'), date_add('day', -1, date(now())))
             and token0 = p0.contract_address
     inner join prices.day as p1
         on
-            p1.timestamp = date_trunc('day', case when ('{{end_time}}' = '2100-01-01' or date('{{end_time}}') = date_trunc('day', now())) then now() - interval '1' day else date('{{end_time}}') end)
+            p1.timestamp = least(date('{{start_time}}'), date_add('day', -1, date(now())))
             and token1 = p1.contract_address
     where latest_per_pool = 1
     order by tvl desc

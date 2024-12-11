@@ -9,4 +9,3 @@ end_time='2024-08-27 00:00:00'
 results=final_results_per_solver,cow_surplus_per_batch
 cow_budget=30000
 number_of_pools=1000
-competitor_end_time = 2100-01-01

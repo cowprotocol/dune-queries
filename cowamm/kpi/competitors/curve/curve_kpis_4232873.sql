@@ -2,7 +2,8 @@
 -- APR is measured as the fees earned per $ invested, over the last 24 hours, projected over 1 year
 -- Parameters:
 -- {{blockchain}}: The blockchain to query
--- {{competitor_end_time}}: The end time of the time window (end_time - 1 day; end_time), defaults to now()
+-- {{start_time}}: The start time of the analysis. date '{{start_time}}' <= evt_block_time < date '{{start_time}}' + 1 day
+--      By default, we look at the past full day
 
 with accumulated_kpis as (
     select
@@ -13,13 +14,13 @@ with accumulated_kpis as (
         365 * sum(amount_usd * fee / (reserve0 * p0.price * power(10, -p0.decimals) + reserve1 * p1.price * power(10, -p1.decimals))) over (partition by r.contract_address order by latest_per_pool desc) as apr,
         -- new index to make sure rows don't get lost in the filtering later
         row_number() over (partition by r.contract_address order by r.evt_block_time desc) as latest_per_pool
-    from "query_4232976(blockchain='{{blockchain}}', number_of_pools = '{{number_of_pools}}', end_time = '{{competitor_end_time}}')" as r
+    from "query_4232976(blockchain='{{blockchain}}', number_of_pools = '{{number_of_pools}}', start_time = '{{start_time}}')" as r
     left join
         ( --noqa: ST05
             select *
             from curve.trades
             where
-                block_time >= date_add('day', -1, (case when '{{competitor_end_time}}' = '2100-01-01' then now() else timestamp '{{competitor_end_time}}' end))
+                block_time >= least(date('{{start_time}}'), date_add('day', -1, date(now())))
         ) as t
         on
             r.contract_address = t.project_contract_address
@@ -35,10 +36,8 @@ with accumulated_kpis as (
     where
         -- This test avoids any possible issue with reconstructing the reserves of the pool
         tvl > 0
-        and p0.timestamp >= date_add('day', -1, (case when '{{competitor_end_time}}' = '2100-01-01' then now() else timestamp '{{competitor_end_time}}' end))
-        and p0.timestamp <= (case when '{{competitor_end_time}}' = '2100-01-01' then now() else timestamp '{{competitor_end_time}}' end)
-        and p1.timestamp >= date_add('day', -1, (case when '{{competitor_end_time}}' = '2100-01-01' then now() else timestamp '{{competitor_end_time}}' end))
-        and p1.timestamp <= (case when '{{competitor_end_time}}' = '2100-01-01' then now() else timestamp '{{competitor_end_time}}' end)
+        and p0.timestamp between least(date('{{start_time}}'), date_add('day', -1, date(now()))) and least(date_add('day', 1, date('{{start_time}}')), date(now()))
+        and p1.timestamp between least(date('{{start_time}}'), date_add('day', -1, date(now()))) and least(date_add('day', 1, date('{{start_time}}')), date(now()))
 )
 
 select
