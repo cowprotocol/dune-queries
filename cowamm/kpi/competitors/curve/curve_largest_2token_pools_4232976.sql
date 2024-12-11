@@ -4,7 +4,7 @@
 -- Parameters:
 --  {{blockchain}}: The blockchain to query
 --  {{number_of_pools}}: The number of largest pools to return
--- {{start_time}}: The start time of the analysis. date '{{start_time}}' <= evt_block_time < date '{{start_time}}' + 1 day
+--  {{start_time}}: The start time of the analysis. date '{{start_time}}' <= evt_block_time < date '{{start_time}}' + 1 day
 --      By default, we look at the past full day
 
 with
