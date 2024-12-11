@@ -75,7 +75,7 @@ syncs as (
         date_trunc('day', block_time) as "day",
         varbinary_to_uint256(substr(data, 1, 32)) as reserve0,
         varbinary_to_uint256(substr(data, 33, 32)) as reserve1,
-        rank() over (partition by (pools.contract_address) order by block_time desc, index desc) as latest
+        rank() over (partition by (pools.contract_address, date_trunc('day', block_time)) order by block_time desc, index desc) as latest
     from {{blockchain}}.logs
     inner join pools
         on logs.contract_address = pools.contract_address
