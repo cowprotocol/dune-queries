@@ -33,7 +33,7 @@ per_trade_protocol_fees as (
         ) * r.data.protocol_fee_native_price / pow(10, 18) as raw_integrator_fee_in_eth  -- noqa: RF01
     from
         cow_protocol_ethereum.trades as t
-    left join dune.cowprotocol.dataset_app_data_mainnet as a on t.app_data = a.contract_app_data
+    left join dune.cowprotocol.result_cow_protocol_ethereum_app_data as a on t.app_data = a.app_hash
     left join cowswap.raw_order_rewards as r
         on
             r.order_uid = cast(t.order_uid as varchar)
