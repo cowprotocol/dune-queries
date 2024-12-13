@@ -37,3 +37,4 @@ inner join transfers as t
 where
     not (net_inflow = 0)
     and timestamp between (date '{{start_time}}') and (date '{{end_time}}')
+    and blockchain = '{{blockchain}}'
