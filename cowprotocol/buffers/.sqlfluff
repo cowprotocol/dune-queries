@@ -1,0 +1,4 @@
+[sqlfluff:templater:jinja:context]
+blockchain='ethereum'
+start_time='2024-01-01'
+end_time='2024-01-01'
