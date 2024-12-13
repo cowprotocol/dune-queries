@@ -3,7 +3,8 @@
 -- Parameters:
 -- {{blockchain}}: The blockchain to query
 -- {{number_of_pools}}: The number of largest pools to return
--- {{competitor_end_time}}: The end time of the time window (end_time - 1 day; end_time), defaults to now()
+-- {{start_time}}: The start time of the analysis. date '{{start_time}}' <= evt_block_time < date '{{start_time}}' + 1 day
+--      By default, we look at the past full day
 
 -- select the pool with the largest latest k
 with pool as (
@@ -13,7 +14,7 @@ with pool as (
         token0,
         token1,
         tvl
-    from "query_4303563(blockchain='{{blockchain}}', number_of_pools = '{{number_of_pools}}')"
+    from "query_4303563(blockchain='{{blockchain}}', number_of_pools = '{{number_of_pools}}', start_time = '{{start_time}}')"
 ),
 
 syncs as (
@@ -30,7 +31,7 @@ syncs as (
     inner join pool
         on logs.contract_address = pool.contract_address
     where
-        block_time >= date_add('day', -1, (case when '{{competitor_end_time}}' = '2100-01-01' then now() else timestamp '{{competitor_end_time}}' end))
+        block_time between least(date('{{start_time}}'), date_add('day', -1, date(now()))) and least(date_add('day', 1, date('{{start_time}}')), date(now()))
         and topic0 = 0x1c411e9a96e071241c2f21f7726b17ae89e3cab4c78be50e062b03a9fffbbad1 -- Sync        
 ),
 
@@ -47,7 +48,7 @@ swaps as (
         varbinary_to_uint256(substr(data, 97, 32)) as amount1Out
     from {{blockchain}}.logs
     where
-        block_time >= date(date_add('day', -1, now()))
+        block_time between least(date('{{start_time}}'), date_add('day', -1, date(now()))) and least(date_add('day', 1, date('{{start_time}}')), date(now()))
         and topic0 = 0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822 -- Swap
         and contract_address in (select contract_address from pool)
 ),
@@ -77,6 +78,9 @@ tvl_volume_per_swap as (
         on
             date_trunc('minute', syncs.evt_block_time) = p1.timestamp
             and syncs.token1 = p1.contract_address
+    where
+        p0.timestamp between least(date('{{start_time}}'), date_add('day', -1, date(now()))) and least(date_add('day', 1, date('{{start_time}}')), date(now()))
+        and p1.timestamp between least(date('{{start_time}}'), date_add('day', -1, date(now()))) and least(date_add('day', 1, date('{{start_time}}')), date(now()))
 )
 
 select
