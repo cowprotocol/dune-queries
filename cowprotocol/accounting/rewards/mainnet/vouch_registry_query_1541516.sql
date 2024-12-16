@@ -18,13 +18,13 @@ vouches as (
         solver,
         cowRewardTarget as reward_target,
         pool_address,
-        initial_funder,
+        creator,
         True as active
     from cow_protocol_{{blockchain}}.VouchRegister_evt_Vouch
     inner join query_4056263
         on
             pool_address = bondingPool
-            and sender = initial_funder
+            and sender = creator
     where evt_block_number <= (select * from last_block_before_timestamp)
 ),
 
@@ -35,13 +35,13 @@ invalidations as (
         solver,
         Null as reward_target,  -- This is just to align with vouches to take a union
         pool_address,
-        initial_funder,
+        creator,
         False as active
     from cow_protocol_{{blockchain}}.VouchRegister_evt_InvalidateVouch
     inner join query_4056263
         on
             pool_address = bondingPool
-            and sender = initial_funder
+            and sender = creator
     where evt_block_number <= (select * from last_block_before_timestamp)
 ),
 
@@ -53,13 +53,13 @@ vouches_and_invalidations as (
 ),
 
 -- At this point we have excluded all arbitrary vouches (i.e., those not from initial funders of recognized pools)
--- The next query ranks (solver, pool_address, initial_funder) by most recent (vouch or invalidation)
+-- The next query ranks (solver, pool_address, creator) by most recent (vouch or invalidation)
 -- and yields as rank 1, the current "active" status of the triplet.
 ranked_vouches as (
     select
         *,
         rank() over (
-            partition by solver, pool_address, initial_funder
+            partition by solver, pool_address, creator
             order by evt_block_number desc, evt_index desc
         ) as rk
     from vouches_and_invalidations
