@@ -3,7 +3,7 @@
 -- due to erroneous native prices that were included in the auction.
 
 with excluded_orders as (
-    select column1 as order_uid
+    select value as order_uid
     from (
         values
         ('0x05a561527ed7128e3cabf8bd76f4c8eb7be124b5ed26efe3245f1d4852a0e0c25f0484839862aa8f7b99d1b9faaa3ba6c8ac35a966152a31'),
@@ -43,7 +43,7 @@ with excluded_orders as (
         ('0x4baa716e083a1bea4ea870b44d5e6eef828848e4429eb16e7f96d9c5b1c8107340a50cf069e992aa4536211b23f286ef88752187ffffffff'),
         ('0x9157819168397f2b6450f84a345e048712825aeae163b46a764e0cde7bdf2162b0acb0e8133f1bf5615a46ffad35ba1ccf55c50e665dae15'),
         ('0x942e55be89314c5e799a12b487387a1221e5671bd17222a1bc69cb2b7728a4eea53a13a80d72a855481de5211e7654fabdfe352666e32aec')
-    )
+    ) as v(value) --noqa: AL05, LT01
 )
 
 select order_uid
