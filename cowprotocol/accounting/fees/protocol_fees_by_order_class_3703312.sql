@@ -14,7 +14,7 @@ block_range as (
 initial_block as (
     select
         case
-            when {{blockchain}} = 'ethereum' then 19068880
+            when '{{blockchain}}' = 'ethereum' then 19068880
             else 1
         end as initial_block
 ),
@@ -35,7 +35,7 @@ protocol_fees_collected as (
         quote_buy_amount,
         tx_hash
     from "query_4364122(blockchain='{{blockchain}}')"
-    where block_number > (select initial_block from initial_block) and order_uid not in (select cast(order_uid as varchar) from query_3639473)
+    where block_number > (select initial_block from initial_block) and cast(order_uid as varchar) not in (select order_uid from query_3639473)
 )
 
 select
@@ -53,7 +53,7 @@ select
     end) as cow_dao_partner_fee_part
 from protocol_fees_collected as f
 inner join cow_protocol_{{blockchain}}.trades as t
-    on f.order_uid = cast(t.order_uid as varchar) and f.tx_hash = cast(t.tx_hash as varchar)
+    on f.order_uid = t.order_uid and f.tx_hash = t.tx_hash
 left join dune.cowprotocol.result_cow_protocol_{{blockchain}}_app_data as a on t.app_data = a.app_hash
 where
     block_number >= (select start_block from block_range)
