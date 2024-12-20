@@ -12,36 +12,35 @@ per_trade_protocol_fees as (
         t.block_number,
         t.order_uid,
         t.tx_hash,
-        r.data.partner_fee_recipient as partner_recipient,  -- noqa: RF01
-        t.app_data,
+        r.partner_fee_recipient as partner_recipient,  -- noqa: RF01
         usd_value,
-        cast(cast(r.data.protocol_fee as varchar) as int256) as protocol_fee,  -- noqa: RF01
-        r.data.protocol_fee_token,  -- noqa: RF01
-        json_extract(a.encode, '$.metadata.partnerFee.bps') as partnerFeeBps,
-        json_extract(a.encode, '$.metadata.widget.appCode') as widget_app_code,
-        json_extract(a.encode, '$.appCode') as app_code,
+        protocol_fee,  -- noqa: RF01
+        r.protocol_fee_token,  -- noqa: RF01
+        a.partner_bps,
+        a.widget_app_code,
+        a.app_code,
         usd_value * cast(
-            json_extract(a.encode, '$.metadata.partnerFee.bps') as double
+            a.partner_bps as double
         ) / 10000 as est_partner_revenue,
         usd_value * cast(
-            json_extract(a.encode, '$.metadata.partnerFee.bps') as double
+            a.partner_bps as double
         ) / 10000 * 0.15 as est_cow_revenue,
         cast(
             cast(
-                coalesce(r.data.partner_fee, r.data.protocol_fee) as varchar  -- noqa: RF01
+                coalesce(r.partner_fee, r.protocol_fee) as varchar  -- noqa: RF01
             ) as int256
-        ) * r.data.protocol_fee_native_price / pow(10, 18) as raw_integrator_fee_in_eth  -- noqa: RF01
+        ) * r.protocol_fee_native_price / pow(10, 18) as raw_integrator_fee_in_eth  -- noqa: RF01
     from
-        cow_protocol_ethereum.trades as t
-    left join dune.cowprotocol.result_cow_protocol_ethereum_app_data as a on t.app_data = a.app_hash
-    left join cowswap.raw_order_rewards as r
+        cow_protocol_{{blockchain}}.trades as t
+    left join dune.cowprotocol.result_cow_protocol_{{blockchain}}_app_data as a on t.app_data = a.app_hash
+    left join "query_4364122(blockchain='{{blockchain}}')" as r
         on
-            r.order_uid = cast(t.order_uid as varchar)
-            and t.tx_hash = from_hex(r.tx_hash)
+            r.order_uid = t.order_uid
+            and r.tx_hash = t.tx_hash
     where
-        json_extract(a.encode, '$.metadata.partnerFee.recipient') is not null
-        and t.block_number >= (select start_block from "query_3333356(blockchain='ethereum',start_time='{{start_time}}',end_time='{{end_time}}')")
-        and t.block_number < (select end_block from "query_3333356(blockchain='ethereum',start_time='{{start_time}}',end_time='{{end_time}}')")
+        a.partner_recipient is not null
+        and t.block_number >= (select start_block from "query_3333356(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')")
+        and t.block_number < (select end_block from "query_3333356(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')")
     order by
         t.block_time desc
 ),
@@ -60,11 +59,11 @@ per_recipient_partner_fees as (
         app_code,
         widget_app_code,
         case
-            when partner_recipient = '0x63695Eee2c3141BDE314C5a6f89B98E62808d716' then sum(0.9 * raw_integrator_fee_in_eth)
+            when partner_recipient = 0x63695eee2c3141bde314c5a6f89b98e62808d716 then sum(0.9 * raw_integrator_fee_in_eth)
             else sum(0.85 * raw_integrator_fee_in_eth)
         end as partner_fee_part,
         case
-            when partner_recipient = '0x63695Eee2c3141BDE314C5a6f89B98E62808d716' then sum(0.1 * raw_integrator_fee_in_eth)
+            when partner_recipient = 0x63695eee2c3141bde314c5a6f89b98e62808d716 then sum(0.1 * raw_integrator_fee_in_eth)
             else sum(0.15 * raw_integrator_fee_in_eth)
         end as cow_dao_partner_fee_part
     from
