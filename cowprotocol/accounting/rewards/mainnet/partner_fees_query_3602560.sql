@@ -12,14 +12,13 @@ per_trade_protocol_fees as (
         t.block_number,
         t.order_uid,
         t.tx_hash,
-        cast(r.partner_fee_recipient as varchar) as partner_recipient,  -- noqa: RF01
-        cast(t.app_data as varchar) as app_data,
+        r.partner_fee_recipient as partner_recipient,  -- noqa: RF01
         usd_value,
         protocol_fee,  -- noqa: RF01
         r.protocol_fee_token,  -- noqa: RF01
         a.partner_bps,
-        cast(a.widget_app_code as varchar) as widget_app_code,
-        cast(a.app_code as varchar) as app_code,
+        a.widget_app_code,
+        a.app_code,
         usd_value * cast(
             a.partner_bps as double
         ) / 10000 as est_partner_revenue,
@@ -36,8 +35,8 @@ per_trade_protocol_fees as (
     left join dune.cowprotocol.result_cow_protocol_{{blockchain}}_app_data as a on t.app_data = a.app_hash
     left join "query_4364122(blockchain='{{blockchain}}')" as r
         on
-            cast(r.order_uid as varchar) = cast(t.order_uid as varchar)
-            and cast(t.tx_hash as varchar) = cast(r.tx_hash as varchar)
+            r.order_uid = t.order_uid
+            and r.tx_hash = t.tx_hash
     where
         a.partner_recipient is not null
         and t.block_number >= (select start_block from "query_3333356(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')")
@@ -60,11 +59,11 @@ per_recipient_partner_fees as (
         app_code,
         widget_app_code,
         case
-            when cast(partner_recipient as varchar) = '0x63695eee2c3141bde314c5a6f89b98e62808d716' then sum(0.9 * raw_integrator_fee_in_eth)
+            when partner_recipient = 0x63695eee2c3141bde314c5a6f89b98e62808d716 then sum(0.9 * raw_integrator_fee_in_eth)
             else sum(0.85 * raw_integrator_fee_in_eth)
         end as partner_fee_part,
         case
-            when cast(partner_recipient as varchar) = '0x63695eee2c3141bde314c5a6f89b98e62808d716' then sum(0.1 * raw_integrator_fee_in_eth)
+            when partner_recipient = 0x63695eee2c3141bde314c5a6f89b98e62808d716 then sum(0.1 * raw_integrator_fee_in_eth)
             else sum(0.15 * raw_integrator_fee_in_eth)
         end as cow_dao_partner_fee_part
     from
