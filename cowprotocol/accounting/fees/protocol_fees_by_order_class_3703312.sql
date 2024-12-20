@@ -1,3 +1,10 @@
+-- This query computes protocol fees collected by the DAO,
+-- and breaks down the revenue based on order class.
+--
+-- Parameters:
+--  {{start_time}} - the timestamp for which the analysis should start (inclusively)
+--  {{end_time}} - the timestamp for which the analysis should end (exclusively)
+
 with
 protocol_fees_collected as (
     select --noqa: ST06
@@ -17,6 +24,7 @@ protocol_fees_collected as (
         data.protocol_fee_kind --noqa: RF01
     from cowswap.raw_order_rewards
     where block_number > 19068880 and order_uid not in (select cast(order_uid as varchar) from query_3639473) --noqa: RF03
+    -- context: CoW DAO enabled protocol fees after mainnet block 19068880; there were no protocol fees collected up till that block.
 )
 select
     order_class,
@@ -37,7 +45,6 @@ inner join cow_protocol_ethereum.trades as t
 left join dune.cowprotocol.result_cow_protocol_ethereum_app_data as a on t.app_data = a.app_hash
 where
     block_date >= date '2024-01-23'
-    and block_number > 19068880
     and block_date >= timestamp'{{start_time}}'
     and block_date < timestamp'{{end_time}}'
 group by 1
