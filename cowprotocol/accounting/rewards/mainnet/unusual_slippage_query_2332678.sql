@@ -7,7 +7,15 @@
 --  {{significant_slippage_value}} -- the absolute threshold above which a tx is always flagged as high-slippage
 with
 results_per_tx as (
-    select * from "query_4070065(blockchain='ethereum',start_time='{{start_time}}',end_time='{{end_time}}',slippage_table_name='slippage_per_transaction')"
+    select * from "query_4070065(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}',slippage_table_name='slippage_per_transaction')"
+),
+
+url_helper as (
+    select
+        case
+            when '{{blockchain}}' = 'ethereum' then 'eth'
+            else '{{blockchain}}'
+        end
 )
 
 select  --noqa: ST06
@@ -15,19 +23,27 @@ select  --noqa: ST06
     concat(environment, '-', name) as solver_name,
     concat(
         '<a href="https://dune.com/queries/4059683',
-        '?blockchain=ethereum',
+        '?blockchain={{blockchain}}',
         '&start_time={{start_time}}',
         '&end_time={{end_time}}',
         '&slippage_table_name=raw_slippage_breakdown',
         '" target="_blank">link</a>'
     ) as token_breakdown,
-    rpt.tx_hash,
+    concat(
+        '<a href="https://phalcon.blocksec.com/explorer/tx/',
+        (select * from url_helper),
+        '/',
+        to_hex(rpt.tx_hash),
+        '" target="_blank">',
+        to_hex(rpt.tx_hash),
+        '</a>'
+    ) as tx_hash,
     slippage_usd,
     batch_value,
     100 * slippage_usd / batch_value as relative_slippage
 from results_per_tx as rpt
-inner join cow_protocol_ethereum.batches as b on rpt.tx_hash = b.tx_hash
-inner join cow_protocol_ethereum.solvers on address = rpt.solver_address
+inner join cow_protocol_{{blockchain}}.batches as b on rpt.tx_hash = b.tx_hash
+inner join cow_protocol_{{blockchain}}.solvers on address = rpt.solver_address
 where (
     abs(slippage_usd) > {{min_absolute_slippage_tolerance}}
     and
