@@ -5,6 +5,7 @@
 -- Parameters:
 --  {{start_time}} - the timestamp for which the analysis should start (inclusively)
 --  {{end_time}} - the timestamp for which the analysis should end (exclusively)
+--  {{blockchain}}: the corresponding network
 
 with
 block_range as (
