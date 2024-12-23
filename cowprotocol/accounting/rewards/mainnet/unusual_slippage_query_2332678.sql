@@ -34,7 +34,7 @@ select  --noqa: ST06
         (select * from url_helper),
         '/0x',
         to_hex(rpt.tx_hash),
-        '" target="_blank">',
+        '" target="_blank">0x',
         to_hex(rpt.tx_hash),
         '</a>'
     ) as tx_hash,
