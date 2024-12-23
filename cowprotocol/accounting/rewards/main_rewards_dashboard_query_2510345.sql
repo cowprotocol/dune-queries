@@ -125,7 +125,7 @@ combined_data as (
         concat(
             '<a href="https://dune.com/queries/2332678?SolverAddress=',
             cast(ar.solver as varchar),
-            '&start_time={{start_time}}&end_time={{end_time}}&min_absolute_slippage_tolerance=0&relative_slippage_tolerance=0&significant_slippage_value=0" target="_blank">link</a>'
+            '&blockchain={{blockchain}}&start_time={{start_time}}&end_time={{end_time}}&min_absolute_slippage_tolerance=0&relative_slippage_tolerance=0&significant_slippage_value=0" target="_blank">link</a>'
         ) as slippage_per_tx,
         concat(environment, '-', name) as name  --noqa: RF04
     from aggregate_results as ar
