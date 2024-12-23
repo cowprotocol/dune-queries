@@ -32,7 +32,7 @@ select  --noqa: ST06
     concat(
         '<a href="https://phalcon.blocksec.com/explorer/tx/',
         (select * from url_helper),
-        '/',
+        '/0x',
         to_hex(rpt.tx_hash),
         '" target="_blank">',
         to_hex(rpt.tx_hash),
