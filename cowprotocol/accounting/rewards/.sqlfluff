@@ -11,3 +11,5 @@ relative_slippage_tolerance=0.3
 significant_slippage_value=1000
 time='2024-08-27 00:00:00'
 blockchain=ethereum
+upper_cap=0.012
+lower_cap=-0.01

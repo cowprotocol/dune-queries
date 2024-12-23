@@ -1,29 +1,33 @@
 with
 
 block_range as (
-    select * from "query_3333356(blockchain='ethereum',start_time='{{start_time}}',end_time='{{end_time}}')"
+    select * from "query_3333356(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')"
 ),
 
 solver_slippage as (
     select
         solver_address as solver,
         slippage_wei * 1.0 / pow(10, 18) as slippage
-    from "query_4070065(blockchain='ethereum',start_time='{{start_time}}',end_time='{{end_time}}',slippage_table_name='slippage_per_solver')"
+    from "query_4070065(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}',slippage_table_name='slippage_per_solver')"
 ),
 
 named_results as (
-    select * from "query_1541516(blockchain='ethereum',end_time='{{end_time}}',vouch_cte_name='named_results')"
+    select * from "query_1541516(blockchain='{{blockchain}}',end_time='{{end_time}}',vouch_cte_name='named_results')"
 ),
 
 -- BEGIN SOLVER REWARDS
 batch_rewards as (
-    select  --noqa: ST06
-        from_hex(rbr.solver) as winning_solver,
-        -- Unpacking the needed data
-        cast(cast(rbr.data.fee as varchar) as int256) as fee,  -- noqa: RF01
-        cast(cast(rbr.data.execution_cost as varchar) as int256) as execution_cost,  -- noqa: RF01
-        cast(cast(rbr.data.capped_payment as varchar) as int256) as capped_payment  -- noqa: RF01
-    from cowswap.raw_batch_rewards as rbr
+    select
+        rbr.solver as winning_solver,
+        rbr.network_fee as fee,
+        rbr.execution_cost,
+        --rnr.capped_payment,
+        case
+            when rbr.uncapped_payment_native_token > {{upper_cap}} * pow(10, 18) then {{upper_cap}} * (pow(10, 18))
+            when rbr.uncapped_payment_native_token < {{lower_cap}} * pow(10, 18) then {{lower_cap}} * pow(10, 18)
+            else rbr.uncapped_payment_native_token
+        end as capped_payment
+    from "query_4351957(blockchain='{{blockchain}}')" as rbr
     where
         rbr.block_deadline > (select start_block from block_range)
         and rbr.block_deadline <= (select end_block from block_range)
@@ -52,15 +56,23 @@ conversion_prices as (
         (
             select avg(price) from prices.usd
             where
-                blockchain = 'ethereum'
+                blockchain = 'ethereum' -- use cow price from mainnet
                 and contract_address = 0xdef1ca1fb7fbcdc777520aa7f396b4e015f497ab
                 and date(minute) = cast('{{end_time}}' as timestamp) - interval '1' day
         ) as cow_price,
         (
             select avg(price) from prices.usd
             where
-                blockchain = 'ethereum'
-                and contract_address = 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2
+                blockchain = '{{blockchain}}' -- use native prices from respective chains
+                and contract_address = (
+                    select
+                        case
+                            when '{{blockchain}}' = 'ethereum' then 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2
+                            when '{{blockchain}}' = 'gnosis' then 0xe91d153e0b41518a2ce8dd3d7944fa863463a97d
+                            when '{{blockchain}}' = 'arbitrum' then 0x82aF49447D8a07e3bd95BD0d56f35241523fBab1
+                            when '{{blockchain}}' = 'base' then 0x4200000000000000000000000000000000000006
+                        end
+                )
                 and date(minute) = cast('{{end_time}}' as timestamp) - interval '1' day
         ) as eth_price
 ),
@@ -70,7 +82,7 @@ order_quotes as (
     select
         order_uid,
         quote_solver
-    from cow_protocol_ethereum.order_rewards
+    from "query_4364122(blockchain='{{blockchain}}')"
     where
         block_number > (select start_block from block_range)
         and block_number <= (select end_block from block_range)
@@ -81,7 +93,7 @@ winning_quotes as (
         oq.order_uid,
         quote_solver as solver
     from order_quotes as oq
-    inner join cow_protocol_ethereum.trades as t on oq.order_uid = t.order_uid and oq.quote_solver != 0x0000000000000000000000000000000000000000
+    inner join cow_protocol_{{blockchain}}.trades as t on oq.order_uid = t.order_uid and oq.quote_solver != 0x0000000000000000000000000000000000000000
 ),
 
 quote_rewards as (
@@ -113,7 +125,7 @@ combined_data as (
         concat(
             '<a href="https://dune.com/queries/2332678?SolverAddress=',
             cast(ar.solver as varchar),
-            '&start_time={{start_time}}&end_time={{end_time}}&min_absolute_slippage_tolerance=0&relative_slippage_tolerance=0&significant_slippage_value=0" target="_blank">link</a>'
+            '&blockchain={{blockchain}}&start_time={{start_time}}&end_time={{end_time}}&min_absolute_slippage_tolerance=0&relative_slippage_tolerance=0&significant_slippage_value=0" target="_blank">link</a>'
         ) as slippage_per_tx,
         concat(environment, '-', name) as name  --noqa: RF04
     from aggregate_results as ar
@@ -121,7 +133,7 @@ combined_data as (
         on ar.solver = ss.solver
     full outer join quote_rewards as qr
         on ar.solver = qr.solver
-    left join cow_protocol_ethereum.solvers as s
+    left join cow_protocol_{{blockchain}}.solvers as s
         on coalesce(ar.solver, ss.solver, qr.solver) = s.address
 ),
 
@@ -133,7 +145,7 @@ service_fee_flag as (
             when service_fee then 0.85
             else 1
         end as service_fee_factor
-    from "query_4298142(start_time='{{start_time}}', end_time='{{end_time}}')"
+    from "query_4298142(blockchain='{{blockchain}}', start_time='{{start_time}}', end_time='{{end_time}}')"
 ),
 
 combined_data_after_service_fee as (
@@ -176,7 +188,7 @@ select  --noqa: ST06
         when reimbursement_eth < 0 and total_cow_reward > 0
             then 0
         else reimbursement_eth
-    end as eth_transfer,
+    end as native_token_transfer,
     case
         when is_overdraft then null
         when reimbursement_eth > 0 and total_cow_reward < 0
@@ -188,13 +200,13 @@ select  --noqa: ST06
     case
         when is_overdraft then total_outgoing_eth
     end as overdraft,
-    slippage_eth,
+    slippage_eth as slippage_native_token,
     slippage_per_tx,
     service_fee_enabled,
-    reimbursement_eth,
+    reimbursement_eth as reimbursement_native_token,
     reimbursement_cow,
     total_cow_reward,
-    network_fee_eth,
-    execution_cost_eth
+    network_fee_eth as network_fee_native_token,
+    execution_cost_eth as execution_cost_native_token
 from extended_payout_data as epd
 left join named_results as nr on epd.solver = nr.solver
