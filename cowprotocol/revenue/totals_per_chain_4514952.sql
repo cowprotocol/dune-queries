@@ -10,7 +10,11 @@ with per_type as (
     from "query_4514883(blockchain='{{blockchain}}',ui_fee_recipient='{{ui_fee_recipient}}')"
     group by 1
 )
+
 select * from per_type
-union
-select 'Total', sum(total) from per_type
+union distinct
+select
+    'Total' as "type",
+    sum(total) as total
+from per_type
 order by 1 desc
