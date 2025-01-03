@@ -5,9 +5,9 @@
 
 select
     t.block_time,
-    (protocol_fee + partner_fee) / pow(10, 18) * cast(protocol_fee_native_price as double) as "Total Fee",
-    if(protocol_fee_kind = 'surplus', protocol_fee - partner_fee) / pow(10, 18) * cast(protocol_fee_native_price as double) as "Limit",
-    if(protocol_fee_kind = 'priceimprovement', protocol_fee - partner_fee) / pow(10, 18) * cast(protocol_fee_native_price as double) as "Market",
+    protocol_fee / pow(10, 18) * cast(protocol_fee_native_price as double) as "Total Fee (including ext. partner fee)",
+    if(t.block_number < 19564399 or protocol_fee_kind = 'surplus', protocol_fee - coalesce(partner_fee, 0)) / pow(10, 18) * cast(protocol_fee_native_price as double) as "Limit",
+    if(protocol_fee_kind = 'priceimprovement', protocol_fee - coalesce(partner_fee, 0)) / pow(10, 18) * cast(protocol_fee_native_price as double) as "Market",
     if(partner_fee_recipient in ({{ui_fee_recipient}}), partner_fee / pow(10, 18) * cast(protocol_fee_native_price as double)) as "UI Fee",
     if(partner_fee_recipient not in ({{ui_fee_recipient}}), 0.15 * partner_fee / pow(10, 18) * cast(protocol_fee_native_price as double)) as "Partner Fee Share",
     d.app_code,
