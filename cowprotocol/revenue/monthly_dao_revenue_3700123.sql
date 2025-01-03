@@ -12,10 +12,12 @@ cow_fee as (
         on
             t.order_uid = f.order_uid
             and t.tx_hash = f.tx_hash
+            -- rough block around which the DAO started accruing fees
             and f.block_number > 19068880
             and f.protocol_fee_native_price > 0
     where
         t.block_number > 19068880
+        -- some orders report unrealistic fees due to incorrect native prices
         and t.order_uid not in (select order_uid from query_3639473)
     group by 1
 ),
