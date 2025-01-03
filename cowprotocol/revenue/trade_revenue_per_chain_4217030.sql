@@ -22,4 +22,5 @@ inner join cow_protocol_{{blockchain}}.trades as t
         and r.tx_hash = t.tx_hash
 left join dune.cowprotocol.result_cow_protocol_{{blockchain}}_app_data as d
     on t.app_data = d.app_hash
+where t.order_uid not in (select order_uid from query_3639473)
 order by block_time desc
