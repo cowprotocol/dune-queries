@@ -1,3 +1,5 @@
+-- This query returns the protocol fees (per type) that CoW DAO accrues per month
+
 with
 cow_fee as (
     select

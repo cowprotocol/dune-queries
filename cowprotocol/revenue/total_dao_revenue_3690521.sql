@@ -1,3 +1,5 @@
+-- This query returns the total protocol fees (per type) that CoW DAO accrued since inception
+
 select
     sum(partner_fee_share) as partner_fee_share,
     sum(total_protocol_fee_in_eth) as total_protocol_fee_in_eth,
