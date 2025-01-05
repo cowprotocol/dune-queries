@@ -37,7 +37,7 @@ protocol_fees_collected as (
         quote_buy_amount,
         tx_hash
     from "query_4364122(blockchain='{{blockchain}}')"
-    where block_number > (select initial_block from initial_block) and cast(order_uid as varchar) not in (select order_uid from query_3639473)
+    where block_number > (select initial_block from initial_block) and order_uid not in (select order_uid from query_3639473)
 )
 
 select
