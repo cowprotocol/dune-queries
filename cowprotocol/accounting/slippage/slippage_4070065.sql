@@ -14,6 +14,9 @@
 -- - solver_address: address of the solver executing the settlement
 -- - slippage_usd: USD value of slippage
 -- - slippage_wei: value of slippage in atoms of native token
+-- - imbalance_usd: USD value of total buffer imbalance
+-- - protocol_fee_usd: USD value of protocol fees
+-- - network_fee_usd: USD value of network fees
 --
 -- The columns of slippage_per_solver are
 -- - solver_address: address of the solver executing the settlement
@@ -33,7 +36,10 @@ slippage_per_transaction as (
         rs.tx_hash,
         solver_address,
         sum(slippage_usd) as slippage_usd,
-        sum(slippage_wei) as slippage_wei
+        sum(slippage_wei) as slippage_wei,
+        sum(if(slippage_type = 'raw_imbalance', slippage_usd, 0)) as imbalance_usd,
+        sum(if(slippage_type = 'protocol_fee', -slippage_usd, 0)) as protocol_fee_usd,
+        sum(if(slippage_type = 'network_fee', -slippage_usd, 0)) as network_fee_usd
     from "query_4059683(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}',raw_slippage_table_name='raw_slippage_breakdown')" as rs
     inner join cow_protocol_{{blockchain}}.batches as b
         on rs.tx_hash = b.tx_hash
