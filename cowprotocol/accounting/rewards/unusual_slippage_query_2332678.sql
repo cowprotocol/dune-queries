@@ -40,7 +40,10 @@ select  --noqa: ST06
     ) as tx_hash,
     slippage_usd,
     batch_value,
-    100 * slippage_usd / batch_value as relative_slippage
+    100 * slippage_usd / batch_value as relative_slippage,
+    imbalance_usd,
+    protocol_fee_usd,
+    network_fee_usd
 from results_per_tx as rpt
 inner join cow_protocol_{{blockchain}}.batches as b on rpt.tx_hash = b.tx_hash
 inner join cow_protocol_{{blockchain}}.solvers on address = rpt.solver_address
