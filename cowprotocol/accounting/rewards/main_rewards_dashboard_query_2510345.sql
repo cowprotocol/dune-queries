@@ -74,7 +74,7 @@ conversion_prices as (
                         end
                 )
                 and date(minute) = cast('{{end_time}}' as timestamp) - interval '1' day
-        ) as eth_price
+        ) as native_token_price
 ),
 
 -- BEGIN QUOTE REWARDS
@@ -99,7 +99,7 @@ winning_quotes as (
 quote_rewards as (
     select
         solver,
-        least({{quote_reward}}, {{quote_cap_eth}} * (select eth_price / cow_price from conversion_prices)) * count(*) as quote_reward
+        least({{quote_reward}}, {{quote_cap_native_token}} * (select native_token_price / cow_price from conversion_prices)) * count(*) as quote_reward
     from winning_quotes group by solver
 ),
 
@@ -109,7 +109,7 @@ aggregate_results as (
         coalesce(reward_wei, 0) / pow(10, 18) as primary_reward_eth,
         coalesce(network_fee_wei, 0) / pow(10, 18) as network_fee_eth,
         coalesce(execution_cost_wei, 0) / pow(10, 18) as execution_cost_eth,
-        coalesce(reward_wei, 0) / pow(10, 18) * (select eth_price / cow_price from conversion_prices) as primary_reward_cow
+        coalesce(reward_wei, 0) / pow(10, 18) * (select native_token_price / cow_price from conversion_prices) as primary_reward_cow
     from primary_rewards as pr left outer join fees_and_costs as fc on pr.solver = fc.solver
 ),
 
@@ -170,7 +170,7 @@ extended_payout_data as (
         cd.primary_reward_eth + cd.slippage_eth + cd.network_fee_eth as total_outgoing_eth,
         coalesce(cd.primary_reward_eth + cd.slippage_eth + cd.network_fee_eth < 0, false) as is_overdraft,
         cd.slippage_eth + cd.network_fee_eth as reimbursement_eth,
-        (cd.slippage_eth + cd.network_fee_eth) * (select eth_price / cow_price from conversion_prices) as reimbursement_cow,
+        (cd.slippage_eth + cd.network_fee_eth) * (select native_token_price / cow_price from conversion_prices) as reimbursement_cow,
         cd.primary_reward_cow as total_cow_reward,
         cd.primary_reward_eth as total_eth_reward
     from combined_data_after_service_fee as cd
