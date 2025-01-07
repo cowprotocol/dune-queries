@@ -115,6 +115,7 @@ wrapped_native_token as (
             when 'ethereum' then 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2 -- WETH
             when 'gnosis' then 0xe91d153e0b41518a2ce8dd3d7944fa863463a97d -- WXDAI
             when 'arbitrum' then 0x82af49447d8a07e3bd95bd0d56f35241523fbab1 -- WETH
+            when 'base' then 0x4200000000000000000000000000000000000006 -- WETH
         end as native_token_address
 ),
 
