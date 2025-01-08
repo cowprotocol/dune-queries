@@ -27,6 +27,16 @@ cow_arbitrum as (
     group by 1
 ),
 
+cow_base as (
+    select
+        date_trunc('month', block_time) as date_month,
+        coalesce(sum("Limit"), 0) + coalesce(sum("Market"), 0) + coalesce(sum("UI Fee"), 0) as protocol_fee,
+        coalesce(sum("Partner Fee Share"), 0) as partner_fee_share
+    from "query_4217030(blockchain='base',ui_fee_recipient='0x0000000000000000000000000000000000000000')"
+    group by 1
+),
+
+
 mevblocker as (
     select
         date_trunc('month', call_block_time) as date_month,
@@ -43,14 +53,17 @@ select
     cm.protocol_fee as "Protocol (Mainnet)",
     ca.protocol_fee as "Protocol (Arbitrum)",
     cg.protocol_fee as "Protocol (Gnosis)",
+    cb.protocol_fee as "Protocol (Base)",
     mev_blocker_fee as mev_blocker,
-    coalesce(cm.partner_fee_share, 0) + coalesce(ca.partner_fee_share, 0) + coalesce(cg.partner_fee_share, 0) as total_partner_share_all_chains,
-    coalesce(cm.protocol_fee, 0) + coalesce(ca.protocol_fee, 0) + coalesce(cg.protocol_fee, 0) as "total_protocol_fee_in_eth"
+    coalesce(cm.partner_fee_share, 0) + coalesce(ca.partner_fee_share, 0) + coalesce(cg.partner_fee_share, 0) + coalesce(cb.partner_fee_share, 0) as total_partner_share_all_chains,
+    coalesce(cm.protocol_fee, 0) + coalesce(ca.protocol_fee, 0) + coalesce(cg.protocol_fee, 0) + coalesce(cb.protocol_fee, 0) as "total_protocol_fee_in_eth"
 from cow_mainnet as cm
 left join cow_arbitrum as ca
     on cm.date_month = ca.date_month
 left join cow_gnosis as cg
     on cm.date_month = cg.date_month
+left join cow_base as cb
+    on cm.date_month = cb.date_month
 left join mevblocker as m
     on cm.date_month = m.date_month
 where cm.date_month >= date '2024-01-01'
