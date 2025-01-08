@@ -1,33 +1,36 @@
 -- This query returns the protocol fees (per type) that CoW DAO accrues per month
 
-with
-cow_fee as (
+with cow_mainnet as (
     select
-        date_trunc('month', block_date) as date_month,
-        sum(f.protocol_fee * f.protocol_fee_native_price / pow(10, 18))
-        - coalesce(sum(case when f.partner_fee_recipient is not null then f.partner_fee * f.protocol_fee_native_price / pow(10, 18) end), 0) as total_protocol_fee_in_eth,
-        -- partner fee is calculated based on 15% cut that goes to cow dao
-        sum(case when f.partner_fee_recipient is not null then f.partner_fee * f.protocol_fee_native_price / pow(10, 18) end) as partner_fee_eth,
-        sum(case when f.partner_fee_recipient is not null then f.partner_fee * f.protocol_fee_native_price / pow(10, 18) * cast(0.15 as double) end) as partner_fee_share
-    from cow_protocol_ethereum.trades as t
-    left join "query_4364122(blockchain='ethereum')" as f
-        on
-            t.order_uid = f.order_uid
-            and t.tx_hash = f.tx_hash
-            -- rough block around which the DAO started accruing fees
-            and f.block_number > 19068880
-            and f.protocol_fee_native_price > 0
-    where
-        t.block_number > 19068880
-        -- some orders report unrealistic fees due to incorrect native prices
-        and t.order_uid not in (select order_uid from query_3639473)
+        date_trunc('month', block_time) as date_month,
+        coalesce(sum('Limit'), 0) + coalesce(sum('Market'), 0) + coalesce(sum('UI Fee'), 0) as protocol_fee,
+        coalesce(sum('Partner Fee Share'), 0) as partner_fee_share
+    from "query_4217030(blockchain='ethereum',ui_fee_recipient='0x0000000000000000000000000000000000000000')"
     group by 1
 ),
 
-mev_fee as (
+cow_gnosis as (
+    select
+        date_trunc('month', block_time) as date_month,
+        (coalesce(sum('Limit'), 0) + coalesce(sum('Market'), 0) + coalesce(sum('UI Fee'), 0)) as protocol_fee,
+        coalesce(sum('Partner Fee Share'), 0) as partner_fee_share
+    from "query_4217030(blockchain='arbitrum',ui_fee_recipient='0x6b3214fD11dc91De14718DeE98Ef59bCbFcfB432')"
+    group by 1
+),
+
+cow_arbitrum as (
+    select
+        date_trunc('month', block_time) as date_month,
+        coalesce(sum('Limit'), 0) + coalesce(sum('Market'), 0) + coalesce(sum('UI Fee'), 0) as protocol_fee,
+        coalesce(sum('Partner Fee Share'), 0) as partner_fee_share
+    from "query_4217030(blockchain='arbitrum',ui_fee_recipient='0x451100Ffc88884bde4ce87adC8bB6c7Df7fACccd')"
+    group by 1
+),
+
+mevblocker as (
     select
         date_trunc('month', call_block_time) as date_month,
-        sum(t.due / 1e18 / 2) as mev_blocker_fee_cow
+        sum(t.due / 1e18 / 2) as mev_blocker_fee
     from mev_blocker_ethereum.MevBlockerFeeTill_call_bill
     cross join unnest(due) as t (due)
     where
@@ -36,11 +39,18 @@ mev_fee as (
 )
 
 select
-    c.date_month as "month",
-    partner_fee_share,
-    total_protocol_fee_in_eth,
-    mev_blocker_fee_cow,
-    coalesce(partner_fee_share, 0) + coalesce(total_protocol_fee_in_eth, 0) + coalesce(mev_blocker_fee_cow, 0) as total_cow_dao_fee
-from cow_fee as c
-left join mev_fee as m
-    on c.date_month = m.date_month
+    cm.date_month as "month",
+    cm.protocol_fee as "Protocol (Mainnet)",
+    ca.protocol_fee as "Protocol (Arbitrum)",
+    cg.protocol_fee as "Protocol (Gnosis)",
+    mev_blocker_fee as mev_blocker,
+    coalesce(cm.partner_fee_share, 0) + coalesce(ca.partner_fee_share, 0) + coalesce(cg.partner_fee_share, 0) as total_partner_share_all_chains,
+    coalesce(cm.protocol_fee, 0) + coalesce(ca.protocol_fee, 0) + coalesce(cg.protocol_fee, 0) as "total_protocol_fee_in_eth"
+from cow_mainnet as cm
+left join cow_arbitrum as ca
+    on cm.date_month = ca.date_month
+left join cow_gnosis as cg
+    on cm.date_month = cg.date_month
+left join mevblocker as m
+    on cm.date_month = m.date_month
+where cm.date_month >= date '2024-01-01'
