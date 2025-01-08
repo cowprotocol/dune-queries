@@ -1,0 +1,6 @@
+[sqlfluff]
+dialect = hive
+
+[sqlfluff:templater:jinja:context]
+ui_fee_recipient=0x6b3214fD11dc91De14718DeE98Ef59bCbFcfB432
+blockchain=gnosis
