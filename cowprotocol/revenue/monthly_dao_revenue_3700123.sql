@@ -3,8 +3,8 @@
 with cow_mainnet as (
     select
         date_trunc('month', block_time) as date_month,
-        coalesce(sum('Limit'), 0) + coalesce(sum('Market'), 0) + coalesce(sum('UI Fee'), 0) as protocol_fee,
-        coalesce(sum('Partner Fee Share'), 0) as partner_fee_share
+        coalesce(sum("Limit"), 0) + coalesce(sum("Market"), 0) + coalesce(sum("UI Fee"), 0) as protocol_fee,
+        coalesce(sum("Partner Fee Share"), 0) as partner_fee_share
     from "query_4217030(blockchain='ethereum',ui_fee_recipient='0x0000000000000000000000000000000000000000')"
     group by 1
 ),
@@ -12,8 +12,8 @@ with cow_mainnet as (
 cow_gnosis as (
     select
         date_trunc('month', block_time) as date_month,
-        (coalesce(sum('Limit'), 0) + coalesce(sum('Market'), 0) + coalesce(sum('UI Fee'), 0)) as protocol_fee,
-        coalesce(sum('Partner Fee Share'), 0) as partner_fee_share
+        (coalesce(sum("Limit"), 0) + coalesce(sum("Market"), 0) + coalesce(sum("UI Fee"), 0)) as protocol_fee,
+        coalesce(sum("Partner Fee Share"), 0) as partner_fee_share
     from "query_4217030(blockchain='arbitrum',ui_fee_recipient='0x6b3214fD11dc91De14718DeE98Ef59bCbFcfB432')"
     group by 1
 ),
@@ -21,8 +21,8 @@ cow_gnosis as (
 cow_arbitrum as (
     select
         date_trunc('month', block_time) as date_month,
-        coalesce(sum('Limit'), 0) + coalesce(sum('Market'), 0) + coalesce(sum('UI Fee'), 0) as protocol_fee,
-        coalesce(sum('Partner Fee Share'), 0) as partner_fee_share
+        coalesce(sum("Limit"), 0) + coalesce(sum("Market"), 0) + coalesce(sum("UI Fee"), 0) as protocol_fee,
+        coalesce(sum("Partner Fee Share"), 0) as partner_fee_share
     from "query_4217030(blockchain='arbitrum',ui_fee_recipient='0x451100Ffc88884bde4ce87adC8bB6c7Df7fACccd')"
     group by 1
 ),

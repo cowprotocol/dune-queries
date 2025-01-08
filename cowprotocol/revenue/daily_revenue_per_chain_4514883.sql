@@ -21,7 +21,7 @@ select
 from prep
 cross join
     unnest(
-        array["Limit", "Market", "UI Fee", "Partner Fee Share"],
+        array['Limit', 'Market', 'UI Fee', 'Partner Fee Share'],
         array["Limit", "Market", "UI Fee", "Partner Fee Share"]
-    )
+    ) as t (type, value) -- noqa: AL05
 order by 1 desc
