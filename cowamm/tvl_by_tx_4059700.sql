@@ -45,7 +45,7 @@ balances_by_tx as (
 
 -- joins token balances with prices to get tvl of pool per transaction
 tvl as (
-    select
+    select distinct
         evt_block_time as block_time,
         evt_tx_hash as tx_hash,
         b.pool,
