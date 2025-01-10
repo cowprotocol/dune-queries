@@ -1,3 +1,5 @@
+--Summary of the output for cow amms and uniswap style
+
 select
     block_day,
     contract_address,
