@@ -1,21 +1,11 @@
 --Query computes the trading volume over all Cow AMMs (matching users and rebalancing) and 7 day growth thereof.
-with all_trades as (
-    select * from cow_protocol_ethereum.trades
-    union all
-    select * from cow_protocol_gnosis.trades
-    union all
-    select * from cow_protocol_arbitrum.trades
-    union all
-    select * from cow_protocol_base.trades
-),
-
-cow_trades as (
+with cow_trades as (
     select
         block_date,
-        sum(usd_value) as volume
-    from all_trades
+        sum(amount_usd) as volume
+    from cow_protocol.trades as t
     inner join query_3959044 as pool
-        on all_trades.trader = pool.address
+        on t.taker = pool.address
     group by 1
 ),
 
