@@ -1,7 +1,7 @@
 --Query computes the trading volume over all Cow AMMs (matching users and rebalancing)
 
 -- Parameters:
--- {{frequence}}: the frequence of the data, e.g. 'day', 'week', 'month'
+-- {{aggregate_by}}: the frequence of the data, e.g. 'day', 'week', 'month'
 with all_trades as (
     select * from cow_protocol_ethereum.trades
     union all
@@ -14,7 +14,7 @@ with all_trades as (
 
 cow_trades as (
     select
-        date_trunc('{{frequence}}', block_date) as period,
+        date_trunc('{{aggregate_by}}', block_date) as period,
         sum(usd_value) as volume
     from all_trades
     inner join query_3959044 as pool

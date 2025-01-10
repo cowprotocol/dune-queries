@@ -97,7 +97,7 @@ cowamm_creations_base as (
         contract_address in (0x03362f847B4fAbC12e1Ce98b6b59F94401E4588e)
         and topic0 = 0x0d03834d0d86c7f57e877af40e26f176dc31bd637535d4ba153d1ac9de88a7ea
     )
-    and block_time >= cast('2024-09-01 00:00:00' as timestamp)
+    and block_time >= cast('2024-12-01 00:00:00' as timestamp)
 ),
 
 cowamms_base as (
@@ -112,7 +112,7 @@ cowamms_base as (
     where
         contract_address in (select address from cowamm_creations_base)
         and topic0 = 0xe4e1e53800000000000000000000000000000000000000000000000000000000
-        and block_time >= cast('2024-09-01 00:00:00' as timestamp)
+        and block_time >= cast('2024-12-01 00:00:00' as timestamp)
     group by 1, 2
 ),
 

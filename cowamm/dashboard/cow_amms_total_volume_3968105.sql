@@ -1,4 +1,4 @@
---Query computes the trading volume over all Cow AMMs (matching users and rebalancing)
+--Query computes the trading volume over all Cow AMMs (matching users and rebalancing) and 7 day growth thereof.
 with all_trades as (
     select * from cow_protocol_ethereum.trades
     union all
