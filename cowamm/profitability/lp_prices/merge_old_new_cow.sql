@@ -1,5 +1,5 @@
---merge with old data
-
+-- merge the old lines in the data base with the additional ones
+-- compute the reserves/ lp reserves and prices
 
 with old_last as (
     select
