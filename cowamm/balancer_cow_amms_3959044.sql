@@ -1,5 +1,5 @@
 -- This is part of a base query for monitoring Balancer CoW AMMs
--- It indexes all Balancer CoW AMMs on ethereum and gnosis and arbitrum
+-- It indexes all Balancer CoW AMMs on ethereum and gnosis and arbitrum and base
 --
 -- the final table has columns
 -- - created_at: the creation timestamp
@@ -89,6 +89,33 @@ cowamms_arbitrum as (
     group by 1, 2
 ),
 
+-- on base
+cowamm_creations_base as (
+    select varbinary_substring(topic1, 1 + 12, 20) as address
+    from base.logs
+    where (
+        contract_address in (0x03362f847B4fAbC12e1Ce98b6b59F94401E4588e)
+        and topic0 = 0x0d03834d0d86c7f57e877af40e26f176dc31bd637535d4ba153d1ac9de88a7ea
+    )
+    and block_time >= cast('2024-12-01 00:00:00' as timestamp)
+),
+
+cowamms_base as (
+    select
+        'base' as blockchain,
+        contract_address as address,
+        min(block_time) as created_at,
+        min(varbinary_substring(data, 5 + 2 * 32 + 12, 20)) as token_1_address,
+        max(varbinary_substring(data, 5 + 2 * 32 + 12, 20)) as token_2_address
+    from
+        base.logs
+    where
+        contract_address in (select address from cowamm_creations_base)
+        and topic0 = 0xe4e1e53800000000000000000000000000000000000000000000000000000000
+        and block_time >= cast('2024-12-01 00:00:00' as timestamp)
+    group by 1, 2
+),
+
 -- combine data for different chains
 cowamms as (
     select * from cowamms_ethereum
@@ -96,6 +123,8 @@ cowamms as (
     select * from cowamms_gnosis
     union all
     select * from cowamms_arbitrum
+    union all
+    select * from cowamms_base
 )
 
 select * from cowamms
