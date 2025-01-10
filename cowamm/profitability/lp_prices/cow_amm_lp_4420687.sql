@@ -98,4 +98,4 @@ left join prices.day as price1
         and p.token1 = price1.contract_address
 where
     coalesce(price0.blockchain, '{{blockchain}}') = '{{blockchain}}'
-    and coalesce(price0.blockchain, '{{blockchain}}') = '{{blockchain}}'
+    and coalesce(price1.blockchain, '{{blockchain}}') = '{{blockchain}}'
