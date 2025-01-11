@@ -24,9 +24,9 @@ aggregate_transfer as (
         price0,
         decimals0,
         decimals1,
-        last_reserve0 + sum(transfer0) over (partition by new.contract_address order by block_day asc) as reserve0,
-        last_reserve1 + sum(transfer1) over (partition by new.contract_address order by block_day asc) as reserve1,
-        last_lp_reserve + sum(lp_transfer) over (partition by new.contract_address order by block_day asc) as lp_reserve
+        coalesce(last_reserve0, 0) + sum(transfer0) over (partition by new.contract_address order by block_day asc) as reserve0,
+        coalesce(last_reserve1, 0) + sum(transfer1) over (partition by new.contract_address order by block_day asc) as reserve1,
+        coalesce(last_lp_reserve, 0) + sum(lp_transfer) over (partition by new.contract_address order by block_day asc) as lp_reserve
     from new
     left join old_last
         on new.contract_address = old_last.contract_address
