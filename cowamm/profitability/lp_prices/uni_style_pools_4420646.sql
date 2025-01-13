@@ -3,6 +3,7 @@
 --    {{blockchain}}
 
 select
+    block_time as created_at,
     substr(data, 13, 20) as contract_address,
     substr(topic1, 13, 20) as token0,
     substr(topic2, 13, 20) as token1,

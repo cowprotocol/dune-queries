@@ -58,9 +58,9 @@ select
     price1.price as price1,
     price0.decimals as decimals0,
     price1.decimals as decimals1,
-    coalesce(l.lp_transfer, 0) as lp_transfer,
-    coalesce(s.reserve0, 0) as reserve0,
-    coalesce(s.reserve1, 0) as reserve1
+    last_value(l.lp_transfer) ignore nulls over (partition by p.contract_address order by d.day range between unbounded preceding and current row) as lp_transfer,
+    last_value(s.reserve0) ignore nulls over (partition by p.contract_address order by d.day range between unbounded preceding and current row) as reserve0,
+    last_value(s.reserve1) ignore nulls over (partition by p.contract_address order by d.day range between unbounded preceding and current row) as reserve1
 from date_range as d
 cross join pools as p
 left join lp_balance_delta as l
@@ -83,3 +83,4 @@ where
     coalesce(price0.blockchain, '{{blockchain}}') = '{{blockchain}}'
     and coalesce(price0.blockchain, '{{blockchain}}') = '{{blockchain}}'
     and s.latest = 1
+    and d.day >= p.created_at
