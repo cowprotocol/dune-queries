@@ -87,4 +87,4 @@ left join prices.day as price1
 where
     (price0.blockchain = '{{blockchain}}' or price0.blockchain is null)
     and (price1.blockchain = '{{blockchain}}' or price0.blockchain is null)
-    and d.day >= date_trunc('day',p.created_at)
+    and d.day >= date_trunc('day', p.created_at)
