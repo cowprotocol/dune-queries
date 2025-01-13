@@ -37,5 +37,10 @@ aggregate_transfer as (
 
 select
     *,
-    (reserve0 * price0 / power(10, -decimals0) + reserve1 * price1 / power(10, -decimals1)) / lp_reserve as lp_price
+    -- if 1 token does not have a price, we assume the pool is balanced
+    coalesce(
+        (reserve0 * price0 / power(10, -decimals0) + reserve1 * price1 / power(10, -decimals1)),
+        reserve0 * price0 / power(10, -decimals0),
+        reserve1 * price1 / power(10, -decimals1)
+    ) / lp_reserve as lp_price
 from aggregate_transfer
