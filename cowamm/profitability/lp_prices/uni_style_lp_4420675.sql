@@ -85,6 +85,6 @@ left join prices.day as price1
         d.day = price1.timestamp
         and p.token1 = price1.contract_address
 where
-    price0.blockchain = ('{{blockchain}}' or price0.blockchain is null)
-    and price1.blockchain = ('{{blockchain}}' or price0.blockchain is null)
-    and d.day >= p.created_at
+    (price0.blockchain = '{{blockchain}}' or price0.blockchain is null)
+    and (price1.blockchain = '{{blockchain}}' or price0.blockchain is null)
+    and d.day >= date_trunc('day',p.created_at)
