@@ -58,7 +58,7 @@ select
     price1.price as price1,
     price0.decimals as decimals0,
     price1.decimals as decimals1,
-    last_value(l.lp_transfer) ignore nulls over (partition by p.contract_address order by d.day range between unbounded preceding and current row) as lp_transfer,
+    coalesce(l.lp_transfer, 0) as lp_transfer,
     last_value(s.reserve0) ignore nulls over (partition by p.contract_address order by d.day range between unbounded preceding and current row) as reserve0,
     last_value(s.reserve1) ignore nulls over (partition by p.contract_address order by d.day range between unbounded preceding and current row) as reserve1
 from date_range as d
@@ -67,7 +67,12 @@ left join lp_balance_delta as l
     on
         d.day = l.day
         and p.contract_address = l.contract_address
-left join syncs as s
+--only keep the last reserves of the day
+left join (--noqa: ST05
+    select *
+    from syncs
+    where latest = 1
+) as s
     on
         d.day = s.day
         and p.contract_address = s.contract_address
@@ -80,7 +85,6 @@ left join prices.day as price1
         d.day = price1.timestamp
         and p.token1 = price1.contract_address
 where
-    coalesce(price0.blockchain, '{{blockchain}}') = '{{blockchain}}'
-    and coalesce(price0.blockchain, '{{blockchain}}') = '{{blockchain}}'
-    and s.latest = 1
+    price0.blockchain = ('{{blockchain}}' or price0.blockchain is null)
+    and price1.blockchain = ('{{blockchain}}' or price0.blockchain is null)
     and d.day >= p.created_at
