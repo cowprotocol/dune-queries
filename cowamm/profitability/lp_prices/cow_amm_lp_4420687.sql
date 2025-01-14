@@ -19,7 +19,7 @@ cow_amm_pool as (
         token_1_address as token0,
         token_2_address as token1,
         address as contract_address
-    from query_3959044
+    from dune.cowprotocol.result_balancer_co_w_am_ms
     where blockchain = '{{blockchain}}'
 ),
 
