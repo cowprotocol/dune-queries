@@ -97,5 +97,6 @@ left join prices.day as price1
         d.day = price1.timestamp
         and p.token1 = price1.contract_address
 where
-    coalesce(price0.blockchain, '{{blockchain}}') = '{{blockchain}}'
-    and coalesce(price1.blockchain, '{{blockchain}}') = '{{blockchain}}'
+    (price0.blockchain = '{{blockchain}}' or price0.blockchain is null)
+    and (price1.blockchain = '{{blockchain}}' or price0.blockchain is null)
+    and d.day >= date_trunc('day', p.created_at)

@@ -59,6 +59,7 @@ select
     price0.decimals as decimals0,
     price1.decimals as decimals1,
     coalesce(l.lp_transfer, 0) as lp_transfer,
+    --fill in the days without reserves
     last_value(s.reserve0) ignore nulls over (partition by p.contract_address order by d.day range between unbounded preceding and current row) as reserve0,
     last_value(s.reserve1) ignore nulls over (partition by p.contract_address order by d.day range between unbounded preceding and current row) as reserve1
 from date_range as d
