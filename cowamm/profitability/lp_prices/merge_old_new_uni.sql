@@ -42,3 +42,6 @@ select
         reserve1 * price1 / power(10, -decimals1)
     ) / lp_reserve as lp_price
 from aggregate_transfer
+
+-- Then, drop lp_transfer, transfer0 and transfer1
+-- And merge with old database

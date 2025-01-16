@@ -16,6 +16,7 @@ select
     decimals1,
     transfer0,
     transfer1,
+    -- not useful in our internal database
     lp_reserve,
     lp_transfer,
     lp_price
