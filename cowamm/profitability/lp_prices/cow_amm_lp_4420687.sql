@@ -1,3 +1,9 @@
+-- Issues with the other version (4420687)
+-- Trying by accessing only once the logs table to get assets reserve
+-- However for periods longer than 1 month, the query exceeds cluster capacity
+-- The issue is with the join between both reserves_delta tables
+-- Although this table is only 4000 rows at most (~10kb)
+
 --Parameters
 --  {{blockchain}}: The blockchain to query
 --  {{start}}: The start date of the analysis
@@ -13,13 +19,14 @@ with date_range as (
         )) t (day) --noqa: AL01
 ),
 
+--use the materialized view of query_3959044
 cow_amm_pool as (
     select
         created_at,
         token_1_address as token0,
         token_2_address as token1,
         address as contract_address
-    from dune.cowprotocol.result_balancer_co_w_am_ms
+    from query_3959044
     where blockchain = '{{blockchain}}'
 ),
 
@@ -40,30 +47,21 @@ lp_balance_delta as (
 reserves_delta as (
     select
         p.contract_address,
-        date(coalesce(t0.evt_block_time, t1.evt_block_time)) as "day",
-        sum(case when t0."from" = p.contract_address then -t0.value else t0.value end) as transfer0,
-        sum(case when t1."from" = p.contract_address then -t1.value else t1.value end) as transfer1
+        t.contract_address as token,
+        date(t.evt_block_time) as "day",
+        sum(case when t."from" = p.contract_address then -t.value else t.value end) as transfer
     from cow_amm_pool as p
-    left join erc20_{{blockchain}}.evt_transfer as t0
+    left join erc20_{{blockchain}}.evt_transfer as t
         on
             (
-                t0."from" = p.contract_address
-                or t0.to = p.contract_address
+                t."from" = p.contract_address
+                or t.to = p.contract_address
             )
-            and t0.contract_address = p.token0
-    left join erc20_{{blockchain}}.evt_transfer as t1
-        on
-            (
-                t1."from" = p.contract_address
-                or t1.to = p.contract_address
-            )
-            and t1.contract_address = p.token1
     where
-        t0.evt_block_time >= date(timestamp '{{start}}')
-        and date(t0.evt_block_time) <= date(timestamp '{{end}}')
-        and t1.evt_block_time >= date(timestamp '{{start}}')
-        and date(t1.evt_block_time) <= date(timestamp '{{end}}')
-    group by 1, 2
+        t.evt_block_time >= date(timestamp '{{start}}')
+        and date(t.evt_block_time) <= date(timestamp '{{end}}')
+        and t.contract_address in (p.token0, p.token1)
+    group by 1, 2, 3
 )
 
 select
@@ -76,18 +74,24 @@ select
     price0.decimals as decimals0,
     price1.decimals as decimals1,
     coalesce(l.lp_transfer, 0) as lp_transfer,
-    coalesce(r.transfer0, 0) as transfer0,
-    coalesce(r.transfer1, 0) as transfer1
+    coalesce(r0.transfer, 0) as transfer0,
+    coalesce(r1.transfer, 0) as transfer1
 from date_range as d
 cross join cow_amm_pool as p
 left join lp_balance_delta as l
     on
         d.day = l.day
         and p.contract_address = l.contract_address
-left join reserves_delta as r
+left join reserves_delta as r0
     on
-        d.day = r.day
-        and p.contract_address = r.contract_address
+        d.day = r0.day
+        and p.contract_address = r0.contract_address
+        and p.token0 = r0.token
+left join reserves_delta as r1
+    on
+        d.day = r1.day
+        and p.contract_address = r1.contract_address
+        and p.token1 = r1.token
 left join prices.day as price0
     on
         d.day = price0.timestamp
@@ -97,6 +101,5 @@ left join prices.day as price1
         d.day = price1.timestamp
         and p.token1 = price1.contract_address
 where
-    (price0.blockchain = '{{blockchain}}' or price0.blockchain is null)
-    and (price1.blockchain = '{{blockchain}}' or price0.blockchain is null)
-    and d.day >= date_trunc('day', p.created_at)
+    coalesce(price0.blockchain, '{{blockchain}}') = '{{blockchain}}'
+    and coalesce(price1.blockchain, '{{blockchain}}') = '{{blockchain}}'
