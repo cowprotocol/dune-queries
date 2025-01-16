@@ -29,7 +29,7 @@ batch_rewards as (
         end as capped_payment
     from "query_4351957(blockchain='{{blockchain}}')" as rbr
     where
-        rbr.block_deadline > (select start_block from block_range)
+        rbr.block_deadline >= (select start_block from block_range)
         and rbr.block_deadline <= (select end_block from block_range)
 ),
 
@@ -84,7 +84,7 @@ order_quotes as (
         quote_solver
     from "query_4364122(blockchain='{{blockchain}}')"
     where
-        block_number > (select start_block from block_range)
+        block_number >= (select start_block from block_range)
         and block_number <= (select end_block from block_range)
 ),
 
