@@ -1,9 +1,5 @@
--- Issues with the other version (4420687)
--- Trying by accessing only once the logs table to get assets reserve
--- However for periods longer than 1 month, the query exceeds cluster capacity
--- The issue is with the join between both reserves_delta tables
--- Although this table is only 4000 rows at most (~10kb)
-
+-- This query gets all the transfers during a day for all existing CoW AMMs:
+-- Reserve tokens and lp tokens
 --Parameters
 --  {{blockchain}}: The blockchain to query
 --  {{start}}: The start date of the analysis
@@ -19,14 +15,17 @@ with date_range as (
         )) t (day) --noqa: AL01
 ),
 
---use the materialized view of query_3959044
+--Use the materialized view of query_3959044
+--This is necessary because of performance issues.
+--For large time frames the query is slow because of multiple accesses to logs
+--The query has to run after the materialization.
 cow_amm_pool as (
     select
         created_at,
         token_1_address as token0,
         token_2_address as token1,
         address as contract_address
-    from query_3959044
+    from dune.cowprotocol.result_balancer_co_w_am_ms
     where blockchain = '{{blockchain}}'
 ),
 
