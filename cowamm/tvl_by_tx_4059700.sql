@@ -54,9 +54,9 @@ tvl as (
         price,
         balance * price / POW(10, decimals) as tvl
     from balances_by_tx as b
-    inner join prices.minute as p
+    inner join prices.day as p
         on
-            p.timestamp = DATE_TRUNC('minute', evt_block_time)
+            p.timestamp = DATE_TRUNC('day', evt_block_time)
             and b.token = p.contract_address
 )
 
