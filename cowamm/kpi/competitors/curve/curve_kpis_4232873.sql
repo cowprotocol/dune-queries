@@ -25,19 +25,19 @@ with accumulated_kpis as (
         on
             r.contract_address = t.project_contract_address
             and r.tx_hash = t.tx_hash
-    inner join prices.minute as p0
+    inner join prices.usd as p0
         on
             r.token0 = p0.contract_address
-            and date_trunc('minute', r.evt_block_time) = p0.timestamp
-    inner join prices.minute as p1
+            and date_trunc('minute', r.evt_block_time) = p0.minute
+    inner join prices.usd as p1
         on
             r.token1 = p1.contract_address
-            and date_trunc('minute', r.evt_block_time) = p1.timestamp
+            and date_trunc('minute', r.evt_block_time) = p1.minute
     where
         -- This test avoids any possible issue with reconstructing the reserves of the pool
         tvl > 0
-        and p0.timestamp between least(date('{{start_time}}'), date_add('day', -1, date(now()))) and least(date_add('day', 1, date('{{start_time}}')), date(now()))
-        and p1.timestamp between least(date('{{start_time}}'), date_add('day', -1, date(now()))) and least(date_add('day', 1, date('{{start_time}}')), date(now()))
+        and p0.minute between least(date('{{start_time}}'), date_add('day', -1, date(now()))) and least(date_add('day', 1, date('{{start_time}}')), date(now()))
+        and p1.minute between least(date('{{start_time}}'), date_add('day', -1, date(now()))) and least(date_add('day', 1, date('{{start_time}}')), date(now()))
 )
 
 select
