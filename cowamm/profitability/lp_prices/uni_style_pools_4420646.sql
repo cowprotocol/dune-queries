@@ -12,21 +12,21 @@ select
             contract_address in (
                 0x1097053Fd2ea711dad45caCcc45EfF7548fCB362,
                 0x02a84c1b3bbd7401a5f7fa98a384ebc70bb5749e
-            ) then 'pancakeswap'
+            ) then 'pancakeswapv2'
         when
             contract_address in (
                 0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f,
                 0xf1D7CC64Fb4452F05c498126312eBE29f30Fbcf9,
                 0x8909Dc15e40173Ff4699343b6eB8132c65e18eC6
             )
-            then 'uniswap'
+            then 'uniswapv2'
         when
             contract_address in (
                 0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac,
                 0xc35DADB65012eC5796536bD9864eD8773aBc74C4,
                 0x71524B4f93c58fcbF659783284E38825f0622859
             )
-            then 'sushiswap'
+            then 'sushiswapv2'
     end as project
 from {{blockchain}}.logs
 where
@@ -34,11 +34,11 @@ where
     and contract_address in
     (
         0x1097053Fd2ea711dad45caCcc45EfF7548fCB362, --eth, pancake
-        0x02a84c1b3bbd7401a5f7fa98a384ebc70bb5749e, --arb/bas, pancake
+        0x02a84c1b3bbd7401a5f7fa98a384ebc70bb5749e, --arb/base, pancake
         0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f, --eth, uni
         0xf1D7CC64Fb4452F05c498126312eBE29f30Fbcf9, --arb, uni
-        0x8909Dc15e40173Ff4699343b6eB8132c65e18eC6, --bas, uni
+        0x8909Dc15e40173Ff4699343b6eB8132c65e18eC6, --base, uni
         0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac, --eth, sushi
-        0xc35DADB65012eC5796536bD9864eD8773aBc74C4, --arb/gno, sushi
-        0x71524B4f93c58fcbF659783284E38825f0622859 --bas, sushi
+        0xc35DADB65012eC5796536bD9864eD8773aBc74C4, --arb/gnosis, sushi
+        0x71524B4f93c58fcbF659783284E38825f0622859 --base, sushi
     )
