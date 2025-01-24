@@ -1,4 +1,4 @@
--- This query gets the reserve of every Uni style pool at the end of a day 
+-- This query gets the reserve of every Univ2 style pool at the end of a day 
 -- and the lp token transfers
 --Parameters
 --  {{blockchain}}: The blockchain to query
