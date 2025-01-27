@@ -142,7 +142,7 @@ select
         -- Assess initial investment in lp tokens
         select 10000 / lp_token_price as investment
         from final
-        where day = timestamp '{{start}}'
+        where day = date(timestamp '{{start}}')
     ) * lp_token_price as current_value_of_investment
 from final
 where day >= timestamp '{{start}}'
