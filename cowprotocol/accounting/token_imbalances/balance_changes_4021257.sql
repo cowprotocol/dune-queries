@@ -59,7 +59,7 @@ native_transfers as (
 
 -- 2) chain specific data
 -- 2.1) ethereum
--- special treatmet of
+-- special treatment of
 -- 2.1.1) WETH
 -- 2.1.2) sDAI
 -- 2.1.3) MKR
@@ -160,7 +160,7 @@ special_balance_changes_ethereum as (
 ),
 
 -- 2.2) gnosis
--- special treatmet of
+-- special treatment of
 -- 2.2.1) WXDAI
 
 -- 2.2.1) all deposit and withdrawal events for WXDAI
@@ -197,7 +197,7 @@ special_balance_changes_gnosis as ( -- noqa: ST03
 ),
 
 -- 2.3) arbitrum
--- special treatmet of
+-- special treatment of
 -- 2.3.1) WETH
 
 -- 2.3.1) all deposit and withdrawal events for WETH
@@ -233,6 +233,11 @@ special_balance_changes_arbitrum as ( -- noqa: ST03
     select * from weth_deposits_withdrawals_arbitrum
 ),
 
+-- 2.4) base
+-- special treatment of
+-- 2.4.1) WETH
+
+-- 2.4.1) all deposit and withdrawal events for WETH
 weth_deposits_withdrawals_base as (
     -- deposits (contract deposits ETH to get WETH)
     select
