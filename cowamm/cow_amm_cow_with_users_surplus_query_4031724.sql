@@ -64,12 +64,33 @@ cow_surplus_per_batch_arbitrum as (
     where trades.trader in (select address from query_3959044 where blockchain = 'arbitrum')
 ),
 
+cow_surplus_per_batch_base as (
+    select --noqa: ST06
+        'base' as blockchain,
+        cow_per_batch.block_time,
+        cow_per_batch.tx_hash,
+        case
+            when solvers.environment = 'new' then cast(solvers.address as varchar)
+            else solvers.name
+        end as solver_name,
+        naive_cow,  -- fraction of batch volume traded within a CoW
+        trades.surplus_usd as surplus_in_usd,  -- surplus of the executed CoW AMM order, expressed in USD
+        naive_cow * trades.surplus_usd as realized_cow_surplus_in_usd -- surplus of the CoW AMM that is assumed to be generated via a CoW.
+    from "query_4025739(blockchain='base',start_time='{{start_time}}',end_time='{{end_time}}')" as cow_per_batch
+    inner join cow_protocol_base.trades as trades on cow_per_batch.tx_hash = trades.tx_hash
+    inner join cow_protocol_base.batches as batches on cow_per_batch.tx_hash = batches.tx_hash
+    inner join cow_protocol_base.solvers as solvers on batches.solver_address = solvers.address and solvers.active
+    where trades.trader in (select address from query_3959044 where blockchain = 'base')
+),
+
 cow_surplus_per_batch as (
     select * from cow_surplus_per_batch_ethereum
     union all
     select * from cow_surplus_per_batch_gnosis
     union all
     select * from cow_surplus_per_batch_arbitrum
+    union all
+    select * from cow_surplus_per_batch_base
 ),
 
 
