@@ -1,4 +1,5 @@
 -- Computes the TVL, lp token total supply and lp token price of a curve pool over time
+-- Only usable on ethereum because of the native ETH transfers
 -- Parameters
 --  {{token_a}} - either token of the desired uni pool
 --  {{token_b}} - other token of the desired uni pool
@@ -82,6 +83,7 @@ lp_total_supply as (
 
 -- Computes the token balance changes of the relevant token per transaction
 reserves_delta as (
+    --erc20 tokens
     select
         evt_block_time,
         p.address as pool,
@@ -134,7 +136,7 @@ reserves_delta as (
         )
         and contract_address = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2 --WETH
         and varbinary_to_uint256(topic1) = varbinary_to_uint256((select address from curve_pool))
-    --ETH transfers
+    --native ETH transfers
     union all
     select
         block_time as evt_block_time,
