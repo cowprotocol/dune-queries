@@ -78,7 +78,7 @@ weth_deposits_withdrawals_ethereum as (
     where
         evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and dst = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
-    union distinct
+    union all
     -- withdrawals (contract withdraws ETH by returning WETH)
     select
         evt_block_time as block_time,
@@ -107,7 +107,7 @@ sdai_deposits_withdraws_ethereum as (
     where
         evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and owner = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
-    union distinct
+    union all
     -- withdraws
     select
         evt_block_time as block_time,
@@ -136,7 +136,7 @@ mkr_mint_burn_ethereum as (
     where
         evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and guy = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
-    union distinct
+    union all
     -- withdraws
     select
         evt_block_time as block_time,
@@ -177,7 +177,7 @@ wxdai_deposits_withdrawals_gnosis as (
     where
         evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and dst = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
-    union distinct
+    union all
     -- withdrawals (contract withdraws XDAI by returning WXDAI)
     select
         evt_block_time as block_time,
@@ -214,7 +214,7 @@ weth_deposits_withdrawals_arbitrum as (
     where
         evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and dst = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
-    union distinct
+    union all
     -- withdrawals (contract withdraws ETH by returning WETH)
     select
         evt_block_time as block_time,
@@ -246,7 +246,7 @@ weth_deposits_withdrawals_base as (
     where
         evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and dst = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
-    union distinct
+    union all
     -- withdrawals (contract withdraws ETH by returning WETH)
     select
         evt_block_time as block_time,
