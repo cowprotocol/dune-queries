@@ -28,34 +28,58 @@ with token_times as (
 
 -- Fetching all additional price feeds that are synced to Dune
 imported_price_feeds as (
-    select
-        a.hour,
+    select --noqa: ST06
+        a.source,
+        date_trunc('hour', a.minute) as hour, --noqa: RF04
         a.token_address,
         a.decimals,
-        a.price_unit
-    from "query_4252674" as a inner join token_times as tt on a.hour = tt.hour and a.token_address = tt.token_address
-    where a.price_unit < 10000000 -- here we filter all tokens with price more than $1M, as these are probably bogus prices
+        avg(a.price) as price_unit
+    from "query_4252674" as a inner join token_times as tt
+        on
+            date_trunc('hour', a.minute) = tt.hour
+            and a.contract_address = tt.token_address
+            and a.blockchain = '{{blockchain}}'
+    group by 1, 2, 3, 4
 ),
 
 -- the Dune price feed; note that this is computed on Dune and is not part of the imported_price_feeds_raw table.
 dune_price_feed as (
     select -- noqa: ST06
-        date_trunc('hour', minute) as hour, --noqa: RF04
-        token_address,
-        decimals,
-        avg(price) as price_unit
-    from
-        prices.usd
-    inner join token_times
+        date_trunc('hour', a.minute) as hour, --noqa: RF04
+        a.token_address,
+        a.decimals,
+        avg(a.price) as price_unit,
+        avg(a.price) / pow(10, a.decimals) as price_atom -- this is needed later on
+    from prices.usd as a inner join token_times as tt
         on
-            date_trunc('hour', minute) = hour
-            and contract_address = token_address
-            and blockchain = '{{blockchain}}'
+            date_trunc('hour', minute) = tt.hour
+            and a.contract_address = tt.token_address
+            and a.blockchain = '{{blockchain}}'
     group by 1, 2, 3
 ),
 
+-- we now collect together all different price feeds that we have
+all_price_feeds as (
+    select
+        source as price_source,
+        hour,
+        token_address,
+        decimals,
+        price_unit
+    from imported_price_feeds
+    union all
+    select
+        'dune' as price_source,
+        hour,
+        token_address,
+        decimals,
+        price_unit
+    from dune_price_feed
+),
+
 -- we are now ready to define a new price feed that is the median of all price feeds defined above
--- there are 2 tables for this purpose, and the code for the median is based on the No.2 section
+-- there is an intermediate table to help with the calculation,
+-- and the code for the median is based on the No.2 section
 -- of this article: https://medium.com/learning-sql/how-to-calculate-median-the-right-way-in-postgresql-f7b84e9e2df7
 intermediate_compute_median_table as (
     select
@@ -65,11 +89,7 @@ intermediate_compute_median_table as (
         price_unit,
         row_number() over (partition by hour, token_address, decimals order by price_unit asc) as rn_asc,
         count(*) over (partition by hour, token_address, decimals) as ct
-    from (
-        select * from dune_price_feed
-        union all
-        select * from imported_price_feeds
-    )
+    from all_price_feeds
 ),
 
 -- this is the final table generated, that uses the median of all price feeds
@@ -86,8 +106,8 @@ multiple_price_feeds as (
     group by 1, 2, 3
 ),
 
--- We now define the precise_prices table, which refers to prices that 
--- we have directly computed from various price feeds.
+-- We now define the precise_prices table, and there are 2 options to choose from,
+-- either the multiple_price_feeds table or the dune_price_feed
 precise_prices as (
     select *
     from {{price_feed}}
