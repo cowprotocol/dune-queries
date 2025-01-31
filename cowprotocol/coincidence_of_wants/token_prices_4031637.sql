@@ -6,9 +6,9 @@
 --  {{blockchain}} - network to run the analysis on
 --
 -- The returned table has columns:
--- - block_time: time a a settlement transaction
+-- - block_time: time of a settlement transaction
 -- - tx_hash: settlement transaction hash
--- - token_address:
+-- - token_address: contract address of a token
 -- - token_price: price in USD of one _atom_ of a token
 --
 -- Prices are either fetched from the trades table which contains Dune prices if they exist,
