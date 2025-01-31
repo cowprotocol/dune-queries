@@ -31,7 +31,7 @@ imported_price_feeds as (
     select --noqa: ST06
         a.source,
         date_trunc('hour', a.minute) as hour, --noqa: RF04
-        a.token_address,
+        a.contract_address as token_address,
         a.decimals,
         avg(a.price) as price_unit
     from "query_4252674" as a inner join token_times as tt
@@ -46,7 +46,7 @@ imported_price_feeds as (
 dune_price_feed as (
     select -- noqa: ST06
         date_trunc('hour', a.minute) as hour, --noqa: RF04
-        a.token_address,
+        a.contract_address as token_address,
         a.decimals,
         avg(a.price) as price_unit,
         avg(a.price) / pow(10, a.decimals) as price_atom -- this is needed later on
