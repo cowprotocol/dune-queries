@@ -8,7 +8,7 @@ Additional information can be found in the [documentation](https://docs.cow.fi/c
 
 ![Structure of slippage query](slippage.svg)
 
-The figure was generated using [](draw.io).
+The figure was generated using https://app.diagrams.net/.
 
 ## Notes
 
