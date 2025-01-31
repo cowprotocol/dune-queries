@@ -1,12 +1,14 @@
 # Slippage accounting
 
-The queries in this folder are used for slippage accounting on CoW Protocol. Results are used for solver payments in [https://github.com/cowprotocol/solver-rewards]. Additional information can be found in the [documentation](https://docs.cow.fi/cow-protocol/reference/core/auctions/accounting#slippage).
+The queries in this folder are used for slippage accounting on CoW Protocol.
+Results are used for solver payments in https://github.com/cowprotocol/solver-rewards.
+Additional information can be found in the [documentation](https://docs.cow.fi/cow-protocol/reference/core/auctions/accounting#slippage).
 
 ## Query structure
 
 ![Structure of slippage query](slippage.svg)
 
-The figure was generated using [draw.io].
+The figure was generated using [](draw.io).
 
 ## Notes
 
