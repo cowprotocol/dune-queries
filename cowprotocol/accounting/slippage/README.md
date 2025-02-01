@@ -12,6 +12,6 @@ The figure was generated using https://app.diagrams.net/.
 
 ## Notes
 
-- Slippage depends on raw token imbalances as well information on protocol and network fees.
+- Slippage depends on raw token imbalances as well as information on protocol and network fees.
 - Slippage in different tokens is converted to ETH using the Dune price feed `prices.usd`, as implemented in `slippage_prices_4064601.sql`. The price feed uses hourly prices. If a price is _not_ available in the feed, exchange rates from CoW Protocol are used to reconstruct a price. If no price can be reconstructed, settlements are excluded from slippage.
 - The file `slippage_query_3427730.sql` is a wrapper to make results from slippage conform to the format used in `solver-rewards`.
