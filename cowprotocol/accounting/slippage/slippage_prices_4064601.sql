@@ -49,8 +49,7 @@ dune_price_feed as (
         date_trunc('hour', a.minute) as hour, --noqa: RF04
         a.contract_address as token_address,
         a.decimals,
-        avg(a.price) as price_unit,
-        avg(a.price) / pow(10, a.decimals) as price_atom -- this is needed later on
+        avg(a.price) as price_unit
     from prices.usd as a inner join token_times as tt
         on
             date_trunc('hour', a.minute) = tt.hour
@@ -90,8 +89,7 @@ median_price_feed as (
         hour,
         token_address,
         decimals,
-        avg(price_unit) as price_unit,
-        avg(price_unit) / pow(10, decimals) as price_atom
+        avg(price_unit) as price_unit
     from intermediate_compute_median_table
     where rn_asc between ct / 2.0 and ct / 2.0 + 1
     group by 1, 2, 3
@@ -113,15 +111,13 @@ intrinsic_prices as (
         hour,
         token_address,
         decimals,
-        avg(price_unit) as price_unit,
-        avg(price_atom) as price_atom
+        avg(price_unit) as price_unit
     from (
         select
             date_trunc('hour', block_time) as hour, --noqa: RF04
             buy_token_address as token_address,
             round(log(10, atoms_bought / units_bought)) as decimals,
-            usd_value / units_bought as price_unit,
-            usd_value / atoms_bought as price_atom
+            usd_value / units_bought as price_unit
         from cow_protocol_{{blockchain}}.trades
         where
             block_time >= cast('{{start_time}}' as timestamp) and block_time < cast('{{end_time}}' as timestamp)
@@ -131,8 +127,7 @@ intrinsic_prices as (
             date_trunc('hour', block_time) as hour, --noqa: RF04
             sell_token_address as token_address,
             round(log(10, atoms_sold / units_sold)) as decimals,
-            usd_value / units_sold as price_unit,
-            usd_value / atoms_sold as price_atom
+            usd_value / units_sold as price_unit
         from cow_protocol_{{blockchain}}.trades
         where
             block_time >= cast('{{start_time}}' as timestamp) and block_time < cast('{{end_time}}' as timestamp)
@@ -156,9 +151,9 @@ prices as (
             intrinsic.price_unit
         ) as price_unit,
         coalesce(
-            precise.price_atom,
-            intrinsic.price_atom
-        ) as price_atom
+            precise.price_unit,
+            intrinsic.price_unit
+        ) / pow(10, coalesce(precise.decimals, intrinsic.decimals)) as price_atom
     from token_times as tt
     left join precise_prices as precise
         on
