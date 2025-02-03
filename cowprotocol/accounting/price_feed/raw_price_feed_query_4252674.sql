@@ -43,4 +43,3 @@ select -- noqa: ST06
 from imported_prices_per_minute as ippm
 inner join prices.usd as p on ippm.minute = p.minute
 where p.contract_address = 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2 and p.blockchain = 'ethereum'
-order by ippm.minute desc --noqa: AM06
