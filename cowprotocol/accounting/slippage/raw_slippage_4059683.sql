@@ -6,7 +6,8 @@
 --  {{blockchain}} - network to run the analysis on
 --  {{raw_slippage_table_name}} - raw_slippage_breakdown for a detailed per token breakdown of
 --    slippage; raw_slippage_per_transaction for aggregated values per transaction
---  {{price_feed}} -- option to user either the dune_price_feed (which has been used up till now) or the median of multiple_price_feeds
+--  {{price_feed}} -- option to user either the dune_price_feed (which has been used up till now) or the median_price_feed, which
+--    considers the median over multiple price feeds
 --
 -- The columns of raw_slippage_breakdown are
 -- - block_time: time of settlement transaction
@@ -47,7 +48,7 @@ fees as (
         -amount as amount,
         fee_type as slippage_type,
         date_trunc('hour', block_time) as hour --noqa: RF04
-    from "query_4058574(blockchain='{{blockchain}}',price_feed='{{price_feed}}',start_time='{{start_time}}',end_time='{{end_time}}')"
+    from "query_4058574(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')"
 ),
 
 imbalances as (
@@ -57,7 +58,7 @@ imbalances as (
 ),
 
 prices as (
-    select * from "query_4064601(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')"
+    select * from "query_4064601(blockchain='{{blockchain}}',price_feed='{{price_feed}}',start_time='{{start_time}}',end_time='{{end_time}}')"
 ),
 
 raw_slippage_breakdown as (
