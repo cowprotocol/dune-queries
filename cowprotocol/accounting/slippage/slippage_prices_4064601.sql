@@ -29,7 +29,7 @@ with token_times as (
 -- Fetching all additional price feeds that are synced to Dune
 imported_price_feeds as (
     select --noqa: ST06
-        a.source,
+        a.source as price_source,
         date_trunc('hour', a.minute) as hour, --noqa: RF04
         a.contract_address as token_address,
         a.decimals,
@@ -45,6 +45,7 @@ imported_price_feeds as (
 -- the Dune price feed; note that this is computed on Dune and is not part of the imported_price_feeds_raw table.
 dune_price_feed as (
     select -- noqa: ST06
+        'dune' as price_source,
         date_trunc('hour', a.minute) as hour, --noqa: RF04
         a.contract_address as token_address,
         a.decimals,
@@ -60,20 +61,10 @@ dune_price_feed as (
 
 -- we now collect together all different price feeds that we have
 all_price_feeds as (
-    select
-        source as price_source,
-        hour,
-        token_address,
-        decimals,
-        price_unit
+    select *
     from imported_price_feeds
     union all
-    select
-        'dune' as price_source,
-        hour,
-        token_address,
-        decimals,
-        price_unit
+    select *
     from dune_price_feed
 ),
 
@@ -208,5 +199,5 @@ native_token_prices as (
 )
 
 select * from prices
-union all
+union distinct -- new price feeds might already entries for the native token
 select * from native_token_prices
