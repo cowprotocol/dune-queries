@@ -8,7 +8,7 @@ solver_slippage as (
     select
         solver_address as solver,
         slippage_wei * 1.0 / pow(10, 18) as slippage
-    from "query_4070065(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}',slippage_table_name='slippage_per_solver')"
+    from "query_4070065(blockchain='{{blockchain}}',price_feed='dune_price_feed',start_time='{{start_time}}',end_time='{{end_time}}',slippage_table_name='slippage_per_solver')"
 ),
 
 named_results as (

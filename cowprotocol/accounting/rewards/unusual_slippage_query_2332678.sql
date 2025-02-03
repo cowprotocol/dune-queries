@@ -8,7 +8,7 @@
 --  {{price_feed}} -- option to user either the dune_price_feed (which has been used up till now) or the median_price_feed
 with
 results_per_tx as (
-    select * from "query_4070065(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}',slippage_table_name='slippage_per_transaction')"
+    select * from "query_4070065(blockchain='{{blockchain}}',price_feed='dune_price_feed',start_time='{{start_time}}',end_time='{{end_time}}',slippage_table_name='slippage_per_transaction')"
 ),
 
 url_helper as (
