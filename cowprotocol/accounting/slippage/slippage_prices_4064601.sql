@@ -85,7 +85,7 @@ intermediate_compute_median_table as (
 
 -- this is the final table generated, that uses the median of all price feeds
 -- to compute a final price.
-multiple_price_feeds as (
+median_price_feed as (
     select
         hour,
         token_address,

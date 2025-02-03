@@ -4,4 +4,4 @@ end_time='2024-08-02 12:00'
 blockchain='ethereum'
 slippage_table_name=slippage_per_solver,slippage_per_transaction
 raw_slippage_table_name=raw_slippage_breakdown,raw_slippage_per_transaction
-price_feed=dune_price_feed,multiple_price_feeds
+price_feed=dune_price_feed,median_price_feed
