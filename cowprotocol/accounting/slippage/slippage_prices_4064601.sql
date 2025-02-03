@@ -6,7 +6,7 @@
 --  {{start_time}} - the timestamp for which the analysis should start (inclusively)
 --  {{end_time}} - the timestamp for which the analysis should end (exclusively)
 --  {{blockchain}} - network to run the analysis on
---  {{price_feed}} -- option to user either the dune_price_feed (which has been used up till now) or the median of multiple_price_feeds
+--  {{price_feed}} -- option to user either the dune_price_feed (which has been used up till now) or the median_price_feed
 --
 -- The columns of the result are
 -- - hour: hour for which a price is valid
@@ -98,7 +98,7 @@ median_price_feed as (
 ),
 
 -- We now define the precise_prices table, and there are 2 options to choose from,
--- either the multiple_price_feeds table or the dune_price_feed
+-- either the median_price_feed table or the dune_price_feed
 precise_prices as (
     select *
     from {{price_feed}}
