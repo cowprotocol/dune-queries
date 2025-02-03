@@ -53,7 +53,7 @@ dune_price_feed as (
         avg(a.price) / pow(10, a.decimals) as price_atom -- this is needed later on
     from prices.usd as a inner join token_times as tt
         on
-            date_trunc('hour', minute) = tt.hour
+            date_trunc('hour', a.minute) = tt.hour
             and a.contract_address = tt.token_address
             and a.blockchain = '{{blockchain}}'
     group by 1, 2, 3
