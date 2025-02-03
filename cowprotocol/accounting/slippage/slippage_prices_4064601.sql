@@ -55,7 +55,7 @@ dune_price_feed as (
             date_trunc('hour', a.minute) = tt.hour
             and a.contract_address = tt.token_address
             and a.blockchain = '{{blockchain}}'
-    group by 1, 2, 3
+    group by 1, 2, 3, 4
 ),
 
 -- we now collect together all different price feeds that we have
