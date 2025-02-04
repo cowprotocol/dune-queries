@@ -16,7 +16,7 @@ WITH block_range AS (
 
 final_fee AS (
     --TODO: remove the 2/3 once the fee increment should also be reflected in the payment due query (not just in announcing the new fee)
-    SELECT avg_block_fee_wei * 2 / 3 as avg_block_fee_wei
+    SELECT avg_block_fee_wei * 2 / 3 AS avg_block_fee_wei
     FROM "query_4002039(start='{{fee_computation_start}}', end='{{fee_computation_end}}')"
 ),
 
