@@ -4,6 +4,7 @@
 --  {{start_time}} - the timestamp for which the accounting should start (inclusively)
 --  {{end_time}} - the timestamp for which the accounting should end (exclusively)
 --  {{result}} - two views of the result, one aggregated and one on a per tx basis
+--  {{blockchain}} - the blockchain for which to fetch the data
 
 with
 per_trade_protocol_fees as (
