@@ -153,7 +153,7 @@ SELECT
     COALESCE(user_tip_wei, 0) AS user_tip_wei,
     COALESCE(SUM(backrun_value_wei), 0) AS backrun_value_wei,
     COALESCE(SUM(backrun_tip_wei), 0) AS backrun_tip_wei,
-    CAST(0.2 * (COALESCE(user_tip_wei, 0) + COALESCE(SUM(backrun_tip_wei), 0) + (COALESCE(SUM(backrun_value_wei), 0) / 9)) AS UINT256) AS tx_mevblocker_fee_wei
+    CAST(0.3 * (COALESCE(user_tip_wei, 0) + COALESCE(SUM(backrun_tip_wei), 0) + (COALESCE(SUM(backrun_value_wei), 0) / 9)) AS UINT256) AS tx_mevblocker_fee_wei
 FROM user_txs AS u
 LEFT JOIN searcher_txs AS searcher
     ON u.hash = searcher.tx_1
