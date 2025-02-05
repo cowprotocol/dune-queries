@@ -41,7 +41,7 @@ slippage_per_transaction as (
         sum(if(slippage_type = 'raw_imbalance', slippage_usd, 0)) as imbalance_usd,
         sum(if(slippage_type = 'protocol_fee', -slippage_usd, 0)) as protocol_fee_usd,
         sum(if(slippage_type = 'network_fee', -slippage_usd, 0)) as network_fee_usd
-    from "query_4059683(blockchain='{{blockchain}}',price_feed='dune_price_feed',start_time='{{start_time}}',end_time='{{end_time}}',raw_slippage_table_name='raw_slippage_breakdown')" as rs
+    from "query_4059683(blockchain='{{blockchain}}',price_feed='{{price_feed}}',start_time='{{start_time}}',end_time='{{end_time}}',raw_slippage_table_name='raw_slippage_breakdown')" as rs
     inner join cow_protocol_{{blockchain}}.batches as b
         on rs.tx_hash = b.tx_hash
     where rs.tx_hash not in (select tx_hash from excluded_batches)

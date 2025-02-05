@@ -58,7 +58,7 @@ imbalances as (
 ),
 
 prices as (
-    select * from "query_4064601(blockchain='{{blockchain}}',price_feed='dune_price_feed',start_time='{{start_time}}',end_time='{{end_time}}')"
+    select * from "query_4064601(blockchain='{{blockchain}}',price_feed='{{price_feed}}',start_time='{{start_time}}',end_time='{{end_time}}')"
 ),
 
 raw_slippage_breakdown as (
