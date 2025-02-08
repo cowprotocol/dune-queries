@@ -96,6 +96,7 @@ last_tx_in_bundle AS (
 searcher_txs AS (
     SELECT
         m.tx_1,
+        m.tx_from_1,
         m.hash AS search_tx,
         m.index,
         m.block_number,
@@ -116,7 +117,9 @@ kickback_txs AS (
         et.hash,
         st.search_tx,
         st.tx_1 AS target_tx,
+        st.tx_from_1 AS target_from,
         value AS backrun_value_wei,
+        et.to AS refund_recipient,
         CAST(et.gas_used AS uint256) * (et.gas_price - COALESCE(b.base_fee_per_gas, 0)) AS backrun_tip_wei
     FROM searcher_txs AS st
     INNER JOIN ethereum_transactions_filtered AS et
@@ -139,6 +142,7 @@ user_txs AS (
         tx.block_time,
         tx.block_number,
         tx.hash,
+        tx.tx_from,
         CAST(tx.gas_used AS uint256) * (tx.gas_price - COALESCE(b.base_fee_per_gas, 0)) AS user_tip_wei
     FROM mev_blocker_tx AS tx
     LEFT JOIN ethereum.blocks AS b ON block_number = number
@@ -146,7 +150,7 @@ user_txs AS (
         tx.hash NOT IN (SELECT search_tx FROM searcher_txs)
         AND CAST(tx.hash AS varchar) NOT IN (SELECT hash FROM nonexclusive_flow)
     -- deduplicate approve txs that appear in bundles and individually
-    GROUP BY 1, 2, 3, 4
+    GROUP BY 1, 2, 3, 4, 5
 )
 
 -- coalesce is needed because of the outer join
@@ -154,11 +158,14 @@ SELECT
     COALESCE(u.block_time, kickback.block_time) AS block_time,
     COALESCE(u.block_number, kickback.block_number) AS block_number,
     COALESCE(u.hash, kickback.target_tx) AS hash,
+    COALESCE(u.tx_from, kickback.target_from) AS address,
     ARRAY_AGG(searcher.search_tx) AS searcher_txs,
     ARRAY_AGG(kickback.hash) AS kickback_txs,
     COALESCE(user_tip_wei, 0) AS user_tip_wei,
     COALESCE(SUM(backrun_value_wei), 0) AS backrun_value_wei,
     COALESCE(SUM(backrun_tip_wei), 0) AS backrun_tip_wei,
+    -- in practice there is only a single refund recipient per target transaction. Collapsing using the largest is a bit hacky but should work.
+    MAX(refund_recipient) AS refund_recipient,
     CAST(0.3 * (COALESCE(user_tip_wei, 0) + COALESCE(SUM(backrun_tip_wei), 0) + (COALESCE(SUM(backrun_value_wei), 0) / 9)) AS uint256) AS tx_mevblocker_fee_wei
 FROM user_txs AS u
 LEFT JOIN searcher_txs AS searcher
@@ -168,4 +175,4 @@ FULL JOIN kickback_txs AS kickback
     ON
         u.hash = kickback.target_tx
         AND searcher.search_tx = kickback.search_tx
-GROUP BY 1, 2, 3, 6
+GROUP BY 1, 2, 3, 4, 7
