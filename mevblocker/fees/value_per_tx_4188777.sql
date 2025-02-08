@@ -13,13 +13,19 @@ WITH block_range AS (
         AND time < TIMESTAMP '{{end}}'
 ),
 
--- perfomance optimisation: all mempool tx according to flashbots during that timeframe
-mempool AS (
+-- perfomance optimisation: all non exclusive txs according to flashbots and titan during that timeframe
+nonexclusive_flow AS (
     SELECT DISTINCT hash
     FROM dune.flashbots.dataset_mempool_dumpster
     WHERE
         included_at_block_height >= (SELECT start_block FROM block_range)
         AND included_at_block_height < (SELECT end_block FROM block_range)
+    UNION
+    SELECT DISTINCT cast(hash as varchar)
+    FROM dune.gattacahq.mev_blocker_non_exclusive_txs
+    WHERE
+        block_timestamp >= TIMESTAMP '{{start}}'
+        AND block_timestamp < TIMESTAMP '{{end}}'
 
 ),
 
@@ -127,7 +133,7 @@ kickback_txs AS (
 ),
 
 -- all original (user) transactions, calculating the tip of these transactions
--- excluding transactions that were in the public mempool
+-- excluding transactions that were non-exclusive
 user_txs AS (
     SELECT
         tx.block_time,
@@ -138,7 +144,7 @@ user_txs AS (
     LEFT JOIN ethereum.blocks AS b ON block_number = number
     WHERE
         tx.hash NOT IN (SELECT search_tx FROM searcher_txs)
-        AND CAST(tx.hash AS VARCHAR) NOT IN (SELECT hash FROM mempool)
+        AND CAST(tx.hash AS VARCHAR) NOT IN (SELECT hash FROM nonexclusive_flow)
     -- deduplicate approve txs that appear in bundles and individually
     GROUP BY 1, 2, 3, 4
 )
