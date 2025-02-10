@@ -13,13 +13,19 @@ WITH block_range AS (
         AND time < TIMESTAMP '{{end}}'
 ),
 
--- perfomance optimisation: all mempool tx according to flashbots during that timeframe
-mempool AS (
+-- perfomance optimisation: all non exclusive txs according to flashbots and titan during that timeframe
+nonexclusive_flow AS (
     SELECT DISTINCT hash
     FROM dune.flashbots.dataset_mempool_dumpster
     WHERE
         included_at_block_height >= (SELECT start_block FROM block_range)
         AND included_at_block_height < (SELECT end_block FROM block_range)
+    UNION DISTINCT
+    SELECT DISTINCT CAST(hash AS varchar)
+    FROM dune.gattacahq.mev_blocker_non_exclusive_txs
+    WHERE
+        block_timestamp >= TIMESTAMP '{{start}}'
+        AND block_timestamp < TIMESTAMP '{{end}}'
 
 ),
 
@@ -52,8 +58,8 @@ mev_blocker_tx AS (
         et.block_time,
         et.gas_used,
         et.gas_price,
-        FROM_HEX(CAST(JSON_EXTRACT(mb.transactions, '$[0].hash') AS VARCHAR)) AS tx_1,
-        FROM_HEX(CAST(JSON_EXTRACT(mb.transactions, '$[0].from') AS VARCHAR)) AS tx_from_1,
+        FROM_HEX(CAST(JSON_EXTRACT(mb.transactions, '$[0].hash') AS varchar)) AS tx_1,
+        FROM_HEX(CAST(JSON_EXTRACT(mb.transactions, '$[0].from') AS varchar)) AS tx_from_1,
         FROM_HEX(jt.hash) AS hash
     FROM
         mev_blocker_filtered AS mb
@@ -62,7 +68,7 @@ mev_blocker_tx AS (
             mb.transactions,
             'lax $[*]' COLUMNS(
                 row_number for ordinality,
-                hash VARCHAR(255) PATH 'lax $.hash'
+                hash VARCHAR(255) path 'lax $.hash'
             )
         ) AS jt
     INNER JOIN ethereum_transactions_filtered AS et
@@ -111,7 +117,7 @@ kickback_txs AS (
         st.search_tx,
         st.tx_1 AS target_tx,
         value AS backrun_value_wei,
-        CAST(et.gas_used AS UINT256) * (et.gas_price - COALESCE(b.base_fee_per_gas, 0)) AS backrun_tip_wei
+        CAST(et.gas_used AS uint256) * (et.gas_price - COALESCE(b.base_fee_per_gas, 0)) AS backrun_tip_wei
     FROM searcher_txs AS st
     INNER JOIN ethereum_transactions_filtered AS et
         ON
@@ -127,18 +133,18 @@ kickback_txs AS (
 ),
 
 -- all original (user) transactions, calculating the tip of these transactions
--- excluding transactions that were in the public mempool
+-- excluding transactions that were non-exclusive
 user_txs AS (
     SELECT
         tx.block_time,
         tx.block_number,
         tx.hash,
-        CAST(tx.gas_used AS UINT256) * (tx.gas_price - COALESCE(b.base_fee_per_gas, 0)) AS user_tip_wei
+        CAST(tx.gas_used AS uint256) * (tx.gas_price - COALESCE(b.base_fee_per_gas, 0)) AS user_tip_wei
     FROM mev_blocker_tx AS tx
     LEFT JOIN ethereum.blocks AS b ON block_number = number
     WHERE
         tx.hash NOT IN (SELECT search_tx FROM searcher_txs)
-        AND CAST(tx.hash AS VARCHAR) NOT IN (SELECT hash FROM mempool)
+        AND CAST(tx.hash AS varchar) NOT IN (SELECT hash FROM nonexclusive_flow)
     -- deduplicate approve txs that appear in bundles and individually
     GROUP BY 1, 2, 3, 4
 )
@@ -153,7 +159,7 @@ SELECT
     COALESCE(user_tip_wei, 0) AS user_tip_wei,
     COALESCE(SUM(backrun_value_wei), 0) AS backrun_value_wei,
     COALESCE(SUM(backrun_tip_wei), 0) AS backrun_tip_wei,
-    CAST(0.3 * (COALESCE(user_tip_wei, 0) + COALESCE(SUM(backrun_tip_wei), 0) + (COALESCE(SUM(backrun_value_wei), 0) / 9)) AS UINT256) AS tx_mevblocker_fee_wei
+    CAST(0.3 * (COALESCE(user_tip_wei, 0) + COALESCE(SUM(backrun_tip_wei), 0) + (COALESCE(SUM(backrun_value_wei), 0) / 9)) AS uint256) AS tx_mevblocker_fee_wei
 FROM user_txs AS u
 LEFT JOIN searcher_txs AS searcher
     ON u.hash = searcher.tx_1
