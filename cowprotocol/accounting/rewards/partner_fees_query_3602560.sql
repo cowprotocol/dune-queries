@@ -63,12 +63,14 @@ per_recipient_partner_fees as (
             when partner_recipient = 0x63695eee2c3141bde314c5a6f89b98e62808d716 then sum(0.9 * raw_integrator_fee_in_eth)
             when partner_recipient = 0xe37da2d07e769b7fcb808bdeaeffb84561ff4eca then sum(0.85 * raw_integrator_fee_in_eth)
             when partner_recipient = 0x352a3666b27bb09aca7b4a71ed624429b7549551 then sum(0.85 * raw_integrator_fee_in_eth)
+            when partner_recipient = 0x90a48d5cf7343b08da12e067680b4c6dbfe551be then sum(0.85 * raw_integrator_fee_in_eth)
             else sum(0.5 * raw_integrator_fee_in_eth)
         end as partner_fee_part,
         case
             when partner_recipient = 0x63695eee2c3141bde314c5a6f89b98e62808d716 then sum(0.1 * raw_integrator_fee_in_eth)
             when partner_recipient = 0xe37da2d07e769b7fcb808bdeaeffb84561ff4eca then sum(0.15 * raw_integrator_fee_in_eth)
             when partner_recipient = 0x352a3666b27bb09aca7b4a71ed624429b7549551 then sum(0.15 * raw_integrator_fee_in_eth)
+            when partner_recipient = 0x90a48d5cf7343b08da12e067680b4c6dbfe551be then sum(0.15 * raw_integrator_fee_in_eth)
             else sum(0.5 * raw_integrator_fee_in_eth)
         end as cow_dao_partner_fee_part
     from

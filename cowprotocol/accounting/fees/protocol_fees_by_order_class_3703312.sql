@@ -49,12 +49,14 @@ select
         when partner_recipient = '0x63695Eee2c3141BDE314C5a6f89B98E62808d716' then partner_fee_native_token * 0.90
         when partner_recipient = '0xe37da2d07e769b7fcb808bdeaeffb84561ff4eca' then partner_fee_native_token * 0.85
         when partner_recipient = '0x352a3666b27bb09aca7b4a71ed624429b7549551' then partner_fee_native_token * 0.85
+        when partner_recipient = '0x90a48d5cf7343b08da12e067680b4c6dbfe551be' then partner_fee_native_token * 0.85
         when partner_recipient is not null then partner_fee_native_token * 0.5
     end) as partner_fee_part,
     sum(case
         when partner_recipient = '0x63695Eee2c3141BDE314C5a6f89B98E62808d716' then partner_fee_native_token * 0.10
         when partner_recipient = '0xe37da2d07e769b7fcb808bdeaeffb84561ff4eca' then partner_fee_native_token * 0.15
         when partner_recipient = '0x352a3666b27bb09aca7b4a71ed624429b7549551' then partner_fee_native_token * 0.15
+        when partner_recipient = '0x90a48d5cf7343b08da12e067680b4c6dbfe551be' then partner_fee_native_token * 0.15
         when partner_recipient is not null then partner_fee_native_token * 0.5
     end) as cow_dao_partner_fee_part
 from protocol_fees_collected as f
