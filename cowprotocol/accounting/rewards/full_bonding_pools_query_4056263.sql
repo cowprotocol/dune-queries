@@ -26,8 +26,13 @@ full_bonding_pools as (
         from_hex('0xe78d5F3aba2B31C980bF5E35E05B3A55b8365b48') as pool_address,
         'Project Blanc' as pool_name,
         from_hex('0xCa99e3Fc7B51167eaC363a3Af8C9A185852D1622') as creator
+    union distinct
+    select
+        from_hex('0x0deb0ae9c4399c51289adb1f3ed83557a56df657') as pool_address,
+        'Rizzolver' as pool_name,
+        from_hex('0x042c9c6d52881dc7e70bf3e233b540a07377d26b') as creator
 )
 
+
 select *
-from
-    full_bonding_pools
+from full_bonding_pools
