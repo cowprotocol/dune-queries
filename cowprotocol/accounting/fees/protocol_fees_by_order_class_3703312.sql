@@ -46,12 +46,52 @@ select
     sum(net_protocol_fee_in_native_token) as net_protocol_fee_in_native_token,
     sum(partner_fee_native_token) as total_partner_fee,
     sum(case
-        when partner_recipient = '0x63695Eee2c3141BDE314C5a6f89B98E62808d716' then partner_fee_native_token * 0.90
-        when partner_recipient is not null then partner_fee_native_token * 0.85
+        -- mainnet
+        when '{{blockchain}}' = 'ethereum' and partner_recipient = '0x63695Eee2c3141BDE314C5a6f89B98E62808d716' then partner_fee_native_token * 0.90
+        when '{{blockchain}}' = 'ethereum' and partner_recipient = '0x352a3666b27bb09aca7b4a71ed624429b7549551' then partner_fee_native_token * 0.85
+        when '{{blockchain}}' = 'ethereum' and partner_recipient = '0xe37da2d07e769b7fcb808bdeaeffb84561ff4eca' then partner_fee_native_token * 0.85
+        when '{{blockchain}}' = 'ethereum' and partner_recipient = '0x90a48d5cf7343b08da12e067680b4c6dbfe551be' then partner_fee_native_token * 0.85
+        -- gnosis
+        when '{{blockchain}}' = 'gnosis' and partner_recipient = '0x63695Eee2c3141BDE314C5a6f89B98E62808d716' then partner_fee_native_token * 0.90
+        when '{{blockchain}}' = 'gnosis' and partner_recipient = '0x352a3666b27bb09aca7b4a71ed624429b7549551' then partner_fee_native_token * 0.85
+        when '{{blockchain}}' = 'gnosis' and partner_recipient = '0x8387fae9951724c00c753797b22b897111750673' then partner_fee_native_token * 0.85
+        when '{{blockchain}}' = 'gnosis' and partner_recipient = '0xb0E3175341794D1dc8E5F02a02F9D26989EbedB3' then partner_fee_native_token * 0.85
+        -- arbitrum
+        when '{{blockchain}}' = 'arbitrum' and partner_recipient = '0x63695Eee2c3141BDE314C5a6f89B98E62808d716' then partner_fee_native_token * 0.90
+        when '{{blockchain}}' = 'arbitrum' and partner_recipient = '0x352a3666b27bb09aca7b4a71ed624429b7549551' then partner_fee_native_token * 0.85
+        when '{{blockchain}}' = 'arbitrum' and partner_recipient = '0x86cd2bBC859E797B75D86E6eEEC1a726A9284c23' then partner_fee_native_token * 0.85
+        when '{{blockchain}}' = 'arbitrum' and partner_recipient = '0x38276553F8fbf2A027D901F8be45f00373d8Dd48' then partner_fee_native_token * 0.85
+        -- base
+        when '{{blockchain}}' = 'base' and partner_recipient = '0x63695Eee2c3141BDE314C5a6f89B98E62808d716' then partner_fee_native_token * 0.90
+        when '{{blockchain}}' = 'base' and partner_recipient = '0x352a3666b27bb09aca7b4a71ed624429b7549551' then partner_fee_native_token * 0.85
+        when '{{blockchain}}' = 'base' and partner_recipient = '0xAf1c727B605530AcDb00906a158E817f41aFD778' then partner_fee_native_token * 0.85
+        when '{{blockchain}}' = 'base' and partner_recipient = '0x9c9aA90363630d4ab1D9dbF416cc3BBC8d3Ed502' then partner_fee_native_token * 0.85
+        -- default
+        when partner_recipient is not null then partner_fee_native_token * 0.5
     end) as partner_fee_part,
     sum(case
-        when partner_recipient = '0x63695Eee2c3141BDE314C5a6f89B98E62808d716' then partner_fee_native_token * 0.10
-        when partner_recipient is not null then partner_fee_native_token * 0.15
+        -- mainnet
+        when '{{blockchain}}' = 'ethereum' and partner_recipient = '0x63695Eee2c3141BDE314C5a6f89B98E62808d716' then partner_fee_native_token * 0.10
+        when '{{blockchain}}' = 'ethereum' and partner_recipient = '0x352a3666b27bb09aca7b4a71ed624429b7549551' then partner_fee_native_token * 0.15
+        when '{{blockchain}}' = 'ethereum' and partner_recipient = '0xe37da2d07e769b7fcb808bdeaeffb84561ff4eca' then partner_fee_native_token * 0.15
+        when '{{blockchain}}' = 'ethereum' and partner_recipient = '0x90a48d5cf7343b08da12e067680b4c6dbfe551be' then partner_fee_native_token * 0.15
+        -- gnosis
+        when '{{blockchain}}' = 'gnosis' and partner_recipient = '0x63695Eee2c3141BDE314C5a6f89B98E62808d716' then partner_fee_native_token * 0.10
+        when '{{blockchain}}' = 'gnosis' and partner_recipient = '0x352a3666b27bb09aca7b4a71ed624429b7549551' then partner_fee_native_token * 0.15
+        when '{{blockchain}}' = 'gnosis' and partner_recipient = '0x8387fae9951724c00c753797b22b897111750673' then partner_fee_native_token * 0.15
+        when '{{blockchain}}' = 'gnosis' and partner_recipient = '0xb0E3175341794D1dc8E5F02a02F9D26989EbedB3' then partner_fee_native_token * 0.15
+        -- arbitrum
+        when '{{blockchain}}' = 'arbitrum' and partner_recipient = '0x63695Eee2c3141BDE314C5a6f89B98E62808d716' then partner_fee_native_token * 0.10
+        when '{{blockchain}}' = 'arbitrum' and partner_recipient = '0x352a3666b27bb09aca7b4a71ed624429b7549551' then partner_fee_native_token * 0.15
+        when '{{blockchain}}' = 'arbitrum' and partner_recipient = '0x86cd2bBC859E797B75D86E6eEEC1a726A9284c23' then partner_fee_native_token * 0.15
+        when '{{blockchain}}' = 'arbitrum' and partner_recipient = '0x38276553F8fbf2A027D901F8be45f00373d8Dd48' then partner_fee_native_token * 0.15
+        -- base
+        when '{{blockchain}}' = 'base' and partner_recipient = '0x63695Eee2c3141BDE314C5a6f89B98E62808d716' then partner_fee_native_token * 0.10
+        when '{{blockchain}}' = 'base' and partner_recipient = '0x352a3666b27bb09aca7b4a71ed624429b7549551' then partner_fee_native_token * 0.15
+        when '{{blockchain}}' = 'base' and partner_recipient = '0xAf1c727B605530AcDb00906a158E817f41aFD778' then partner_fee_native_token * 0.15
+        when '{{blockchain}}' = 'base' and partner_recipient = '0x9c9aA90363630d4ab1D9dbF416cc3BBC8d3Ed502' then partner_fee_native_token * 0.15
+        -- default
+        when partner_recipient is not null then partner_fee_native_token * 0.5
     end) as cow_dao_partner_fee_part
 from protocol_fees_collected as f
 inner join cow_protocol_{{blockchain}}.trades as t
