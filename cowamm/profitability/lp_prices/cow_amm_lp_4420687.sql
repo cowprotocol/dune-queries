@@ -12,7 +12,7 @@ with date_range as (
     from
         unnest(sequence(
             date(timestamp '{{start}}'),
-            date(timestamp '{{end}}')
+            least(date(timestamp '{{end}}'), current_date)
         )) t (day) --noqa: AL01
 ),
 
@@ -25,7 +25,9 @@ cow_amm_pool as (
         created_at,
         token_1_address as token0,
         token_2_address as token1,
-        address as contract_address
+        address as contract_address,
+        token_1_weight as weight0,
+        token_2_weight as weight1
     from dune.cowprotocol.result_balancer_co_w_am_ms
     where blockchain = '{{blockchain}}'
 ),
@@ -71,6 +73,8 @@ select * from(
         token0,
         token1,
         d.day,
+        weight0,
+        weight1,
         price0.price as price0,
         price1.price as price1,
         price0.decimals as decimals0,
