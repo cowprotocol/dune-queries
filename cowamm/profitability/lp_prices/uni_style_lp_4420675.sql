@@ -22,11 +22,12 @@ uni_style_pools as(
         u.project,
         --cow amms can have multiple pools for a same pair
         min(c.created_at) as cow_created_at
-    from "query_4420646(blockchain = 'ethereum')" as u
+    from "query_4420646(blockchain = '{{blockchain}}')" as u
     inner join cow_amm_pools as c
         on 
-            (u.token0 = c.token_1_address and u.token1 = c.token_2_address)
-            or (u.token1 = c.token_1_address and u.token0 = c.token_2_address)
+            ((u.token0 = c.token_1_address and u.token1 = c.token_2_address)
+            or (u.token1 = c.token_1_address and u.token0 = c.token_2_address))
+            and '{{blockchain}}' = c.blockchain
     group by 1, 2, 3, 4, 5
 ),
 
