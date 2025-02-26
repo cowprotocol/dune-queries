@@ -5,7 +5,7 @@
 --  {{start}}: The start date of the analysis
 --  {{end}}: The end date of the analysis. date(Timestamp) <= date(timestamp '{{end}}').
 --      For a 1 day period, {{end}} = {{start}}
--- Hard coded start for the events scan to '2024-07-01', month of the Balancer AMMs launch
+-- Hard coded start for the events scan to '2024-07-29', month of the Balancer AMMs launch
 
 with date_range as (
     select t.day
@@ -42,8 +42,17 @@ lp_balance_delta as (
         on p.contract_address = t.contract_address
     where
         ("from" = 0x0000000000000000000000000000000000000000 or "to" = 0x0000000000000000000000000000000000000000)
-        and evt_block_time >= timestamp '2024-07-01'
+        and evt_block_time >= timestamp '2024-07-29'
     group by 1, 2
+),
+
+lp_reserve_first as (
+    select
+        contract_address,
+        sum(lp_transfer) as lp_reserve_first
+    from lp_balance_delta
+    where day < date(timestamp '{{start}}')
+    group by contract_address
 ),
 
 reserves_delta as (
@@ -62,9 +71,20 @@ reserves_delta as (
     where
         t.contract_address in (p.token0, p.token1)
         -- transfers can only happen after the creation of the pool which happens after the launch
-        and evt_block_time >= timestamp '2024-07-01'
+        and evt_block_time >= timestamp '2024-07-29'
     group by 1, 2, 3
+),
+
+reserves_first as (
+    select
+        contract_address,
+        token,
+        sum(transfer) as reserve_first
+    from reserves_delta
+    where day < date(timestamp '{{start}}')
+    group by contract_address, token
 )
+
 
 select * from(
     select
@@ -79,37 +99,45 @@ select * from(
         price1.price as price1,
         price0.decimals as decimals0,
         price1.decimals as decimals1,
-        sum(coalesce(l.lp_transfer, 0)) over (
+        coalesce(coalesce(lrf.lp_reserve_first, 0) + sum(coalesce(l.lp_transfer, 0)) over (
             partition by p.contract_address
             order by d.day asc
             rows between unbounded preceding and 1 preceding
-            ) as lp_reserve,
-        sum(coalesce(r0.transfer, 0)) over (
+        ), 0) as lp_reserve,
+        coalesce(coalesce(rf0.reserve_first, 0) + sum(coalesce(r0.transfer, 0)) over (
             partition by p.contract_address
             order by d.day asc
             rows between unbounded preceding and 1 preceding
-        ) as reserve0,
-        sum(coalesce(r1.transfer, 0)) over (
+        ), 0) as reserve0,
+        coalesce(coalesce(rf1.reserve_first, 0) + sum(coalesce(r1.transfer, 0)) over (
             partition by p.contract_address
             order by d.day asc
             rows between unbounded preceding and 1 preceding
-        ) as reserve1
+        ), 0) as reserve1
     from date_range as d
     cross join cow_amm_pool as p
     left join lp_balance_delta as l
         on
             d.day = l.day
             and p.contract_address = l.contract_address
+    left join lp_reserve_first as lrf
+        on p.contract_address = lrf.contract_address
     left join reserves_delta as r0
         on
             d.day = r0.day
             and p.contract_address = r0.contract_address
             and p.token0 = r0.token
+    left join reserves_first as rf0
+        on p.contract_address = rf0.contract_address
+        and p.token0 = rf0.token
     left join reserves_delta as r1
         on
             d.day = r1.day
             and p.contract_address = r1.contract_address
             and p.token1 = r1.token
+    left join reserves_first as rf1
+        on p.contract_address = rf1.contract_address
+        and p.token1 = rf1.token
     left join prices.day as price0
         on
             d.day = price0.timestamp

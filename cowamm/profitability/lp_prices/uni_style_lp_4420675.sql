@@ -36,7 +36,7 @@ date_range as (
     from
         unnest(sequence(
             date(timestamp '{{start}}'),
-            date(timestamp '{{end}}')
+            least(date(timestamp '{{end}}'), date(now()))
         )) t (day) --noqa: AL01
 ),
 
@@ -51,7 +51,17 @@ lp_balance_delta as (
     where
         ("from" = 0x0000000000000000000000000000000000000000 or "to" = 0x0000000000000000000000000000000000000000)
         and evt_block_time >= date(u.created_at)
+        and date(evt_block_time) <= least(date(timestamp '{{end}}'), date(now()))
     group by 1, 2
+),
+
+lp_reserve_first as (
+    select
+        contract_address,
+        sum(lp_transfer) as lp_reserve_first
+    from lp_balance_delta
+    where day < date(timestamp '{{start}}')
+    group by contract_address
 ),
 
 syncs as (
@@ -67,6 +77,22 @@ syncs as (
     where
         topic0 = 0x1c411e9a96e071241c2f21f7726b17ae89e3cab4c78be50e062b03a9fffbbad1 -- Sync
         and logs.block_time >= date(u.created_at)
+        and date(logs.block_time) <= least(date(timestamp '{{end}}'), date(now()))
+),
+
+syncs_first as(
+    select *
+    from (
+        select
+            contract_address,
+            reserve0,
+            reserve1,
+            rank() over (partition by contract_address order by day desc) as latest_first
+        from syncs
+        where day < date(timestamp '{{start}}')
+            and latest = 1
+    )
+    where latest_first = 1
 )
 
 select *
@@ -79,24 +105,24 @@ from (
         u.token0,
         u.token1,
         u.project,
-        sum(coalesce(l.lp_transfer, 0)) over (
+        coalesce(lrf.lp_reserve_first, 0) + coalesce(sum(coalesce(l.lp_transfer, 0)) over (
             partition by u.contract_address
             order by d.day asc
             rows between unbounded preceding and 1 preceding
-        ) as lp_reserve,
+        ),0) as lp_reserve,
         coalesce(
             last_value(s.reserve0) over (
                 partition by s.contract_address 
                 order by s.day asc 
                 rows between unbounded preceding and 1 preceding),
-            0
+            sf.reserve0, 0
         ) as reserve0,
         coalesce(
             last_value(s.reserve1) over (
                 partition by s.contract_address 
                 order by s.day asc 
                 rows between unbounded preceding and 1 preceding),
-            0
+            sf.reserve1, 0
         ) as reserve1
     from uni_style_pools as u
     cross join date_range as d
@@ -104,9 +130,13 @@ from (
         on 
             u.contract_address = l.contract_address
             and d.day = l.day
+    left join lp_reserve_first as lrf
+        on u.contract_address = lrf.contract_address
     left join (select * from syncs where latest = 1) as s
         on 
             u.contract_address = s.contract_address
             and d.day = s.day
+    left join syncs_first as sf
+        on u.contract_address = sf.contract_address
 )
-where day >= created_at
+where day >= cow_created_at
