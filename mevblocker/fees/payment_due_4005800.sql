@@ -15,7 +15,7 @@ WITH block_range AS (
 ),
 
 final_fee AS (
-    SELECT avg_block_fee_wei
+    SELECT avg_block_fee_wei * 3 / 4 AS avg_block_fee_wei
     FROM "query_4002039(start='{{fee_computation_start}}', end='{{fee_computation_end}}')"
 ),
 
