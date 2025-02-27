@@ -166,7 +166,7 @@ SELECT
     COALESCE(SUM(backrun_tip_wei), 0) AS backrun_tip_wei,
     -- in practice there is only a single refund recipient per target transaction. Collapsing using the largest is a bit hacky but should work.
     MAX(refund_recipient) AS refund_recipient,
-    CAST(0.3 * (COALESCE(user_tip_wei, 0) + COALESCE(SUM(backrun_tip_wei), 0) + (COALESCE(SUM(backrun_value_wei), 0) / 9)) AS uint256) AS tx_mevblocker_fee_wei
+    CAST(0.4 * (COALESCE(user_tip_wei, 0) + COALESCE(SUM(backrun_tip_wei), 0) + (COALESCE(SUM(backrun_value_wei), 0) / 9)) AS uint256) AS tx_mevblocker_fee_wei
 FROM user_txs AS u
 LEFT JOIN searcher_txs AS searcher
     ON u.hash = searcher.tx_1
