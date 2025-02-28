@@ -1,3 +1,6 @@
+--Groups all the data in a same tabble to then materialize it in a view
+--Easy to add new AMMs from there
+
 with cow_amms as (
     select
         'ethereum' as blockchain, *
@@ -34,9 +37,8 @@ uni_style_pools as (
     from "query_4420675(blockchain = 'base', start = '2024-07-29', end = '2100-01-01')"
 )
 
-select
+fselect
     created_at,
-    created_at as cow_created_at,
     blockchain,
     contract_address,
     'cow_amm' as project,
@@ -58,7 +60,6 @@ union all
 
 select
     uni.created_at,
-    uni.cow_created_at,
     uni.blockchain,
     uni.contract_address,
     uni.project,
@@ -70,16 +71,8 @@ select
     uni.lp_reserve,
     uni.reserve0,
     uni.reserve1,
-    cow.price0,
-    cow.price1,
-    cow.decimals0,
-    cow.decimals1
+    price0,
+    price1,
+    decimals0,
+    decimals1
 from uni_style_pools as uni
-inner join cow_amms as cow
-    on uni.blockchain = cow.blockchain
-    and (
-        (uni.token0 = cow.token0 and uni.token1 = cow.token1)
-        or (uni.token1 = cow.token0 and uni.token0 = cow.token1)
-    )
-    and uni.day = cow.day
-    and uni.cow_created_at = cow.created_at
