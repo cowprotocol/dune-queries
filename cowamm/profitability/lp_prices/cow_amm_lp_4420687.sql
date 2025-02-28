@@ -86,7 +86,7 @@ reserves_first as (
 )
 
 
-select * from(
+select * from (
     select
         p.contract_address,
         p.created_at,
@@ -128,16 +128,18 @@ select * from(
             and p.contract_address = r0.contract_address
             and p.token0 = r0.token
     left join reserves_first as rf0
-        on p.contract_address = rf0.contract_address
-        and p.token0 = rf0.token
+        on
+            p.contract_address = rf0.contract_address
+            and p.token0 = rf0.token
     left join reserves_delta as r1
         on
             d.day = r1.day
             and p.contract_address = r1.contract_address
             and p.token1 = r1.token
     left join reserves_first as rf1
-        on p.contract_address = rf1.contract_address
-        and p.token1 = rf1.token
+        on
+            p.contract_address = rf1.contract_address
+            and p.token1 = rf1.token
     left join (select distinct * from prices.day) as price0
         on
             d.day = price0.timestamp

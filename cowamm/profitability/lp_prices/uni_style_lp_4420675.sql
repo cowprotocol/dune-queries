@@ -13,7 +13,7 @@ with cow_amm_pools as (
 ),
 
 --get all the the pools derived from uniswap which compare to cow amms
-uni_style_pools as(
+uni_style_pools as (
     select
         u.created_at,
         u.contract_address,
@@ -24,9 +24,11 @@ uni_style_pools as(
         min(c.created_at) as cow_created_at
     from "query_4420646(blockchain = '{{blockchain}}')" as u
     inner join cow_amm_pools as c
-        on 
-            ((u.token0 = c.token_1_address and u.token1 = c.token_2_address)
-            or (u.token1 = c.token_1_address and u.token0 = c.token_2_address))
+        on
+            (
+                (u.token0 = c.token_1_address and u.token1 = c.token_2_address)
+                or (u.token1 = c.token_1_address and u.token0 = c.token_2_address)
+            )
             and '{{blockchain}}' = c.blockchain
     group by 1, 2, 3, 4, 5
 ),
@@ -81,7 +83,7 @@ syncs as (
         and date(logs.block_time) <= least(date(timestamp '{{end}}'), date(now()))
 ),
 
-syncs_first as(
+syncs_first as (
     select *
     from (
         select
@@ -90,7 +92,8 @@ syncs_first as(
             reserve1,
             rank() over (partition by contract_address order by day desc) as latest_first
         from syncs
-        where day < date(timestamp '{{start}}')
+        where
+            day < date(timestamp '{{start}}')
             and latest = 1
     )
     where latest_first = 1
@@ -98,7 +101,7 @@ syncs_first as(
 
 select *
 from (
-    select 
+    select
         u.created_at,
         u.cow_created_at,
         u.contract_address,
@@ -114,31 +117,33 @@ from (
             partition by u.contract_address
             order by d.day asc
             rows between unbounded preceding and 1 preceding
-        ),0) as lp_reserve,
+        ), 0) as lp_reserve,
         coalesce(
             last_value(s.reserve0) over (
-                partition by s.contract_address 
-                order by s.day asc 
-                rows between unbounded preceding and 1 preceding),
+                partition by s.contract_address
+                order by s.day asc
+                rows between unbounded preceding and 1 preceding
+            ),
             sf.reserve0, 0
         ) as reserve0,
         coalesce(
             last_value(s.reserve1) over (
-                partition by s.contract_address 
-                order by s.day asc 
-                rows between unbounded preceding and 1 preceding),
+                partition by s.contract_address
+                order by s.day asc
+                rows between unbounded preceding and 1 preceding
+            ),
             sf.reserve1, 0
         ) as reserve1
     from uni_style_pools as u
     cross join date_range as d
     left join lp_balance_delta as l
-        on 
+        on
             u.contract_address = l.contract_address
             and d.day = l.day
     left join lp_reserve_first as lrf
         on u.contract_address = lrf.contract_address
     left join (select * from syncs where latest = 1) as s
-        on 
+        on
             u.contract_address = s.contract_address
             and d.day = s.day
     left join syncs_first as sf

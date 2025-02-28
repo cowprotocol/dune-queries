@@ -3,38 +3,38 @@
 
 with cow_amms as (
     select
-        'ethereum' as blockchain, *
-    from "query_4420687(blockchain = 'ethereum', start = '2024-07-29', end = '2100-01-01')"
+        'ethereum' as blockchain, t.*
+    from "query_4420687(blockchain = 'ethereum', start = '2024-07-29', end = '2100-01-01')" as t
     union all
     select
-        'gnosis' as blockchain, *
-    from "query_4420687(blockchain = 'gnosis', start = '2024-07-29', end = '2100-01-01')"
+        'gnosis' as blockchain, t.*
+    from "query_4420687(blockchain = 'gnosis', start = '2024-07-29', end = '2100-01-01')" as t
     union all
     select
-        'arbitrum' as blockchain, *
-    from "query_4420687(blockchain = 'arbitrum', start = '2024-07-29', end = '2100-01-01')"
+        'arbitrum' as blockchain, t.*
+    from "query_4420687(blockchain = 'arbitrum', start = '2024-07-29', end = '2100-01-01')" as t
     union all
     select
-        'base' as blockchain, *
-    from "query_4420687(blockchain = 'base', start = '2024-07-29', end = '2100-01-01')"
+        'base' as blockchain, t.*
+    from "query_4420687(blockchain = 'base', start = '2024-07-29', end = '2100-01-01')" as t
 ),
 
 uni_style_pools as (
     select
-        'ethereum' as blockchain, *
-    from "query_4420675(blockchain = 'ethereum', start = '2024-07-29', end = '2100-01-01')"
+        'ethereum' as blockchain, t.*
+    from "query_4420675(blockchain = 'ethereum', start = '2024-07-29', end = '2100-01-01')" as t
     union all
     select
-        'gnosis' as blockchain, *
-    from "query_4420675(blockchain = 'gnosis', start = '2024-07-29', end = '2100-01-01')"
+        'gnosis' as blockchain, t.*
+    from "query_4420675(blockchain = 'gnosis', start = '2024-07-29', end = '2100-01-01')" as t
     union all
     select
-        'arbitrum' as blockchain, *
-    from "query_4420675(blockchain = 'arbitrum', start = '2024-07-29', end = '2100-01-01')"
+        'arbitrum' as blockchain, t.*
+    from "query_4420675(blockchain = 'arbitrum', start = '2024-07-29', end = '2100-01-01')" as t
     union all
     select
-        'base' as blockchain, *
-    from "query_4420675(blockchain = 'base', start = '2024-07-29', end = '2100-01-01')"
+        'base' as blockchain, t.*
+    from "query_4420675(blockchain = 'base', start = '2024-07-29', end = '2100-01-01')" as t
 )
 
 fselect
