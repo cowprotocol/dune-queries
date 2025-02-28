@@ -106,6 +106,10 @@ from (
         u.token0,
         u.token1,
         u.project,
+        price0.price as price0,
+        price1.price as price1,
+        price0.decimals as decimals0,
+        price1.decimals as decimals1,
         coalesce(lrf.lp_reserve_first, 0) + coalesce(sum(coalesce(l.lp_transfer, 0)) over (
             partition by u.contract_address
             order by d.day asc
@@ -139,5 +143,16 @@ from (
             and d.day = s.day
     left join syncs_first as sf
         on u.contract_address = sf.contract_address
+    left join (select distinct * from prices.day) as price0
+        on
+            d.day = price0.timestamp
+            and u.token0 = price0.contract_address
+    left join (select distinct * from prices.day) as price1
+        on
+            d.day = price1.timestamp
+            and u.token1 = price1.contract_address
+    where
+        coalesce(price0.blockchain, '{{blockchain}}') = '{{blockchain}}'
+        and coalesce(price1.blockchain, '{{blockchain}}') = '{{blockchain}}'
 )
 where day >= cow_created_at
