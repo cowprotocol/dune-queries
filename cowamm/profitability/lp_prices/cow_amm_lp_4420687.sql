@@ -52,7 +52,7 @@ lp_reserve_first as (
         sum(lp_transfer) as lp_reserve_first
     from lp_balance_delta
     where day < date(timestamp '{{start}}')
-    group by contract_address
+    group by contract_address --noqa: AM06
 ),
 
 reserves_delta as (
@@ -82,7 +82,7 @@ reserves_first as (
         sum(transfer) as reserve_first
     from reserves_delta
     where day < date(timestamp '{{start}}')
-    group by contract_address, token
+    group by contract_address, token --noqa: AM06
 )
 
 

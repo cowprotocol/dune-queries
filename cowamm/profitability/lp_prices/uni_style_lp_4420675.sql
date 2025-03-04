@@ -64,7 +64,7 @@ lp_reserve_first as (
         sum(lp_transfer) as lp_reserve_first
     from lp_balance_delta
     where day < date(timestamp '{{start}}')
-    group by contract_address
+    group by contract_address --noqa: AM06
 ),
 
 syncs as (

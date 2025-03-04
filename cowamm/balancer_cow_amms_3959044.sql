@@ -18,13 +18,13 @@ with cowamm_creations_ethereum as (
     and block_time >= cast('2024-07-29 00:00:00' as timestamp)
 ),
 
-cowamm_weights_ethereum as(
+cowamm_weights_ethereum as (
     select
         logs.contract_address,
         varbinary_substring(data, 81, 20) as token,
         varbinary_to_uint256(varbinary_substring(data, 133, 32)) as weight
     from cowamm_creations_ethereum
-    join ethereum.logs
+    inner join ethereum.logs
         on logs.contract_address = address
     where
         topic0 = 0xe4e1e53800000000000000000000000000000000000000000000000000000000
@@ -54,15 +54,17 @@ cowamms_ethereum as (
         created_at,
         token_1_address,
         token_2_address,
-        100*w1.weight/(w1.weight+w2.weight) as token_1_weight,
-        100*w2.weight/(w1.weight+w2.weight) as token_2_weight
+        100 * w1.weight / (w1.weight + w2.weight) as token_1_weight,
+        100 * w2.weight / (w1.weight + w2.weight) as token_2_weight
     from cowamms_ethereum_tokens
     inner join cowamm_weights_ethereum as w1
-        on w1.contract_address = address
-        and w1.token = token_1_address
+        on
+            w1.contract_address = address
+            and w1.token = token_1_address
     inner join cowamm_weights_ethereum as w2
-        on w2.contract_address = address
-        and w2.token = token_1_address
+        on
+            w2.contract_address = address
+            and w2.token = token_1_address
 ),
 
 
@@ -77,13 +79,13 @@ cowamm_creations_gnosis as (
     and block_time >= cast('2024-07-29 00:00:00' as timestamp)
 ),
 
-cowamm_weights_gnosis as(
+cowamm_weights_gnosis as (
     select
         logs.contract_address,
         varbinary_substring(data, 81, 20) as token,
         varbinary_to_uint256(varbinary_substring(data, 133, 32)) as weight
     from cowamm_creations_gnosis
-    join gnosis.logs
+    inner join gnosis.logs
         on logs.contract_address = address
     where
         topic0 = 0xe4e1e53800000000000000000000000000000000000000000000000000000000
@@ -113,15 +115,17 @@ cowamms_gnosis as (
         created_at,
         token_1_address,
         token_2_address,
-        100*w1.weight/(w1.weight+w2.weight) as token_1_weight,
-        100*w2.weight/(w1.weight+w2.weight) as token_2_weight
+        100 * w1.weight / (w1.weight + w2.weight) as token_1_weight,
+        100 * w2.weight / (w1.weight + w2.weight) as token_2_weight
     from cowamms_gnosis_tokens
     inner join cowamm_weights_gnosis as w1
-        on w1.contract_address = address
-        and w1.token = token_1_address
+        on
+            w1.contract_address = address
+            and w1.token = token_1_address
     inner join cowamm_weights_gnosis as w2
-        on w2.contract_address = address
-        and w2.token = token_1_address
+        on
+            w2.contract_address = address
+            and w2.token = token_1_address
 ),
 
 -- on arbitrum
@@ -135,13 +139,13 @@ cowamm_creations_arbitrum as (
     and block_time >= cast('2024-09-01 00:00:00' as timestamp)
 ),
 
-cowamm_weights_arbitrum as(
+cowamm_weights_arbitrum as (
     select
         logs.contract_address,
         varbinary_substring(data, 81, 20) as token,
         varbinary_to_uint256(varbinary_substring(data, 133, 32)) as weight
     from cowamm_creations_arbitrum
-    join arbitrum.logs
+    inner join arbitrum.logs
         on logs.contract_address = address
     where
         topic0 = 0xe4e1e53800000000000000000000000000000000000000000000000000000000
@@ -170,15 +174,17 @@ cowamms_arbitrum as (
         created_at,
         token_1_address,
         token_2_address,
-        100*w1.weight/(w1.weight+w2.weight) as token_1_weight,
-        100*w2.weight/(w1.weight+w2.weight) as token_2_weight
+        100 * w1.weight / (w1.weight + w2.weight) as token_1_weight,
+        100 * w2.weight / (w1.weight + w2.weight) as token_2_weight
     from cowamms_arbitrum_tokens
     inner join cowamm_weights_arbitrum as w1
-        on w1.contract_address = address
-        and w1.token = token_1_address
+        on
+            w1.contract_address = address
+            and w1.token = token_1_address
     inner join cowamm_weights_arbitrum as w2
-        on w2.contract_address = address
-        and w2.token = token_1_address
+        on
+            w2.contract_address = address
+            and w2.token = token_1_address
 ),
 
 
@@ -193,13 +199,13 @@ cowamm_creations_base as (
     and block_time >= cast('2024-12-01 00:00:00' as timestamp)
 ),
 
-cowamm_weights_base as(
+cowamm_weights_base as (
     select
         logs.contract_address,
         varbinary_substring(data, 81, 20) as token,
         varbinary_to_uint256(varbinary_substring(data, 133, 32)) as weight
     from cowamm_creations_base
-    join base.logs
+    inner join base.logs
         on logs.contract_address = address
     where
         topic0 = 0xe4e1e53800000000000000000000000000000000000000000000000000000000
@@ -228,15 +234,17 @@ cowamms_base as (
         created_at,
         token_1_address,
         token_2_address,
-        100*w1.weight/(w1.weight+w2.weight) as token_1_weight,
-        100*w2.weight/(w1.weight+w2.weight) as token_2_weight
+        100 * w1.weight / (w1.weight + w2.weight) as token_1_weight,
+        100 * w2.weight / (w1.weight + w2.weight) as token_2_weight
     from cowamms_base_tokens
     inner join cowamm_weights_base as w1
-        on w1.contract_address = address
-        and w1.token = token_1_address
+        on
+            w1.contract_address = address
+            and w1.token = token_1_address
     inner join cowamm_weights_base as w2
-        on w2.contract_address = address
-        and w2.token = token_1_address
+        on
+            w2.contract_address = address
+            and w2.token = token_1_address
 ),
 
 
