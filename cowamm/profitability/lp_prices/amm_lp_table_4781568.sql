@@ -1,6 +1,7 @@
 --Groups all the data in a same tabble to then materialize it in a view
 --Easy to add new AMMs from there
 
+-- noqa: disable=all
 with cow_amms as (
     select
         'ethereum' as blockchain, t.*
