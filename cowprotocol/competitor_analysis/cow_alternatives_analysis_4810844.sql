@@ -11,22 +11,23 @@ with all_cow_users as (
     group by
         1
 ),
+
 cow_users_filtered as (
-    select
-        *
+    select *
     from
         all_cow_users
     where
         not contains(uses_on_chains, '{{chain_of_interest}}')
 ),
+
 chains_supported_by_cow as (
-    select distinct
-        blockchain
+    select distinct blockchain
     from
         dex_aggregator.trades
     where
         project = 'cow_protocol'
 ),
+
 all_competitor_transactions as (
     select
         tx_from as address,
@@ -69,7 +70,7 @@ select
     count(distinct address) as distinct_users_count
 from
     cow_users_filtered
-left join all_competitor_transactions using (address)
+left join all_competitor_transactions using (address) -- noqa: disable=L032
 where
     {{show_competitors_on_target_chain_only}} = 0 or chain_used_for_competitor = '{{chain_of_interest}}'
 group by 1, 2

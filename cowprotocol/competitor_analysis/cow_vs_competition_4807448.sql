@@ -13,6 +13,7 @@ with cow_protocol_target_users as (
     group by
         1, 2
 ),
+
 users_per_chain_cow as (
     select
         blockchain as chain_used_for_cow,
@@ -26,14 +27,15 @@ users_per_chain_cow as (
     group by
         1
 ),
+
 chains_supported_by_cow as (
-    select distinct
-        blockchain
+    select distinct blockchain
     from
         dex_aggregator.trades
     where
         project = 'cow_protocol'
 ),
+
 all_competitor_transactions as (
     select
         tx_from as address,
@@ -67,6 +69,7 @@ all_competitor_transactions as (
         block_time between timestamp '{{start_time}}' and timestamp '{{end_time}}'
     group by 1, 2, 3
 ),
+
 agg as (
     select
         chain_used_for_cow,
@@ -79,12 +82,10 @@ agg as (
         sum(competitor_total_volume_usd) as total_volume_usd_on_competitor
     from
         cow_protocol_target_users
-    left join all_competitor_transactions using (address)
-    group by
-        chain_used_for_cow,
-        chain_used_for_competitor,
-        competitor_project
+    left join all_competitor_transactions using (address) -- noqa: disable=L032
+    group by 1, 2, 3
 )
+
 select
     chain_used_for_cow,
     chain_used_for_competitor,
@@ -97,5 +98,4 @@ select
     total_volume_usd_on_competitor
 from
     agg
-left join users_per_chain_cow using(chain_used_for_cow)
-
+left join users_per_chain_cow using (chain_used_for_cow) -- noqa: disable=L032
