@@ -25,24 +25,18 @@ with cow_protocol_target_users as (
 
 users_per_chain_cow as (
     select
-        blockchain as chain_used_for_cow,
-        count(distinct tx_from) as distinct_users_cow
+        chain_used_for_cow,
+        count(distinct address) as distinct_users_cow
     from
-        dex_aggregator.trades
-    where
-        project = 'cow_protocol'
-        and
-        block_time between timestamp '{{start_time}}' and timestamp '{{end_time}}'
+        cow_protocol_target_users
     group by
         1
 ),
 
 chains_supported_by_cow as (
-    select distinct blockchain
+    select distinct chain_used_for_cow as blockchain
     from
-        dex_aggregator.trades
-    where
-        project = 'cow_protocol'
+        cow_protocol_target_users
 ),
 
 trades_dex_and_aggregators as (
