@@ -1,3 +1,13 @@
+-- Get all users who are using COW Protocol on any chain but {{chain_of_interest}}
+-- Get aggregates (tx_count, usd_volume, user_count) of other dexes/aggregators they use on all chains supported by cow
+-- or limit the results to only competitor usage on {{chain_of_interest}} if {{show_competitors_on_target_chain_only}} is set to 1
+--
+-- Parameters:
+--  {{start_time}} - the trade timestamp for which the analysis should start (inclusive)
+--  {{end_time}} - the trade timestamp for which the analysis should end (inclusive)
+--  {{chain_of_interest}} - which chain is not used by cohort of users we want to investigate
+--  {{show_competitors_on_target_chain_only}} - filters competitor's usage to only {{chain_of_interest}}
+
 with all_cow_users as (
     select
         tx_from as address,
@@ -28,29 +38,26 @@ chains_supported_by_cow as (
         project = 'cow_protocol'
 ),
 
-all_competitor_transactions as (
+trades_dex_and_aggregators as (
     select
-        tx_from as address,
-        blockchain as chain_used_for_competitor,
-        project as competitor_project,
-        sum(amount_usd) as competitor_total_volume_usd,
-        count(*) as competitor_total_transactions
+        tx_from,
+        blockchain,
+        project,
+        amount_usd
     from
         dex.trades
     where
         blockchain in (select blockchain from chains_supported_by_cow)
         and
         block_time between timestamp '{{start_time}}' and timestamp '{{end_time}}'
-    group by 1, 2, 3
 
     union all
 
     select
-        tx_from as address,
-        blockchain as chain_used_for_competitor,
-        project as competitor_project,
-        sum(amount_usd) as competitor_total_volume_usd,
-        count(*) as competitor_total_transactions
+        tx_from,
+        blockchain,
+        project,
+        amount_usd
     from
         dex_aggregator.trades
     where
@@ -59,6 +66,17 @@ all_competitor_transactions as (
         blockchain in (select blockchain from chains_supported_by_cow)
         and
         block_time between timestamp '{{start_time}}' and timestamp '{{end_time}}'
+),
+
+all_competitor_transactions as (
+    select
+        tx_from as address,
+        blockchain as chain_used_for_competitor,
+        project as competitor_project,
+        sum(amount_usd) as competitor_total_volume_usd,
+        count(*) as competitor_total_transactions
+    from
+        trades_dex_and_aggregators
     group by 1, 2, 3
 )
 
