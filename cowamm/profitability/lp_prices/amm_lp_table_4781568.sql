@@ -1,4 +1,4 @@
---Groups all the data in a same tabble to then materialize it in a view
+--Groups all the data in one table to then materialize it in a view
 --Easy to add new AMMs from there
 
 -- noqa: disable=all
