@@ -1,5 +1,5 @@
 -- This query gets all the transfers during a day for all existing CoW AMMs:
--- Reserve tokens and lp tokens and the beginning of every day
+-- Reserve tokens and lp tokens at the beginning of every day
 --Parameters
 --  {{blockchain}}: The blockchain to query
 --  {{start}}: The start date of the analysis
@@ -23,11 +23,11 @@ with date_range as (
 cow_amm_pool as (
     select
         created_at,
-        token_1_address as token0,
-        token_2_address as token1,
+        token_0_address as token0,
+        token_1_address as token1,
         address as contract_address,
-        token_1_weight as weight0,
-        token_2_weight as weight1
+        token_0_weight as weight0,
+        token_1_weight as weight1
     from dune.cowprotocol.result_balancer_co_w_am_ms
     where blockchain = '{{blockchain}}'
 ),

@@ -42,8 +42,8 @@ cowamms_tokens as (
         '{{blockchain}}' as blockchain,
         contract_address as address,
         min(block_time) as created_at,
-        min(token) as token_1_address,
-        max(token) as token_2_address
+        min(token) as token_0_address,
+        max(token) as token_1_address
     from
         cowamm_weights
     group by 1, 2
@@ -54,10 +54,10 @@ cowamms as (
         blockchain,
         address,
         created_at,
+        token_0_address,
         token_1_address,
-        token_2_address,
-        100 * w1.weight / (w1.weight + w2.weight) as token_1_weight,
-        100 * w2.weight / (w1.weight + w2.weight) as token_2_weight
+        100 * w1.weight / (w1.weight + w2.weight) as token_0_weight,
+        100 * w2.weight / (w1.weight + w2.weight) as token_1_weight
     from cowamms_tokens
     inner join cowamm_weights as w1
         on
