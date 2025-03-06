@@ -22,7 +22,7 @@ with cowamm_creations as (
 
 
 -- Bind events for tokens
-cowamm_weights as (
+cowamm_binds as (
     select
         logs.contract_address,
         block_time,
@@ -45,7 +45,7 @@ cowamms_tokens as (
         min(token) as token_0_address,
         max(token) as token_1_address
     from
-        cowamm_weights
+        cowamm_binds
     group by 1, 2
 ),
 
@@ -56,17 +56,17 @@ cowamms as (
         created_at,
         token_0_address,
         token_1_address,
-        100 * w1.weight / (w1.weight + w2.weight) as token_0_weight,
-        100 * w2.weight / (w1.weight + w2.weight) as token_1_weight
+        100 * b0.weight / (b0.weight + b1.weight) as token_0_weight,
+        100 * b1.weight / (b0.weight + b1.weight) as token_1_weight
     from cowamms_tokens
-    inner join cowamm_weights as w1
+    inner join cowamm_binds as b0
         on
-            w1.contract_address = address
-            and w1.token = token_1_address
-    inner join cowamm_weights as w2
+            b0.contract_address = address
+            and b0.token = token_0_address
+    inner join cowamm_binds as b1
         on
-            w2.contract_address = address
-            and w2.token = token_1_address
+            b1.contract_address = address
+            and b1.token = token_1_address
 )
 
 select * from cowamms
