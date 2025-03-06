@@ -1,4 +1,4 @@
--- This query gets all the cowamms created after the Balancer AMM launch on July 29, 2024 for a specific chain
+-- This query gets all the cowamms created after the Balancer CoW AMM launch on July 29, 2024 for a specific chain
 --Parameters
 --  {{blockchain}}: The blockchain to query
 -- Hard-coded start for the events scan to '2024-07-29', month of the Balancer CoW AMMs launch
