@@ -81,8 +81,7 @@ all_competitor_transactions as (
 ),
 
 joined_and_filtered as (
-    select
-        *
+    select *
     from
         cow_users_filtered
     inner join all_competitor_transactions using (address) -- noqa: disable=L032
