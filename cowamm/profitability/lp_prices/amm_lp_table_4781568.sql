@@ -38,7 +38,7 @@ uni_style_pools as (
     from "query_4420675(blockchain = 'base', start = '2024-07-29', end = '2100-01-01')" as t
 )
 
-fselect
+select
     created_at,
     blockchain,
     contract_address,

@@ -16,6 +16,7 @@ with cowamm_creations as (
             0x03362f847B4fAbC12e1Ce98b6b59F94401E4588e --base
         )
         and topic0 = 0x0d03834d0d86c7f57e877af40e26f176dc31bd637535d4ba153d1ac9de88a7ea
+        -- log example 147: https://etherscan.io/tx/0x124f2fa9c181003529e34c22e7380b505f1f5e18e44c3868560e4ddc724cc191#eventlog
     )
     and block_time >= cast('2024-07-29 00:00:00' as timestamp)
 ),
@@ -33,6 +34,7 @@ cowamm_binds as (
         on logs.contract_address = address
     where
         topic0 = 0xe4e1e53800000000000000000000000000000000000000000000000000000000
+        -- log example 249: https://etherscan.io/tx/0xc3b0da253a16f7b38f98ff27e1729687a91c871bd3a7c27dd433fd761ac81f6c#eventlog
         and block_time >= cast('2024-07-29 00:00:00' as timestamp)
 ),
 

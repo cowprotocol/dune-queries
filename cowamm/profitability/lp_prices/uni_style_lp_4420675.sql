@@ -1,5 +1,4 @@
--- This query gets the reserve of every Univ2 style pool at the beginning of every day 
--- and the lp token transfers
+-- This query gets the token reserves (token0, 1, lp) of every Univ2 style pool with a CoW AMM version at the beginning of every day 
 --Parameters
 --  {{blockchain}}: The blockchain to query
 --  {{start}}: The start date of the analysis
