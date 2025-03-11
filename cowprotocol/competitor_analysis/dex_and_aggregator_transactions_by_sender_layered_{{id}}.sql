@@ -16,34 +16,37 @@ with dex_aggregator_trades as (
         case
             -- Priorities are chosen in a way that this measures which interface the volume was traded from.
             when da_trades.project = 'cow_protocol' then 1 -- GP aggregates the aggregators
-            when da_trades.project in ( '0x API', '1inch', '1inch Limit Order Protocol') then 2 -- Matcha uses 0x API as a sub aggregator
+            when da_trades.project in ('0x API', '1inch', '1inch Limit Order Protocol') then 2 -- Matcha uses 0x API as a sub aggregator
             else 3
         end as priority,
         'dex-aggregator' as product_type
     from
         dex_aggregator.trades as da_trades
     -- Avoid double counting 1inch fusion
-    left join query_3860172 as _1inch_fusion on
-        da_trades.tx_hash = _1inch_fusion.tx_hash
+    left join query_3860172 as _1inch_fusion
+        on
+            da_trades.tx_hash = _1inch_fusion.tx_hash
             and
-        da_trades.blockchain = _1inch_fusion.blockchain
+            da_trades.blockchain = _1inch_fusion.blockchain
     -- Avoid double counting Paraswap delta on ethereum
-    left join query_4048962 as paraswap_delta on
-        paraswap_delta.evt_tx_hash = da_trades.tx_hash
-        -- and TODO: This might be needed
-        -- da_trades.blockchain = 'ethereum'
+    left join query_4048962 as paraswap_delta
+        on
+            da_trades.tx_hash = paraswap_delta.evt_tx_hash
+            -- and TODO: This might be needed
+            -- da_trades.blockchain = 'ethereum'
     where
         da_trades.block_time between timestamp '{{start_time}}' and timestamp '{{end_time}}'
-            and
+        and
         -- Avoid faulty transactions
         not da_trades.tx_hash in (select tx_hash from query_2617370)
-            and
+        and
         _1inch_fusion.tx_hash is null
-            and
+        and
         paraswap_delta.evt_tx_hash is null
     group by
         1, 2, 3, 4
 ),
+
 dex_trades as (
     select
         tx_from,
@@ -61,17 +64,17 @@ dex_trades as (
     group by
         1, 2, 3, 4
 ),
+
 unified as (
-    select
-        *
+    select *
     from
         dex_aggregator_trades
     union all
-    select
-        *
+    select *
     from
         dex_trades
 ),
+
 keep_first_layer_only as (
     select
         tx_from,
@@ -92,13 +95,6 @@ keep_first_layer_only as (
         rn = 1
 )
 
-select
-    *
+select *
 from
     keep_first_layer_only
-
-
-
-
-
-
