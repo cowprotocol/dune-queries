@@ -115,11 +115,11 @@ prices as (
         token_address,
         decimals,
         case
-            when token_address = 0x22af33fe49fd1fa80c7149773dde5890d3c76f3b and hour >= timestamp '2025-03-04 00:00' and hour <= timestamp '2025-03-11 00:00' then 0.00029585
+            when '{{blockchain}}' = 'base' and token_address = 0x22af33fe49fd1fa80c7149773dde5890d3c76f3b and hour >= timestamp '2025-03-04 00:00' and hour <= timestamp '2025-03-11 00:00' then 0.00029585
             else price_unit
         end as price_unit,
         case
-            when token_address = 0x22af33fe49fd1fa80c7149773dde5890d3c76f3b and hour >= timestamp '2025-03-04 00:00' and hour <= timestamp '2025-03-11 00:00' then 0.00029585 / pow(10, 18)
+            when '{{blockchain}}' = 'base' and token_address = 0x22af33fe49fd1fa80c7149773dde5890d3c76f3b and hour >= timestamp '2025-03-04 00:00' and hour <= timestamp '2025-03-11 00:00' then 0.00029585 / pow(10, 18)
             else price_atom
         end as price_atom
     from prices_pre
