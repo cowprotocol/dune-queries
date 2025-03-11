@@ -153,8 +153,14 @@ combined_data_after_service_fee as (
         cd.solver,
         cd.network_fee_eth,
         cd.execution_cost_eth,
-        coalesce(sff.service_fee_factor, 1) * cd.primary_reward_eth as primary_reward_eth,
-        coalesce(sff.service_fee_factor, 1) * cd.primary_reward_cow as primary_reward_cow,
+        case
+            when cd.primary_reward_eth < 0 then cd.primary_reward_eth
+            else coalesce(sff.service_fee_factor, 1) * cd.primary_reward_eth
+        end as primary_reward_eth,
+        case
+            when cd.primary_reward_cow < 0 then cd.primary_reward_cow
+            else coalesce(sff.service_fee_factor, 1) * cd.primary_reward_cow
+        end as primary_reward_cow,
         coalesce(sff.service_fee_factor, 1) * cd.quote_reward as quote_reward,
         cd.slippage_eth,
         cd.slippage_per_tx,
