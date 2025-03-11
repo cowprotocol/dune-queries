@@ -32,8 +32,6 @@ with dex_aggregator_trades as (
     left join query_4048962 as paraswap_delta
         on
             da_trades.tx_hash = paraswap_delta.evt_tx_hash
-            -- and TODO: This might be needed
-            -- da_trades.blockchain = 'ethereum'
     where
         da_trades.block_time between timestamp '{{start_time}}' and timestamp '{{end_time}}'
         and
