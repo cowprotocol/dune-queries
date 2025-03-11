@@ -82,7 +82,7 @@ intrinsic_prices as (
 
 -- The final price is the Dune price if it exists and the intrinsic price otherwise. If both prices
 -- are not available, the price is null.
-prices as (
+prices_pre as (
     select
         tt.hour,
         tt.token_address,
@@ -107,6 +107,22 @@ prices as (
         on
             tt.hour = intrinsic.hour
             and tt.token_address = intrinsic.token_address
+),
+
+prices as (
+    select
+        hour,
+        token_address,
+        decimals,
+        case
+            when token_address = 0x22af33fe49fd1fa80c7149773dde5890d3c76f3b and hour >= timestamp '2025-03-04 00:00' and hour <= timestamp '2025-03-11 00:00' then 0.00029585
+            else price_unit
+        end as price_unit,
+        case
+            when token_address = 0x22af33fe49fd1fa80c7149773dde5890d3c76f3b and hour >= timestamp '2025-03-04 00:00' and hour <= timestamp '2025-03-11 00:00' then 0.00029585 / pow(10, 18)
+            else price_atom
+        end as price_atom
+    from prices_pre
 ),
 
 wrapped_native_token as (
