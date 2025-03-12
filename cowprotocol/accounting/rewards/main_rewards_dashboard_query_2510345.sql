@@ -18,36 +18,46 @@ named_results as (
 -- BEGIN SOLVER REWARDS
 batch_rewards as (
     select
-        rbr.solver as winning_solver,
-        rbr.network_fee as fee,
-        rbr.execution_cost,
+        solver,
+        network_fee,
+        execution_cost,
         --rnr.capped_payment,
         case
-            when rbr.uncapped_payment_native_token > {{upper_cap}} * pow(10, 18) then {{upper_cap}} * (pow(10, 18))
-            when rbr.uncapped_payment_native_token < {{lower_cap}} * pow(10, 18) then {{lower_cap}} * pow(10, 18)
-            else rbr.uncapped_payment_native_token
-        end as capped_payment
-    from "query_4351957(blockchain='{{blockchain}}')" as rbr
+            when uncapped_payment_native_token > {{upper_cap}} * pow(10, 18) then {{upper_cap}} * (pow(10, 18))
+            when uncapped_payment_native_token < {{lower_cap}} * pow(10, 18) then {{lower_cap}} * pow(10, 18)
+            else uncapped_payment_native_token
+        end as capped_payment,
+        tx_hash
+    from "query_4351957(blockchain='{{blockchain}}')"
     where
-        rbr.block_deadline >= (select start_block from block_range)
-        and rbr.block_deadline <= (select end_block from block_range)
+        block_deadline >= (select start_block from block_range)
+        and block_deadline <= (select end_block from block_range)
+),
+
+batch_rewards_filtered as (
+    select
+        br.solver,
+        br.network_fee,
+        br.execution_cost,
+        br.capped_payment * coalesce(ea.multipler, 1) as capped_payment
+    from batch_rewards as br left outer join "query_4842868(blockchain='{{blockchain}}')" as ea on br.tx_hash = ea.tx_hash
 ),
 
 -- AKA Performance Rewards
 primary_rewards as (
     select
-        winning_solver as solver,
+        solver,
         cast(sum(capped_payment) as double) as reward_wei
-    from batch_rewards
+    from batch_rewards_filtered
     group by winning_solver
 ),
 
 fees_and_costs as (
     select
-        winning_solver as solver,
-        cast(sum(fee) as double) as network_fee_wei,
+        solver,
+        cast(sum(network_fee) as double) as network_fee_wei,
         cast(sum(execution_cost) as double) as execution_cost_wei
-    from batch_rewards
+    from batch_rewards_filtered
     group by winning_solver
 ),
 
