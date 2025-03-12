@@ -92,6 +92,8 @@ select * from (
         p.created_at,
         token0,
         token1,
+        price0.symbol as symbol0,
+        price1.symbol as symbol1,
         d.day,
         weight0,
         weight1,
