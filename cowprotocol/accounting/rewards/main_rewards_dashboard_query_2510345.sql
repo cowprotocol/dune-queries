@@ -58,7 +58,7 @@ fees_and_costs as (
         cast(sum(network_fee) as double) as network_fee_wei,
         cast(sum(execution_cost) as double) as execution_cost_wei
     from batch_rewards_filtered
-    group by winning_solver
+    group by solver
 ),
 
 conversion_prices as (
