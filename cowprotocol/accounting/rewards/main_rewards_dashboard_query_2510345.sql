@@ -49,7 +49,7 @@ primary_rewards as (
         solver,
         cast(sum(capped_payment) as double) as reward_wei
     from batch_rewards_filtered
-    group by winning_solver
+    group by solver
 ),
 
 fees_and_costs as (
