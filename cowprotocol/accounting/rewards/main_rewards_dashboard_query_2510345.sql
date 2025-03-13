@@ -39,7 +39,7 @@ batch_rewards_filtered as (
         br.solver,
         br.network_fee,
         br.execution_cost,
-        br.capped_payment * coalesce(ea.multipler, 1) as capped_payment
+        br.capped_payment * coalesce(ea.multiplier, 1) as capped_payment
     from batch_rewards as br left outer join "query_4842868(blockchain='{{blockchain}}')" as ea on br.tx_hash = ea.tx_hash
 ),
 
