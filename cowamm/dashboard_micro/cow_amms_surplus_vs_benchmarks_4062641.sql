@@ -56,11 +56,12 @@ select
     power(pancake.reserve0, cast(pancake.weight0 as double) / 100) * power(pancake.reserve1, cast(pancake.weight1 as double) / 100) / pancake.lp_reserve
     / lag(power(pancake.reserve0, cast(pancake.weight0 as double) / 100) * power(pancake.reserve1, cast(pancake.weight1 as double) / 100) / pancake.lp_reserve) over (order by pancake.day) - 1 as pancake_relative_surplus
 from dune.cowprotocol.result_amm_lp_infos as cow
-left join (select * from dune.cowprotocol.result_amm_lp_infos where contract_address in (select contract_address from competitors where project = 'uniswapv2')) as uni
+--filter before joining to avoid removing everything if one benchmark does not exist
+left join (select * from dune.cowprotocol.result_amm_lp_infos where contract_address in (select contract_address from competitors where project = 'uniswapv2')) as uni --noqa: ST05
     on cow.day = uni.day
-left join (select * from dune.cowprotocol.result_amm_lp_infos where contract_address in (select contract_address from competitors where project = 'sushiswapv2')) as sushi
+left join (select * from dune.cowprotocol.result_amm_lp_infos where contract_address in (select contract_address from competitors where project = 'sushiswapv2')) as sushi --noqa: ST05
     on cow.day = sushi.day
-left join (select * from dune.cowprotocol.result_amm_lp_infos where contract_address in (select contract_address from competitors where project = 'pancakeswap')) as pancake
+left join (select * from dune.cowprotocol.result_amm_lp_infos where contract_address in (select contract_address from competitors where project = 'pancakeswap')) as pancake --noqa: ST05
     on cow.day = pancake.day
 where
     cow.contract_address in (select contract_address from competitors where project = 'cow_amm')
