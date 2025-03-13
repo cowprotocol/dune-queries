@@ -32,6 +32,7 @@ select --noqa: ST06
     r.tvl,
     r.symbol0,
     r.symbol1,
+    -- Compute surplus based on the curve's value
     power(r.reserve0, r.weight0) * power(r.reserve1, r.weight1) / r.lp_reserve
     / (power(r1.reserve0, r1.weight0) * power(r1.reserve1, r1.weight1) / r1.lp_reserve) - 1 as "1d APY",
     power(r.reserve0, r.weight0) * power(r.reserve1, r.weight1) / r.lp_reserve
