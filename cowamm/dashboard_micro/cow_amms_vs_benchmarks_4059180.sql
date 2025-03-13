@@ -36,15 +36,21 @@ prices as (
         price0 / lag(price0) over (order by day asc) as p0,
         price1 / lag(price1) over (order by day asc) as p1
     from dune.cowprotocol.result_amm_lp_infos
-    where contract_address = {{cow_amm}}
+    where
+        contract_address = {{cow_amm}}
+        and day >= (select max(start) from competitors)
 )
 
 select
     cow.day,
     10000 * (cow.value0 + cow.value1) / cow.lp_reserve / first_value((cow.value0 + cow.value1) / cow.lp_reserve) over (order by cow.day asc) as cow_10k,
+    cow.value0 + cow.value1 as cow_tvl,
     10000 * (uni.value0 + uni.value1) / uni.lp_reserve / first_value((uni.value0 + uni.value1) / uni.lp_reserve) over (order by uni.day asc) as uni_10k,
+    uni.value0 + uni.value1 as uni_tvl,
     10000 * (sushi.value0 + sushi.value1) / sushi.lp_reserve / first_value((sushi.value0 + sushi.value1) / sushi.lp_reserve) over (order by sushi.day asc) as sushi_10k,
+    sushi.value0 + sushi.value1 as sushi_tvl,
     10000 * (pancake.value0 + pancake.value1) / pancake.lp_reserve / first_value((pancake.value0 + pancake.value1) / pancake.lp_reserve) over (order by pancake.day asc) as pancake_10k,
+    pancake.value0 + pancake.value1 as pancake_tvl,
     5000 * cow.price0 / first_value(cow.price0) over (order by cow.day asc) + 5000 * cow.price1 / first_value(cow.price1) over (order by cow.day asc) as hodl_10k,
     -- SQL doesn't support PRODUCT() over (...), but luckily "the sum of logarithms" is equal to "logarithm of the product",
     -- coalesce to factor 1 on first day
