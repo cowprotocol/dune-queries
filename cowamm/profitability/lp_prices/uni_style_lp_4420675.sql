@@ -107,6 +107,8 @@ from (
         d.day,
         u.token0,
         u.token1,
+        price0.symbol as symbol0,
+        price1.symbol as symbol1,
         u.project,
         price0.price as price0,
         price1.price as price1,
