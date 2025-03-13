@@ -1,3 +1,8 @@
+-- Compute the evolution of performance for 10k$ invested in different strategies
+-- Parameters:
+--   cow_amm: the address of the pool
+--   start: the start date
+
 with cow_amm as (
     select
         created_at,
@@ -11,6 +16,7 @@ with cow_amm as (
     where contract_address = {{cow_amm}}
 ),
 
+--we assume that in the table there is one competitor with the same token pair per project
 competitors as (
     select
         i.contract_address,
@@ -30,6 +36,7 @@ competitors as (
     group by 1, 2, 3
 ),
 
+-- precaluclation for the rebalancing
 prices as (
     select
         day,
@@ -67,4 +74,5 @@ left join prices
     on cow.day = prices.day
 where
     cow.contract_address in (select contract_address from competitors where project = 'cow_amm')
+    -- we start whenever all benchmarks can start
     and cow.day >= (select max(start) from competitors)
