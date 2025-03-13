@@ -1,6 +1,6 @@
 --display the informations about a cow amm pool
 -- Parameters:
---   contract_address: the address of the pool
+--   cow_amm: the address of the pool
 
 select
     date(created_at) as created_day,
