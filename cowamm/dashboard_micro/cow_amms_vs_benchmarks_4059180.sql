@@ -51,17 +51,14 @@ select
     coalesce(exp(sum(ln((prices.p0 + prices.p1) / 2)) over (order by cow.day asc)), 1) * 10000 as rebalance_10k
 
 from dune.cowprotocol.result_amm_lp_infos as cow
-left join dune.cowprotocol.result_amm_lp_infos as uni
+left join (select * from dune.cowprotocol.result_amm_lp_infos where contract_address in (select contract_address from competitors where project = 'uniswapv2')) as uni
     on cow.day = uni.day
-left join dune.cowprotocol.result_amm_lp_infos as sushi
+left join (select * from dune.cowprotocol.result_amm_lp_infos where contract_address in (select contract_address from competitors where project = 'sushiswapv2')) as sushi
     on cow.day = sushi.day
-left join dune.cowprotocol.result_amm_lp_infos as pancake
+left join (select * from dune.cowprotocol.result_amm_lp_infos where contract_address in (select contract_address from competitors where project = 'pancakeswap')) as pancake
     on cow.day = pancake.day
 left join prices
     on cow.day = prices.day
 where
     cow.contract_address in (select contract_address from competitors where project = 'cow_amm')
     and cow.day >= (select max(start) from competitors)
-    and uni.contract_address in (select contract_address from competitors where project = 'uniswapv2')
-    and sushi.contract_address in (select contract_address from competitors where project = 'sushiswapv2')
-    and pancake.contract_address in (select contract_address from competitors where project = 'pancakeswapv2')
