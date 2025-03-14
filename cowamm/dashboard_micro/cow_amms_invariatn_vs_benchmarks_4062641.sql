@@ -48,13 +48,13 @@ competitors as (
 select
     cow.day,
     power(cow.reserve0, cast(cow.weight0 as double) / 100) * power(cow.reserve1, cast(cow.weight1 as double) / 100) / cow.lp_reserve
-    / lag(power(cow.reserve0, cast(cow.weight0 as double) / 100) * power(cow.reserve1, cast(cow.weight1 as double) / 100) / cow.lp_reserve) over (order by cow.day) - 1 as cow_relative_surplus,
+    / lag(power(cow.reserve0, cast(cow.weight0 as double) / 100) * power(cow.reserve1, cast(cow.weight1 as double) / 100) / cow.lp_reserve) over (order by cow.day) - 1 as cow_relative_invariant_growth,
     power(uni.reserve0, cast(uni.weight0 as double) / 100) * power(uni.reserve1, cast(uni.weight1 as double) / 100) / uni.lp_reserve
-    / lag(power(uni.reserve0, cast(uni.weight0 as double) / 100) * power(uni.reserve1, cast(uni.weight1 as double) / 100) / uni.lp_reserve) over (order by uni.day) - 1 as uni_relative_surplus,
+    / lag(power(uni.reserve0, cast(uni.weight0 as double) / 100) * power(uni.reserve1, cast(uni.weight1 as double) / 100) / uni.lp_reserve) over (order by uni.day) - 1 as uni_relative_invariant_growth,
     power(sushi.reserve0, cast(sushi.weight0 as double) / 100) * power(sushi.reserve1, cast(sushi.weight1 as double) / 100) / sushi.lp_reserve
-    / lag(power(sushi.reserve0, cast(sushi.weight0 as double) / 100) * power(sushi.reserve1, cast(sushi.weight1 as double) / 100) / sushi.lp_reserve) over (order by sushi.day) - 1 as sushi_relative_surplus,
+    / lag(power(sushi.reserve0, cast(sushi.weight0 as double) / 100) * power(sushi.reserve1, cast(sushi.weight1 as double) / 100) / sushi.lp_reserve) over (order by sushi.day) - 1 as sushi_relative_invariant_growth,
     power(pancake.reserve0, cast(pancake.weight0 as double) / 100) * power(pancake.reserve1, cast(pancake.weight1 as double) / 100) / pancake.lp_reserve
-    / lag(power(pancake.reserve0, cast(pancake.weight0 as double) / 100) * power(pancake.reserve1, cast(pancake.weight1 as double) / 100) / pancake.lp_reserve) over (order by pancake.day) - 1 as pancake_relative_surplus
+    / lag(power(pancake.reserve0, cast(pancake.weight0 as double) / 100) * power(pancake.reserve1, cast(pancake.weight1 as double) / 100) / pancake.lp_reserve) over (order by pancake.day) - 1 as pancake_relative_invariant_growth
 from dune.cowprotocol.result_amm_lp_infos as cow
 --filter before joining to avoid removing everything if one benchmark does not exist
 left join (select * from dune.cowprotocol.result_amm_lp_infos where contract_address in (select contract_address from competitors where project = 'uniswapv2')) as uni --noqa: ST05
