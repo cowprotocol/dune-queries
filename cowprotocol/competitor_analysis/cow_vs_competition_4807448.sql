@@ -7,18 +7,29 @@
 --  {{start_time}} - the trade timestamp for which the analysis should start (inclusive)
 --  {{end_time}} - the trade timestamp for which the analysis should end (inclusive)
 
-with cow_protocol_target_users as (
+with all_transactions as (
+    select
+        tx_from,
+        tx_hash,
+        blockchain,
+        project,
+        amount_usd,
+        block_time,
+        product_type
+    from
+        "query_4836358(start_time='{{start_time}}', end_time='{{end_time}}')"
+),
+
+cow_protocol_target_users as (
     select
         tx_from as address,
         blockchain as chain_used_for_cow,
         count(*) as total_transactions_on_cow,
         sum(amount_usd) as total_volume_usd_on_cow
     from
-        dex_aggregator.trades
+        all_transactions
     where
         project = 'cow_protocol'
-        and
-        block_time between timestamp '{{start_time}}' and timestamp '{{end_time}}'
     group by
         1, 2
 ),
@@ -39,36 +50,6 @@ chains_supported_by_cow as (
         cow_protocol_target_users
 ),
 
-trades_dex_and_aggregators as (
-    select
-        tx_from,
-        blockchain,
-        project,
-        amount_usd
-    from
-        dex.trades
-    where
-        blockchain in (select blockchain from chains_supported_by_cow)
-        and
-        block_time between timestamp '{{start_time}}' and timestamp '{{end_time}}'
-
-    union all
-
-    select
-        tx_from,
-        blockchain,
-        project,
-        amount_usd
-    from
-        dex_aggregator.trades
-    where
-        project != 'cow_protocol'
-        and
-        blockchain in (select blockchain from chains_supported_by_cow)
-        and
-        block_time between timestamp '{{start_time}}' and timestamp '{{end_time}}'
-),
-
 all_competitor_transactions as (
     select
         tx_from as address,
@@ -77,7 +58,11 @@ all_competitor_transactions as (
         sum(amount_usd) as competitor_total_volume_usd,
         count(*) as competitor_total_transactions
     from
-        trades_dex_and_aggregators
+        all_transactions
+    where
+        project != 'cow_protocol'
+        and
+        blockchain in (select blockchain from chains_supported_by_cow)
     group by 1, 2, 3
 ),
 
