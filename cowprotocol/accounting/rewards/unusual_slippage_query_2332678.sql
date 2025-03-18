@@ -30,7 +30,7 @@ select  --noqa: ST06
         '" target="_blank">link</a>'
     ) as token_breakdown,
     concat(
-        '<a href="https://phalcon.blocksec.com/explorer/tx/',
+        '<a href="https://app.blocksec.com/explorer/tx/',
         (select * from url_helper),
         '/0x',
         to_hex(rpt.tx_hash),
