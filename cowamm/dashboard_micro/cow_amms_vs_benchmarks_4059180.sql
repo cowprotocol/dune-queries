@@ -1,4 +1,4 @@
--- Compute the evolution of performance for 10k$ invested in different strategies
+-- Compute the evolution of performance for $10k invested in different strategies
 -- Parameters:
 --   cow_amm: the address of the pool
 --   start: the start date
