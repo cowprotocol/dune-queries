@@ -1,4 +1,4 @@
---Query computes the trading volume over all Cow AMMs (matching users and rebalancing) and 7 day growth thereof.
+-- Query computes the trading volume over all CoW AMMs (matching users and rebalancing) and 7 day growth thereof.
 with cow_trades as (
     select
         block_date,
