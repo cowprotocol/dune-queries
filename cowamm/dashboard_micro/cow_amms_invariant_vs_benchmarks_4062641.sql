@@ -1,4 +1,4 @@
--- This query computes the relative surplus increase of a COW AMM compared to its benchmarks.
+-- This query computes the relative surplus increase of a CoW AMM compared to its benchmarks.
 -- Parameters:
 --   cow_amm: the address of the pool
 --   start: the start date
