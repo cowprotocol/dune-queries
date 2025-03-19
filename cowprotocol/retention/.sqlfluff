@@ -1,0 +1,4 @@
+[sqlfluff:templater:jinja:context]
+start_time='2024-08-01 12:00'
+chain_name='ethereum'
+lookback_window_months=1
