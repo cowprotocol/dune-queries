@@ -1,4 +1,4 @@
---display the informations about a cow amm pool
+-- display the information about a CoW AMM pool
 -- Parameters:
 --   cow_amm: the address of the pool
 
