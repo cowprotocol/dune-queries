@@ -16,7 +16,7 @@ with cow_amm as (
     where contract_address = {{cow_amm}}
 ),
 
---we assume that in the table there is one competitor with the same token pair per project
+-- we assume that in the table there is one competitor with the same token pair per project
 competitors as (
     select
         i.contract_address,
