@@ -22,8 +22,8 @@ select
         power(reserve0, cast(weight0 as double) / 100) * power(reserve1, cast(weight1 as double) / 100) / lp_reserve
         - lag(power(reserve0, cast(weight0 as double) / 100) * power(reserve1, cast(weight1 as double) / 100) / lp_reserve) over (order by day)
     )
-    -- then get the total invariant growth and price it in $$ and weight it with the same as the pool
-    * lp_reserve * power(price0 * power(10, -decimals0), cast(weight0 as double) / 100) * power(price1 * power(10, -decimals1), cast(weight1 as double) / 100) as surplus
+    -- then get the total invariant growth and price it in $$ and weight it with the same weights as the pool
+    * lp_reserve * 2 * power(price0 * power(10, -decimals0), cast(weight0 as double) / 100) * power(price1 * power(10, -decimals1), cast(weight1 as double) / 100) as surplus
 from dune.cowprotocol.result_amm_lp_infos
 left join volume
     on
