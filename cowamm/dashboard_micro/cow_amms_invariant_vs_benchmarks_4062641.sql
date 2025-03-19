@@ -37,7 +37,7 @@ competitors as (
     group by 1, 2, 3
 )
 
--- With Xt and Yt both reserves at time t, wx and wy the weights (wx+wy = 1) and LPt the lp reserves at time t
+-- With Xt and Yt being the reserves at time t, wx and wy the weights (wx+wy = 1) and LPt the lp reserves at time t
 -- we define the curve per LP token : Ct = Xt**wx * Yt**wy / LPt
 -- Then the relative surplus between t and t+1 is delta Surplus = C(t+1)/C(t) - 1. 
 -- Obviously, the surplus is positive as it can only increase during a trade, and a deposit/withdrawal keeps Ct constant.
