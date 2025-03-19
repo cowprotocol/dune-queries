@@ -1,4 +1,4 @@
---Query computes the trading volume over all Cow AMMs (matching users and rebalancing)
+-- Query computes the trading volume over all CoW AMMs (matching users and rebalancing)
 
 -- Parameters:
 -- {{aggregate_by}}: the frequence of the data, e.g. 'day', 'week', 'month'
