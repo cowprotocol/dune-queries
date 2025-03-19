@@ -1,4 +1,4 @@
---Current outperformance of COW AMM vs Uniswap and Sushiswap and TVL
+-- Current outperformance of CoW AMM vs Uniswap and Sushiswap and TVL
 -- Parameters:
 -- cow_amm: CoW AMM address
 -- start: Start date for the query
