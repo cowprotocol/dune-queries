@@ -7,8 +7,8 @@ with cow_amm_pool as (
     select
         created_at,
         address,
-        token_1_address as token0,
-        token_2_address as token1
+        token_0_address as token0,
+        token_1_address as token1
     from dune.cowprotocol.result_balancer_co_w_am_ms
     where blockchain = '{{blockchain}}'
     order by 1 desc
