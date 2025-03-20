@@ -12,14 +12,14 @@ with cow_trades as (
 cumulative_volume as (
     select
         block_date as day, --noqa: RF04
-        sum(volume) over (order by block_date) as tvl
+        sum(volume) over (order by block_date) as total_volume
     from cow_trades
 )
 
 select
-    prev.tvl as prev,
-    curr.tvl as curr,
-    100 * (curr.tvl - prev.tvl) / prev.tvl as growth
+    prev.total_volume as prev,
+    curr.total_volume as curr,
+    100 * (curr.total_volume - prev.total_volume) / prev.total_volume as growth
 from cumulative_volume as curr
 inner join cumulative_volume as prev
     on curr.day = prev.day + interval '7' day
