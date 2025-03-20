@@ -25,8 +25,8 @@ uni_style_pools as (
     inner join cow_amm_pools as c
         on
             (
-                (u.token0 = c.token_1_address and u.token1 = c.token_2_address)
-                or (u.token1 = c.token_1_address and u.token0 = c.token_2_address)
+                (u.token0 = c.token_0_address and u.token1 = c.token_1_address)
+                or (u.token1 = c.token_0_address and u.token0 = c.token_1_address)
             )
             and '{{blockchain}}' = c.blockchain
     group by 1, 2, 3, 4, 5
