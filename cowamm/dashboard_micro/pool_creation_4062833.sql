@@ -10,5 +10,5 @@ select
     concat('<a href="https://etherscan.io/address/', cast(token1 as varchar), '" target="_blank">', symbol1, ' ', cast(weight1 as varchar), '%', '</a>') as symbol1
 from dune.cowprotocol.result_amm_lp_infos
 where (contract_address = {{cow_amm}})
-order by 1, day desc
+order by created_at desc, day desc
 limit 1
