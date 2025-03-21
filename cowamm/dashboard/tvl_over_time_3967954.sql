@@ -14,9 +14,9 @@ select
     curr.day,
     prev.tvl as prev,
     curr.tvl as curr,
-    (curr.tvl - prev.tvl) / prev.tvl as growth
+    100 * (curr.tvl - prev.tvl) / prev.tvl as growth
 from tvl as curr
 inner join tvl as prev
     on curr.day = prev.day + interval '7' day
-where not (curr.tvl is null)
+where not(curr.tvl is null)
 order by day desc
