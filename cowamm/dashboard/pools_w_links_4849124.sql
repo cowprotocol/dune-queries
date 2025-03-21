@@ -33,12 +33,12 @@ select --noqa: ST06
     r.symbol0,
     r.symbol1,
     -- Compute surplus based on the curve's value
-    power(r.reserve0, r.weight0) * power(r.reserve1, r.weight1) / r.lp_reserve
-    / (power(r1.reserve0, r1.weight0) * power(r1.reserve1, r1.weight1) / r1.lp_reserve) - 1 as "1d APY",
-    power(r.reserve0, r.weight0) * power(r.reserve1, r.weight1) / r.lp_reserve
-    / (power(r2.reserve0, r2.weight0) * power(r2.reserve1, r2.weight1) / r2.lp_reserve) - 1 as "7d APY",
-    power(r.reserve0, r.weight0) * power(r.reserve1, r.weight1) / r.lp_reserve
-    / (power(r3.reserve0, r3.weight0) * power(r3.reserve1, r3.weight1) / r3.lp_reserve) - 1 as "30d APY",
+    round(power(r.reserve0, r.weight0) * power(r.reserve1, r.weight1) / r.lp_reserve
+    / (power(r1.reserve0, r1.weight0) * power(r1.reserve1, r1.weight1) / r1.lp_reserve) - 1, 4) as "1d APY",
+    round(power(r.reserve0, r.weight0) * power(r.reserve1, r.weight1) / r.lp_reserve
+    / (power(r2.reserve0, r2.weight0) * power(r2.reserve1, r2.weight1) / r2.lp_reserve) - 1, 4) as "7d APY",
+    round(power(r.reserve0, r.weight0) * power(r.reserve1, r.weight1) / r.lp_reserve
+    / (power(r3.reserve0, r3.weight0) * power(r3.reserve1, r3.weight1) / r3.lp_reserve) - 1, 4) as "30d APY",
     r.token0,
     r.token1
 from recent as r
