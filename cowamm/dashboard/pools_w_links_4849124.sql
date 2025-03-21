@@ -16,7 +16,7 @@ with recent as (
         cast(weight0 as double) / 100 as weight0,
         cast(weight1 as double) / 100 as weight1,
         concat(
-            '<a href="https://dune.com/cowprotocol/cow-amm-micro-v2?token_a=', cast(token0 as varchar), '&token_b=', cast(token1 as varchar), '&blockchain=', blockchain, '&ref_token_a=', cast(token0 as varchar), '&ref_token_b=', cast(token1 as varchar), '&ref_blockchain=', blockchain,
+            '<a href="https://dune.com/cowprotocol/cow-amm-micro-v2?blockchain=', blockchain, '&cow_amm=', cast(contract_address as varchar),
             '" target="_blank">', cast(contract_address as varchar), '</a>'
         ) as cow_amm_address,
         rank() over (partition by contract_address order by day desc) as latest
