@@ -18,5 +18,5 @@ select
 from tvl as curr
 inner join tvl as prev
     on curr.day = prev.day + interval '7' day
-where not(curr.tvl is null)
+where not (curr.tvl is null)
 order by day desc
