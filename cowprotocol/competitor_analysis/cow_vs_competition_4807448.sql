@@ -7,29 +7,18 @@
 --  {{start_time}} - the trade timestamp for which the analysis should start (inclusive)
 --  {{end_time}} - the trade timestamp for which the analysis should end (inclusive)
 
-with all_transactions as (
-    select
-        tx_from,
-        tx_hash,
-        blockchain,
-        project,
-        amount_usd,
-        block_time,
-        product_type
-    from
-        "query_4836358(start_time='{{start_time}}', end_time='{{end_time}}')"
-),
-
-cow_protocol_target_users as (
+with cow_protocol_target_users as (
     select
         tx_from as address,
         blockchain as chain_used_for_cow,
         count(*) as total_transactions_on_cow,
         sum(amount_usd) as total_volume_usd_on_cow
     from
-        all_transactions
+        dex_aggregator.trades
     where
         project = 'cow_protocol'
+        and
+        block_time between timestamp '{{start_time}}' and timestamp '{{end_time}}'
     group by
         1, 2
 ),
@@ -45,9 +34,13 @@ users_per_chain_cow as (
 ),
 
 chains_supported_by_cow as (
-    select distinct chain_used_for_cow as blockchain
+    select distinct blockchain
     from
-        cow_protocol_target_users
+        dex_aggregator.trades
+    where
+        project = 'cow_protocol'
+        and
+        block_time between timestamp '{{start_time}}' and timestamp '{{end_time}}'
 ),
 
 all_competitor_transactions as (
@@ -58,7 +51,7 @@ all_competitor_transactions as (
         sum(amount_usd) as competitor_total_volume_usd,
         count(*) as competitor_total_transactions
     from
-        all_transactions
+        "query_4836358(start_time='{{start_time}}', end_time='{{end_time}}')"
     where
         project != 'cow_protocol'
         and
