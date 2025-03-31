@@ -211,7 +211,7 @@ where
     or tx_hash = 0x1F14B47CCA77FBA18F6AD87372C9F942617FAF9C787622BBD8F56D187EF069FA
 
 -- Base
-union
+union all
 select distinct tx_hash
 from
     cow_protocol_base.trades
