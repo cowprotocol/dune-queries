@@ -44,11 +44,11 @@ all_active_users as (
 users_backbone as (
     select
         user_address,
-        dt as block_month,
+        a.dt as block_month,
         null as project
     from
         all_active_users
-    cross join unnest(sequence(date_trunc('Month', timestamp '{{start_time}}') - interval '1' month, current_date, interval '1' month))
+    cross join unnest(sequence(date_trunc('Month', timestamp '{{start_time}}') - interval '1' month, current_date, interval '1' month)) as a (dt)
 ),
 
 all_users as (
@@ -65,7 +65,7 @@ all_users as (
 
 user_w_creation_date as (
     select
-        user_address,
+        all_users.user_address,
         block_month,
         creation_month,
         project
