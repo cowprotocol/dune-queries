@@ -17,7 +17,7 @@
 
 with creation_month_per_user as (
     -- TODO: use both dex and dex-agg here
-    select distinct
+    select
         taker as user_address,
         min(date_trunc('Month', block_date)) as creation_month
     from
@@ -26,6 +26,7 @@ with creation_month_per_user as (
         blockchain = '{{chain_name}}'
     group by 1
 ),
+
 all_active_users as (
     -- TODO: use layered txs here to prevent miss-information
     select distinct
@@ -39,6 +40,7 @@ all_active_users as (
         and
         block_date >= timestamp '{{start_time}}' - interval '1' month
 ),
+
 users_backbone as (
     select
         user_address,
@@ -46,21 +48,21 @@ users_backbone as (
         null as project
     from
         all_active_users
-    cross join unnest(sequence(date_trunc('Month', timestamp '{{start_time}}') - interval '1' month, current_date, interval '1' month)) as a(dt)
+    cross join unnest(sequence(date_trunc('Month', timestamp '{{start_time}}') - interval '1' month, current_date, interval '1' month))
 ),
+
 all_users as (
-    select
-        *
+    select *
     from
         users_backbone
 
     union all
 
-    select
-        *
+    select *
     from
         all_active_users
 ),
+
 user_w_creation_date as (
     select
         user_address,
@@ -69,10 +71,11 @@ user_w_creation_date as (
         project
     from
         all_users
-    left join creation_month_per_user using (user_address)
+    left join creation_month_per_user on all_users.user_address = creation_month_per_user.user_address
     where
         creation_month <= block_month
 ),
+
 users_labeled as (
     select
         user_address,
@@ -88,6 +91,7 @@ users_labeled as (
         user_w_creation_date
     group by 1, 2
 ),
+
 users_w_last_month_status as (
     select
         user_address,
