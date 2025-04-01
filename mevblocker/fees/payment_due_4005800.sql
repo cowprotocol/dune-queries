@@ -16,7 +16,7 @@ WITH block_range AS (
 
 final_fee AS (
     -- TODO: remove between  2025/04/03 and 2025/04/08
-    SELECT avg_block_fee_wei * 4 / 5 as avg_block_fee_wei
+    SELECT avg_block_fee_wei * 4 / 5 AS avg_block_fee_wei
     FROM "query_4002039(start='{{fee_computation_start}}', end='{{fee_computation_end}}')"
 ),
 
