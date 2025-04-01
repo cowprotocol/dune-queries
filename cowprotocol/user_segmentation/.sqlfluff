@@ -1,0 +1,6 @@
+[sqlfluff:templater:jinja:context]
+start_time='2024-08-01 12:00'
+chain_name='ethereum'
+current_status='Gone'
+previous_status='Gone'
+project='cow_protocol'
