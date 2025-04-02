@@ -7,7 +7,8 @@ SELECT
     blockchain,
     SUM(amount_usd) AS volume
 FROM
-  cow_protocol.trades
- WHERE block_date >= date(timestamp '2021-04-01')
- and token_sold_address not in (select token_address from query_3559859) and token_bought_address not in (select token_address from query_3559859)
- GROUP BY 1, 2
+    cow_protocol.trades
+WHERE
+    block_date >= DATE(TIMESTAMP '2021-04-01')
+    AND token_sold_address NOT IN (SELECT token_address FROM query_3559859) AND token_bought_address NOT IN (SELECT token_address FROM query_3559859)
+GROUP BY 1, 2
