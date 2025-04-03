@@ -1,0 +1,2 @@
+[sqlfluff:templater:jinja:context]
+aggregate_by=week
