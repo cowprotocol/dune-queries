@@ -85,7 +85,6 @@ reserves_first as (
     group by contract_address, token --noqa: AM06
 )
 
-
 select * from (
     select
         p.contract_address,

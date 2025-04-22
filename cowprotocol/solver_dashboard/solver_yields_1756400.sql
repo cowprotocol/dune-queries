@@ -29,7 +29,6 @@ unmodified_rewards as (
     group by solver
 )
 
-
 select
     s.solver,
     solver_name,

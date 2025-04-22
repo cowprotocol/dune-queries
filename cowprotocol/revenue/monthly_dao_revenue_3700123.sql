@@ -36,7 +36,6 @@ cow_base as (
     group by 1
 ),
 
-
 mevblocker as (
     select
         date_trunc('month', call_block_time) as date_month,

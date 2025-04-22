@@ -33,6 +33,5 @@ full_bonding_pools as (
         from_hex('0x042c9c6d52881dc7e70bf3e233b540a07377d26b') as creator
 )
 
-
 select *
 from full_bonding_pools

@@ -93,7 +93,6 @@ cow_surplus_per_batch as (
     select * from cow_surplus_per_batch_base
 ),
 
-
 aggregate_result_per_solver as (
     select
         solver_name,
@@ -102,9 +101,7 @@ aggregate_result_per_solver as (
     group by solver_name
 ),
 
-
 ---- final results
-
 reward_addresses as (
     select
         solver as solver_address,
