@@ -21,7 +21,6 @@ with cowamm_creations as (
     and block_time >= cast('2024-07-29 00:00:00' as timestamp)
 ),
 
-
 -- Bind events for tokens
 cowamm_binds as (
     select

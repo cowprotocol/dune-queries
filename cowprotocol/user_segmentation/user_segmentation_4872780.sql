@@ -103,7 +103,6 @@ users_w_last_month_status as (
         users_labeled
 )
 
-
 select
     block_month,
     previous_status || '->' || current_status as status_shift,
