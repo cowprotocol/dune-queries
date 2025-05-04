@@ -213,6 +213,9 @@ where
     -- for week of April 15 - April 22, 2025 on mainnet
     or tx_hash = 0x91f810f43903c11b99ccb6b4deeda464261b655b0bd546ef4edbcfdd6bad5ddd
 
+    -- for week of April 29 - May 6, 2025 on mainnet
+    or tx_hash = 0x683fff5607fac2fd249050794fedd47875e3f94762ee885c7514b080787989c5
+
 -- Base
 union all
 select distinct tx_hash
