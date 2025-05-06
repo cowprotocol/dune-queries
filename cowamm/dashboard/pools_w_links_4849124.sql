@@ -16,7 +16,7 @@ with recent as (
         cast(weight0 as double) / 100 as weight0,
         cast(weight1 as double) / 100 as weight1,
         concat(
-            '<a href="https://dune.com/cowprotocol/cow-amm-micro-v2?token_a=', cast(token0 as varchar), '&token_b=', cast(token1 as varchar), '&blockchain=', blockchain, '&ref_token_a=', cast(token0 as varchar), '&ref_token_b=', cast(token1 as varchar), '&ref_blockchain=', blockchain,
+            '<a href="https://dune.com/cowprotocol/cow-amm-micro-v2?blockchain=', blockchain, '&cow_amm=', cast(contract_address as varchar),
             '" target="_blank">', cast(contract_address as varchar), '</a>'
         ) as cow_amm_address,
         rank() over (partition by contract_address order by day desc) as latest
@@ -33,12 +33,27 @@ select --noqa: ST06
     r.symbol0,
     r.symbol1,
     -- Compute surplus based on the curve's value
-    power(r.reserve0, r.weight0) * power(r.reserve1, r.weight1) / r.lp_reserve
-    / (power(r1.reserve0, r1.weight0) * power(r1.reserve1, r1.weight1) / r1.lp_reserve) - 1 as "1d APY",
-    power(r.reserve0, r.weight0) * power(r.reserve1, r.weight1) / r.lp_reserve
-    / (power(r2.reserve0, r2.weight0) * power(r2.reserve1, r2.weight1) / r2.lp_reserve) - 1 as "7d APY",
-    power(r.reserve0, r.weight0) * power(r.reserve1, r.weight1) / r.lp_reserve
-    / (power(r3.reserve0, r3.weight0) * power(r3.reserve1, r3.weight1) / r3.lp_reserve) - 1 as "30d APY",
+    round(
+        power(
+            power(r.reserve0, r.weight0) * power(r.reserve1, r.weight1) / r.lp_reserve
+            / (power(r1.reserve0, r1.weight0) * power(r1.reserve1, r1.weight1) / r1.lp_reserve),
+            365
+        ) - 1, 4
+    ) as "1d APY",
+    round(
+        power(
+            power(r.reserve0, r.weight0) * power(r.reserve1, r.weight1) / r.lp_reserve
+            / (power(r2.reserve0, r2.weight0) * power(r2.reserve1, r2.weight1) / r2.lp_reserve),
+            365 / 7
+        ) - 1, 4
+    ) as "7d APY",
+    round(
+        power(
+            power(r.reserve0, r.weight0) * power(r.reserve1, r.weight1) / r.lp_reserve
+            / (power(r3.reserve0, r3.weight0) * power(r3.reserve1, r3.weight1) / r3.lp_reserve),
+            365 / 30
+        ) - 1, 4
+    ) as "30d APY",
     r.token0,
     r.token1
 from recent as r
