@@ -44,7 +44,7 @@ solver_info as (
         avg(t.num_trades) as average_batch_size,
         sum(t.surplus_usd) as total_surplus,
         1.0 * sum(b.gas_used) / nullif(sum(t.num_trades), 0) as average_gas_per_trade,
-        1.0 * sum(b.dex_swaps) / nulliff(sum(t.num_trades), 0) as average_dex_swaps_per_trade
+        1.0 * sum(b.dex_swaps) / nullif(sum(t.num_trades), 0) as average_dex_swaps_per_trade
     from settled_batch_data as b
     inner join cow_protocol_{{blockchain}}.solvers as s
         on b.solver_address = s.address
