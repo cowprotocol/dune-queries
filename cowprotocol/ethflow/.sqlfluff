@@ -3,3 +3,4 @@ start_time='2024-08-20 00:00:00'
 end_time='2024-08-27 00:00:00'
 grace_period=10
 network='ethereum'
+ignored_app_codes=''

@@ -7,6 +7,7 @@
 --  {{end_time}} - the order validity timestamp for which the analysis should end (inclusive)
 --  {{grace_period}} - a global shift of start and end time to account for delays in refunds
 --  {{network}} - the network to be used (e.g. ethereum, gnosis, etc.)
+--  {{ignored_app_codes}} - a comma-separated list of app codes to ignore (e.g. 'Seer','infinex') or '' to include all
 
 with
 join_with_trade_events as (
@@ -21,12 +22,17 @@ join_with_trade_events as (
         block_number as placement_block,
         evt_block_number as fill_block,
         order_uid
-    from cow_protocol_{{network}}.eth_flow_orders
+    from cow_protocol_{{network}}.eth_flow_orders as e
     left outer join gnosis_protocol_v2_{{network}}.GPv2Settlement_evt_Trade
         on
             order_uid = orderUid
             and evt_block_time > block_time
-    where block_time > now() - interval '1' day
+    left join dune.cowprotocol.result_cow_protocol_ethereum_app_data as a
+        on
+            e.app_hash = a.app_hash
+    where
+        block_time > now() - interval '1' day
+        and app_code not in ({{ignored_app_codes}})
 ),
 
 cancellations as (
