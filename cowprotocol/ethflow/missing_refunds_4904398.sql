@@ -6,6 +6,7 @@
 --  {{start_time}} - the order validity timestamp for which the analysis should start (inclusive)
 --  {{end_time}} - the order validity timestamp for which the analysis should end (inclusive)
 --  {{grace_period}} - a global shift of start and end time to account for delays in refunds
+--  {{network}} - the network to be used (e.g. ethereum, gnosis, etc.)
 
 with
 join_with_trade_events as (
@@ -20,8 +21,8 @@ join_with_trade_events as (
         block_number as placement_block,
         evt_block_number as fill_block,
         order_uid
-    from cow_protocol_ethereum.eth_flow_orders
-    left outer join gnosis_protocol_v2_ethereum.GPv2Settlement_evt_Trade
+    from cow_protocol_{{network}}.eth_flow_orders
+    left outer join gnosis_protocol_v2_{{network}}.GPv2Settlement_evt_Trade
         on
             order_uid = orderUid
             and evt_block_time > block_time
@@ -35,8 +36,8 @@ cancellations as (
         evt_block_time as cancellation_time,
         evt_block_number as cancellation_block,
         sum(cast(value as double) / pow(10, 18)) as refund_amount_eth
-    from cow_protocol_ethereum.CoWSwapEthFlow_evt_OrderInvalidation
-    inner join ethereum.tracess
+    from cow_protocol_{{network}}.CoWSwapEthFlow_evt_OrderInvalidation
+    inner join {{network}}.traces
         on
             evt_block_number = block_number
             and evt_tx_hash = tx_hash
@@ -52,8 +53,8 @@ refunds as (
         refunder,
         orderUid,
         sum(cast(value as double) / pow(10, 18)) as refund_amount_eth
-    from cow_protocol_ethereum.CoWSwapEthFlow_evt_OrderRefund
-    inner join ethereum.traces
+    from cow_protocol_{{network}}.CoWSwapEthFlow_evt_OrderRefund
+    inner join {{network}}.traces
         on
             evt_block_number = block_number
             and evt_tx_hash = tx_hash
