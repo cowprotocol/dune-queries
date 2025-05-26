@@ -216,6 +216,11 @@ where
     -- for week of April 29 - May 6, 2025 on mainnet
     or tx_hash = 0x683fff5607fac2fd249050794fedd47875e3f94762ee885c7514b080787989c5
 
+    -- for week of May 20 - May 27, 2025 on Mainnet
+    or tx_hash = 0xac8de01cd4f8737c95bf66d451ce8d2eda31802a41c9629e4c4557e943e13edc
+    or tx_hash = 0xf886919e66f466b7381c4c939e131038a745990357ae9d77ad073668ebb08238
+    or tx_hash = 0x1d3b79fb4b0d9ec150bcfe0a0e893e31d0bca60a6397256548e151e5d44cff37
+
 -- Base
 union all
 select distinct tx_hash
@@ -234,3 +239,4 @@ where
 
     -- for week of March 18 - March 25, 2025 on Base
     or 0x22af33fe49fd1fa80c7149773dde5890d3c76f3b in (buy_token_address) -- exclude BNKR
+
