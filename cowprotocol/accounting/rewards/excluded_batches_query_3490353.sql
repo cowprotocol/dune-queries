@@ -219,7 +219,6 @@ where
     -- for week of May 20 - May 27, 2025 on Mainnet
     or tx_hash = 0xac8de01cd4f8737c95bf66d451ce8d2eda31802a41c9629e4c4557e943e13edc
     or tx_hash = 0xf886919e66f466b7381c4c939e131038a745990357ae9d77ad073668ebb08238
-    or tx_hash = 0x1d3b79fb4b0d9ec150bcfe0a0e893e31d0bca60a6397256548e151e5d44cff37
 
 -- Base
 union all
