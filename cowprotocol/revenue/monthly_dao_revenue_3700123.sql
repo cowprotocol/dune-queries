@@ -14,7 +14,7 @@ cow_gnosis as (
         date_trunc('month', block_time) as date_month,
         (coalesce(sum("Limit"), 0) + coalesce(sum("Market"), 0) + coalesce(sum("UI Fee"), 0)) as protocol_fee,
         coalesce(sum("Partner Fee Share"), 0) as partner_fee_share
-    from "query_4217030(blockchain='arbitrum',ui_fee_recipient='0x6b3214fD11dc91De14718DeE98Ef59bCbFcfB432')"
+    from "query_4217030(blockchain='gnosis',ui_fee_recipient='0x6b3214fD11dc91De14718DeE98Ef59bCbFcfB432')"
     group by 1
 ),
 
