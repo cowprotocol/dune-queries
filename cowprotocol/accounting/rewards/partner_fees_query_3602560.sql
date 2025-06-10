@@ -71,6 +71,7 @@ per_recipient_partner_fees_prelim as (
             when '{{blockchain}}' = 'ethereum' and partner_recipient = 0x8025bacf968aa82bdfe51b513123b55bfb0060d3 then sum(0.45 * raw_integrator_fee_in_eth)
             when '{{blockchain}}' = 'ethereum' and partner_recipient = 0xe423c63e8a25811c9cbe71c8585c4505117397c6 then sum(0.75 * raw_integrator_fee_in_eth)
             when '{{blockchain}}' = 'ethereum' and partner_recipient = 0x1713b79e3dbb8a76d80e038ca701a4a781ac69eb then sum(0.75 * raw_integrator_fee_in_eth)
+            when '{{blockchain}}' = 'ethereum' and partner_recipient = 0xc542c2f197c4939154017c802b0583c596438380 then sum(0.875 * raw_integrator_fee_in_eth)
             -- gnosis
             when '{{blockchain}}' = 'gnosis' and partner_recipient = 0x63695eee2c3141bde314c5a6f89b98e62808d716 and app_code != 'CoW Swap-SafeApp' then sum(0.9 * raw_integrator_fee_in_eth)
             when '{{blockchain}}' = 'gnosis' and partner_recipient = 0x352a3666b27bb09aca7b4a71ed624429b7549551 then sum(0.85 * raw_integrator_fee_in_eth)
@@ -81,6 +82,7 @@ per_recipient_partner_fees_prelim as (
             when '{{blockchain}}' = 'gnosis' and partner_recipient = 0x8025bacf968aa82bdfe51b513123b55bfb0060d3 then sum(0.45 * raw_integrator_fee_in_eth)
             when '{{blockchain}}' = 'gnosis' and partner_recipient = 0xe423c63e8a25811c9cbe71c8585c4505117397c6 then sum(0.75 * raw_integrator_fee_in_eth)
             when '{{blockchain}}' = 'gnosis' and partner_recipient = 0x1713b79e3dbb8a76d80e038ca701a4a781ac69eb then sum(0.75 * raw_integrator_fee_in_eth)
+            when '{{blockchain}}' = 'gnosis' and partner_recipient = 0xc542c2f197c4939154017c802b0583c596438380 then sum(0.875 * raw_integrator_fee_in_eth)
             -- arbitrum
             when '{{blockchain}}' = 'arbitrum' and partner_recipient = 0x63695eee2c3141bde314c5a6f89b98e62808d716 and app_code != 'CoW Swap-SafeApp' then sum(0.9 * raw_integrator_fee_in_eth)
             when '{{blockchain}}' = 'arbitrum' and partner_recipient = 0x352a3666b27bb09aca7b4a71ed624429b7549551 then sum(0.85 * raw_integrator_fee_in_eth)
@@ -91,6 +93,7 @@ per_recipient_partner_fees_prelim as (
             when '{{blockchain}}' = 'arbitrum' and partner_recipient = 0x8025bacf968aa82bdfe51b513123b55bfb0060d3 then sum(0.45 * raw_integrator_fee_in_eth)
             when '{{blockchain}}' = 'arbitrum' and partner_recipient = 0xe423c63e8a25811c9cbe71c8585c4505117397c6 then sum(0.75 * raw_integrator_fee_in_eth)
             when '{{blockchain}}' = 'arbitrum' and partner_recipient = 0x1713b79e3dbb8a76d80e038ca701a4a781ac69eb then sum(0.75 * raw_integrator_fee_in_eth)
+            when '{{blockchain}}' = 'arbitrum' and partner_recipient = 0xc542c2f197c4939154017c802b0583c596438380 then sum(0.875 * raw_integrator_fee_in_eth)
             -- base
             when '{{blockchain}}' = 'base' and partner_recipient = 0x63695eee2c3141bde314c5a6f89b98e62808d716 and app_code != 'CoW Swap-SafeApp' then sum(0.9 * raw_integrator_fee_in_eth)
             when '{{blockchain}}' = 'base' and partner_recipient = 0x352a3666b27bb09aca7b4a71ed624429b7549551 then sum(0.85 * raw_integrator_fee_in_eth)
@@ -101,6 +104,7 @@ per_recipient_partner_fees_prelim as (
             when '{{blockchain}}' = 'base' and partner_recipient = 0x8025bacf968aa82bdfe51b513123b55bfb0060d3 then sum(0.45 * raw_integrator_fee_in_eth)
             when '{{blockchain}}' = 'base' and partner_recipient = 0xe423c63e8a25811c9cbe71c8585c4505117397c6 then sum(0.75 * raw_integrator_fee_in_eth)
             when '{{blockchain}}' = 'base' and partner_recipient = 0x1713b79e3dbb8a76d80e038ca701a4a781ac69eb then sum(0.75 * raw_integrator_fee_in_eth)
+            when '{{blockchain}}' = 'base' and partner_recipient = 0xc542c2f197c4939154017c802b0583c596438380 then sum(0.875 * raw_integrator_fee_in_eth)
             else sum(0.5 * raw_integrator_fee_in_eth)
         end as partner_fee_part
     from
