@@ -92,8 +92,8 @@ order_quotes as (
         quote_solver
     from "query_4364122(blockchain='{{blockchain}}')"
     where
-        block_deadline >= (select start_block from block_range)
-        and block_deadline <= (select end_block from block_range)
+        coalesce(block_deadline, block_number) >= (select start_block from block_range)
+        and coalesce(block_deadline, block_number) <= (select end_block from block_range)
 ),
 
 winning_quotes as (
