@@ -35,6 +35,7 @@ base_march_4_11_auctions_final as (
 ------------------------------
 
 select
-    bd.tx_hash,
+    bd.environment,
+    bd.auction_id,
     ea.multiplier
 from base_march_4_11_auctions_final as ea inner join "query_4351957(blockchain='{{blockchain}}')" as bd on ea.environment = bd.environment and ea.auction_id = bd.auction_id
