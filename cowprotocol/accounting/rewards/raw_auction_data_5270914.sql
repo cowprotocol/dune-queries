@@ -8,6 +8,9 @@
 --    auction_id: integer
 --    block_deadline: integer
 --    solver: varbinary
+--    total_network_fee: decimal(38, 0)
+--    total_execution_cost: decimal(38, 0)
+--    total_protocol_fee: decimal(38, 0)
 --    competition_score: decimal(38, 0)
 --    observed_score: decimal(38, 0)
 --    uncapped_payment_native_token: decimal(38, 0)
@@ -18,6 +21,9 @@ select --noqa: ST06
     auction_id,
     block_deadline,
     solver,
+    sum(network_fee) as total_network_fee,
+    sum(execution_cost) as total_execution_cost,
+    sum(protocol_fee) as total_protocol_fee,
     sum(winning_score) as competition_score,
     sum(
         case
