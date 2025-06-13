@@ -31,6 +31,11 @@ full_bonding_pools as (
         from_hex('0x0deb0ae9c4399c51289adb1f3ed83557a56df657') as pool_address,
         'Rizzolver' as pool_name,
         from_hex('0x042c9c6d52881dc7e70bf3e233b540a07377d26b') as creator
+    union distinct
+    select
+        from_hex('0x7719c9c0d35d460b00487a1744394e9525e8a42c') as pool_address,
+        'Fractal' as pool_name,
+        from_hex('0xd4676b4de3a982a429a8dbe90d4a7e7cfb4769a5') as creator
 )
 
 select *
