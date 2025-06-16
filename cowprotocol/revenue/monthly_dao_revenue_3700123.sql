@@ -9,12 +9,23 @@ with cow_mainnet as (
     group by 1
 ),
 
+daily_eth_price as (
+    select
+        day,
+        price
+    from prices.usd_daily
+    where
+        blockchain = 'ethereum'
+        and contract_address = 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2
+),
+
 cow_gnosis as (
     select
         date_trunc('month', block_time) as date_month,
-        (coalesce(sum("Limit"), 0) + coalesce(sum("Market"), 0) + coalesce(sum("UI Fee"), 0)) as protocol_fee,
-        coalesce(sum("Partner Fee Share"), 0) as partner_fee_share
-    from "query_4217030(blockchain='arbitrum',ui_fee_recipient='0x6b3214fD11dc91De14718DeE98Ef59bCbFcfB432')"
+        (coalesce(sum("Limit" / price), 0) + coalesce(sum("Market" / price), 0) + coalesce(sum("UI Fee" / price), 0)) as protocol_fee,
+        coalesce(sum("Partner Fee Share" / price), 0) as partner_fee_share
+    from "query_4217030(blockchain='gnosis',ui_fee_recipient='0x6b3214fD11dc91De14718DeE98Ef59bCbFcfB432')"
+    left join daily_eth_price on day = date_trunc('day', block_time)
     group by 1
 ),
 
