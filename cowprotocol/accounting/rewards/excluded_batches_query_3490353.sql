@@ -220,6 +220,10 @@ where
     or tx_hash = 0xac8de01cd4f8737c95bf66d451ce8d2eda31802a41c9629e4c4557e943e13edc
     or tx_hash = 0xf886919e66f466b7381c4c939e131038a745990357ae9d77ad073668ebb08238
 
+    -- for week of June 10 - June 17, 2025 on Mainnet
+    or tx_hash = 0x0183756d30137630a9c1f7c02c9ec904751147e0fedbd7e529f31d05aac04baf
+    -- due to bug with slippage accounting for flashloans txs
+
 -- Base
 union all
 select distinct tx_hash
