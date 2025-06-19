@@ -26,9 +26,10 @@ with raw_fee_data as (
         sell_token_address,
         protocol_fee,
         surplus_fee,
+        network_fee,
         protocol_fee_token as protocol_fee_token_address
     from cow_protocol_{{blockchain}}.trades as t
-    inner join "query_4364122(blockchain='{{blockchain}}')" as ror -- this table only exists for ethereum trades
+    inner join "query_4364122(blockchain='{{blockchain}}')" as ror
         on t.order_uid = ror.order_uid and t.tx_hash = ror.tx_hash
     where block_time >= cast('{{start_time}}' as timestamp) and block_time < cast('{{end_time}}' as timestamp)
 ),
@@ -50,10 +51,14 @@ network_fees as (
         tx_hash,
         order_uid,
         sell_token_address as token_address,
-        case
-            when sell_token_address = protocol_fee_token_address then surplus_fee - protocol_fee
-            else surplus_fee - cast(1.0 * protocol_fee * (atoms_sold - surplus_fee) / atoms_bought as int256)
-        end as amount,
+        coalesce(
+            network_fee,
+            case
+                when sell_token_address = protocol_fee_token_address then surplus_fee - protocol_fee
+                else surplus_fee - cast(1.0 * protocol_fee * (atoms_sold - surplus_fee) / atoms_bought as int256)
+            end,
+            0
+        ) as amount,
         'network_fee' as fee_type
     from raw_fee_data
 )
