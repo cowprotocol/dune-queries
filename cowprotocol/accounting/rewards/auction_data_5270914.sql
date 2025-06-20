@@ -1,7 +1,7 @@
 -- This query provides data related to rewards/payouts on a per auction level
 -- for all auctions that had at least one winner.
 -- Parameters:
--- : the chain for which we want to retrieve batch data
+--   blockchain: the chain for which we want to retrieve batch data
 
 -- The output has the following columns:
 --    environment: varchar
