@@ -34,37 +34,11 @@ users_per_chain_cow as (
 ),
 
 chains_supported_by_cow as (
-    select distinct chain_used_for_cow as blockchain
-    from
-        cow_protocol_target_users
-),
-
-trades_dex_and_aggregators as (
-    select
-        tx_from,
-        blockchain,
-        project,
-        amount_usd
-    from
-        dex.trades
-    where
-        blockchain in (select blockchain from chains_supported_by_cow)
-        and
-        block_time between timestamp '{{start_time}}' and timestamp '{{end_time}}'
-
-    union all
-
-    select
-        tx_from,
-        blockchain,
-        project,
-        amount_usd
+    select distinct blockchain
     from
         dex_aggregator.trades
     where
-        project != 'cow_protocol'
-        and
-        blockchain in (select blockchain from chains_supported_by_cow)
+        project = 'cow_protocol'
         and
         block_time between timestamp '{{start_time}}' and timestamp '{{end_time}}'
 ),
@@ -77,7 +51,11 @@ all_competitor_transactions as (
         sum(amount_usd) as competitor_total_volume_usd,
         count(*) as competitor_total_transactions
     from
-        trades_dex_and_aggregators
+        "query_4836358(start_time='{{start_time}}', end_time='{{end_time}}')"
+    where
+        project != 'cow_protocol'
+        and
+        blockchain in (select blockchain from chains_supported_by_cow)
     group by 1, 2, 3
 ),
 
