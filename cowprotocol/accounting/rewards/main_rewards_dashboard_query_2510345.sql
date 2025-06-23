@@ -1,9 +1,5 @@
 with
 
-block_range as (
-    select * from "query_3333356(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')"
-),
-
 auction_range as (
     select
         environment,
