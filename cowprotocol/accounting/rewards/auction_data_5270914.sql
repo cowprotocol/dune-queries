@@ -45,10 +45,10 @@ select --noqa: ST06
         end
     ) as decimal(38, 0)) as observed_score,
     cast(rbd.reference_score as decimal(38, 0)) as reference_score,
-    cast(rbd.uncapped_payment_native_token as decimal(38, 0)) as uncapped_payment_tanive_token,
+    cast(rbd.uncapped_payment_native_token as decimal(38, 0)) as uncapped_payment_native_token,
     cast(rbd.capped_payment as decimal(38, 0)) as capped_payment
 from "query_4351957(blockchain='{{blockchain}}')" as rbd
-inner join relevant_txs as txs on rbd.tx_hash = txs.tx_hash
+left join relevant_txs as txs on rbd.tx_hash = txs.tx_hash
 where
     rbd.block_deadline >= (select start_block from block_range)
     and rbd.block_deadline <= (select end_block from block_range)
