@@ -238,7 +238,7 @@ special_balance_changes_arbitrum as ( -- noqa: ST03
 -- 2.4.1) WETH
 
 -- 2.4.1) all deposit and withdrawal events for WETH
-weth_deposits_withdrawals_base as (
+weth_deposits_withdrawals_base as ( -- noqa: ST03
     -- deposits (contract deposits ETH to get WETH)
     select
         evt_block_time as block_time,
