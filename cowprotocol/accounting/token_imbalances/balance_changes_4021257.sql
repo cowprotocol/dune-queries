@@ -271,7 +271,7 @@ weth_deposits_withdrawals_base as (
 -- 2.4.1) WAVAX
 
 -- 2.4.1) all deposit and withdrawal events for WAVAX
-weth_deposits_withdrawals_avalanche_c as (
+wavax_deposits_withdrawals_avalanche_c as ( -- noqa: ST03
     -- deposits (contract deposits AVAX to get WAVAX)
     select
         evt_block_time as block_time,
@@ -300,7 +300,7 @@ weth_deposits_withdrawals_avalanche_c as (
 ),
 
 special_balance_changes_avalanche_c as ( -- noqa: ST03
-    select * from weth_deposits_withdrawals_base
+    select * from wavax_deposits_withdrawals_base
 )
 
 -- combine results
