@@ -22,11 +22,7 @@ with block_range as (
 
 relevant_txs as (
     select
-        rbd.environment,
-        rbd.auction_id,
-        rbd.block_deadline,
-        rbd.solver,
-        rbd.tx_hash,
+        t.hash as tx_hash,
         t.gas_price * t.gas_used as execution_cost
     from "query_4351957(blockchain='{{blockchain}}')" as rbd inner join {{blockchain}}.transactions as t
         on rbd.tx_hash = t.hash
@@ -38,27 +34,31 @@ select --noqa: ST06
     rbd.auction_id,
     rbd.block_deadline,
     rbd.solver,
-    sum(rbd.network_fee) as total_network_fee,
-    sum(coalesce(rbd.execution_cost, txs.execution_cost, 0)) as total_execution_cost,
-    sum(rbd.protocol_fee) as total_protocol_fee,
-    sum(rbd.winning_score) as competition_score,
-    sum(
+    cast(sum(coalesce(rbd.network_fee, 0)) as decimal(38, 0)) as total_network_fee,
+    cast(sum(coalesce(txs.execution_cost, 0)) as decimal(38, 0)) as total_execution_cost,
+    cast(sum(coalesce(rbd.protocol_fee, 0)) as decimal(38, 0)) as total_protocol_fee,
+    cast(sum(rbd.winning_score) as decimal(38, 0)) as competition_score,
+    cast(sum(
         case
             when rbd.block_number is not null and rbd.block_number <= rbd.block_deadline then winning_score
             else 0
         end
-    ) as observed_score,
-    rbd.reference_score,
-    rbd.uncapped_payment_native_token,
-    rbd.capped_payment
-from "query_4351957(blockchain='{{blockchain}}')" as rbd left join relevant_txs as txs
-    on rbd.environment = txs.environment and rbd.auction_id = txs.auction_id and rbd.block_deadline = txs.block_deadline and rbd.solver = txs.solver
-where rbd.block_deadline >= (select start_block from block_range) and rbd.block_deadline <= (select end_block from block_range)
+    ) as decimal(38, 0)) as observed_score,
+    cast(rbd.reference_score as decimal(38, 0)) as reference_score,
+    cast(rbd.uncapped_payment_native_token as decimal(38, 0)) as uncapped_payment_tanive_token,
+    cast(rbd.capped_payment as decimal(38, 0)) as capped_payment
+from "query_4351957(blockchain='{{blockchain}}')" as rbd
+inner join relevant_txs as txs on rbd.tx_hash = txs.tx_hash
+where
+    rbd.block_deadline >= (select start_block from block_range)
+    and rbd.block_deadline <= (select end_block from block_range)
 group by
     rbd.environment,
     rbd.auction_id,
     rbd.block_deadline,
     rbd.solver,
+    -- the last three columns for grouping are generated per auction and solver, not per solution
+    -- the group by ensures that we do not double count these entries but just select them
     rbd.reference_score,
     rbd.uncapped_payment_native_token,
     rbd.capped_payment
