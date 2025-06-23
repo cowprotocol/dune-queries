@@ -20,12 +20,28 @@ with block_range as (
     select * from "query_3333356(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')"
 ),
 
+txs_block_range as (
+    select
+        min(block_number) as first_block,
+        max(block_number) as last_block
+    from "query_4351957(blockchain='{{blockchain}}')"
+    where block_deadline >= (select start_block from block_range) and block_deadline <= (select end_block from block_range)
+),
+
+-- the following table is a restriction of the transactions table, with the goal to speed up subsequent computations
+candidate_txs as (
+    select
+        *
+    from {{blockchain}}.transactions
+    where block_number >= (select first_block from txs_block_range) and block_number <= (select last_block from txs_block_range)
+),
+
 relevant_txs as (
     select
         t.hash as tx_hash,
         t.gas_price * t.gas_used as execution_cost
-    from "query_4351957(blockchain='{{blockchain}}')" as rbd inner join {{blockchain}}.transactions as t
-        on rbd.tx_hash = t.hash
+    from "query_4351957(blockchain='{{blockchain}}')" as rbd inner join candidate_txs as t
+        on rbd.block_number = t.block_number and rbd.tx_hash = t.hash
     where block_deadline >= (select start_block from block_range) and block_deadline <= (select end_block from block_range)
 )
 
