@@ -1,7 +1,12 @@
 with
 
-block_range as (
-    select * from "query_3333356(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')"
+auction_range as (
+    select
+        environment,
+        min(auction_id) as min_auction_id,
+        max(auction_id) as max_auction_id
+    from "query_5270914(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')"
+    group by environment
 ),
 
 solver_slippage as (
@@ -16,31 +21,28 @@ named_results as (
 ),
 
 -- BEGIN SOLVER REWARDS
-batch_rewards as (
+auction_data as (
     select
-        solver,
-        network_fee,
-        execution_cost,
-        --rnr.capped_payment,
-        case
-            when uncapped_payment_native_token > {{upper_cap}} * pow(10, 18) then {{upper_cap}} * (pow(10, 18))
-            when uncapped_payment_native_token < {{lower_cap}} * pow(10, 18) then {{lower_cap}} * pow(10, 18)
-            else uncapped_payment_native_token
-        end as capped_payment,
-        tx_hash
-    from "query_4351957(blockchain='{{blockchain}}')"
-    where
-        block_deadline >= (select start_block from block_range)
-        and block_deadline <= (select end_block from block_range)
+        ad.environment,
+        ad.auction_id,
+        ad.solver,
+        ad.total_network_fee,
+        ad.total_execution_cost,
+        ad.capped_payment
+    from "query_5270914(blockchain='{{blockchain}}')" as ad
+    inner join auction_range on ad.environment = auction_range.environment
+    where ad.auction_id >= auction_range.min_auction_id and ad.auction_id <= auction_range.max_auction_id
 ),
 
-batch_rewards_filtered as (
+auction_data_filtered as (
     select
-        br.solver,
-        br.network_fee,
-        br.execution_cost,
-        br.capped_payment * coalesce(ea.multiplier, 1) as capped_payment
-    from batch_rewards as br left outer join "query_4842868(blockchain='{{blockchain}}')" as ea on br.tx_hash = ea.tx_hash
+        ad.environment,
+        ad.auction_id,
+        ad.solver,
+        ad.total_network_fee,
+        ad.total_execution_cost,
+        ad.capped_payment * coalesce(ea.multiplier, 1) as capped_payment
+    from auction_data as ad left outer join "query_4842868(blockchain='{{blockchain}}')" as ea on ad.environment = ea.environment and ad.auction_id = ea.auction_id
 ),
 
 -- AKA Performance Rewards
@@ -48,16 +50,16 @@ primary_rewards as (
     select
         solver,
         cast(sum(capped_payment) as double) as reward_wei
-    from batch_rewards_filtered
+    from auction_data_filtered
     group by solver
 ),
 
 fees_and_costs as (
     select
         solver,
-        cast(sum(network_fee) as double) as network_fee_wei,
-        cast(sum(execution_cost) as double) as execution_cost_wei
-    from batch_rewards_filtered
+        cast(sum(total_network_fee) as double) as network_fee_wei,
+        cast(sum(total_execution_cost) as double) as execution_cost_wei
+    from auction_data_filtered
     group by solver
 ),
 
@@ -90,12 +92,11 @@ conversion_prices as (
 -- BEGIN QUOTE REWARDS
 order_quotes as (
     select
-        order_uid,
-        quote_solver
-    from "query_4364122(blockchain='{{blockchain}}')"
-    where
-        block_number >= (select start_block from block_range)
-        and block_number <= (select end_block from block_range)
+        od.order_uid,
+        od.quote_solver
+    from "query_4364122(blockchain='{{blockchain}}')" as od
+    inner join auction_range on od.environment = auction_range.environment
+    where od.auction_id >= auction_range.min_auction_id and od.auction_id <= auction_range.max_auction_id
 ),
 
 winning_quotes as (
