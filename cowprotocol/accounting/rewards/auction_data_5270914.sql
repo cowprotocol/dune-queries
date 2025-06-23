@@ -30,8 +30,7 @@ txs_block_range as (
 
 -- the following table is a restriction of the transactions table, with the goal to speed up subsequent computations
 candidate_txs as (
-    select
-        *
+    select *
     from {{blockchain}}.transactions
     where block_number >= (select first_block from txs_block_range) and block_number <= (select last_block from txs_block_range)
 ),
