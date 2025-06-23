@@ -266,7 +266,6 @@ weth_deposits_withdrawals_base as (
         and src = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
 ),
 
-
 -- 2.4) avalanche
 -- special treatment of
 -- 2.4.1) WAVAX
