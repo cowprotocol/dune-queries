@@ -304,7 +304,7 @@ wavax_deposits_withdrawals_avalanche_c as (
 ),
 
 special_balance_changes_avalanche_c as ( -- noqa: ST03
-    select * from wavax_deposits_withdrawals_avalanche_c_
+    select * from wavax_deposits_withdrawals_avalanche_c
 )
 
 -- combine results
