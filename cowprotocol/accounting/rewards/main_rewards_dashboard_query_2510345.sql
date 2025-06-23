@@ -4,21 +4,12 @@ block_range as (
     select * from "query_3333356(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')"
 ),
 
-min_auction as (
+auction_range as (
     select
         environment,
-        min(auction_id) as min_auction_id
-    from "query_5270914(blockchain='{{blockchain}}')"
-    where block_deadline >= (select start_block from block_range) and block_deadline <= (select end_block from block_range)
-    group by environment
-),
-
-max_auction as (
-    select
-        environment,
+        min(auction_id) as min_auction_id,
         max(auction_id) as max_auction_id
-    from "query_5270914(blockchain='{{blockchain}}')"
-    where block_deadline >= (select start_block from block_range) and block_deadline <= (select end_block from block_range)
+    from "query_5270914(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')"
     group by environment
 ),
 
@@ -43,9 +34,8 @@ auction_data as (
         ad.total_execution_cost,
         ad.capped_payment
     from "query_5270914(blockchain='{{blockchain}}')" as ad
-    inner join min_auction on ad.environment = min_auction.environment
-    inner join max_auction on ad.environment = max_auction.environment
-    where ad.auction_id >= min_auction.min_auction_id and ad.auction_id <= max_auction.max_auction_id
+    inner join auction_range on ad.environment = auction_range.environment
+    where ad.auction_id >= auction_range.min_auction_id and ad.auction_id <= auction_range.max_auction_id
 ),
 
 auction_data_filtered as (
@@ -109,9 +99,8 @@ order_quotes as (
         od.order_uid,
         od.quote_solver
     from "query_4364122(blockchain='{{blockchain}}')" as od
-    inner join min_auction on od.environment = min_auction.environment
-    inner join max_auction on od.environment = max_auction.environment
-    where od.auction_id >= min_auction.min_auction_id and od.auction_id <= max_auction.max_auction_id
+    inner join auction_range on od.environment = auction_range.environment
+    where od.auction_id >= auction_range.min_auction_id and od.auction_id <= auction_range.max_auction_id
 ),
 
 winning_quotes as (
