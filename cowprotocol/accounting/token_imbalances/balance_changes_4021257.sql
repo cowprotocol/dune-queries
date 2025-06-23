@@ -270,11 +270,11 @@ special_balance_changes_base as ( -- noqa: ST03
     select * from weth_deposits_withdrawals_base
 ),
 
--- 2.4) avalanche
+-- 2.5) avalanche
 -- special treatment of
--- 2.4.1) WAVAX
+-- 2.5.1) WAVAX
 
--- 2.4.1) all deposit and withdrawal events for WAVAX
+-- 2.5.1) all deposit and withdrawal events for WAVAX
 wavax_deposits_withdrawals_avalanche_c as (
     -- deposits (contract deposits AVAX to get WAVAX)
     select
