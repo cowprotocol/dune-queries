@@ -268,6 +268,43 @@ weth_deposits_withdrawals_base as (
 
 special_balance_changes_base as ( -- noqa: ST03
     select * from weth_deposits_withdrawals_base
+),
+
+-- 2.5) avalanche
+-- special treatment of
+-- 2.5.1) WAVAX
+
+-- 2.5.1) all deposit and withdrawal events for WAVAX
+wavax_deposits_withdrawals_avalanche_c as (
+    -- deposits (contract deposits AVAX to get WAVAX)
+    select
+        evt_block_time as block_time,
+        evt_tx_hash as tx_hash,
+        contract_address as token_address,
+        0x0000000000000000000000000000000000000000 as sender,
+        0x9008d19f58aabd9ed0d60971565aa8510560ab41 as receiver,
+        wad as amount
+    from wavax_avalanche_c.wavax_evt_deposit
+    where
+        evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
+        and dst = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
+    union all
+    -- withdrawals (contract withdraws AVAX by returning WAVAX)
+    select
+        evt_block_time as block_time,
+        evt_tx_hash as tx_hash,
+        contract_address as token_address,
+        0x9008d19f58aabd9ed0d60971565aa8510560ab41 as sender,
+        0x0000000000000000000000000000000000000000 as receiver,
+        wad as amount
+    from wavax_avalanche_c.wavax_evt_withdrawal
+    where
+        evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
+        and src = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
+),
+
+special_balance_changes_avalanche_c as ( -- noqa: ST03
+    select * from wavax_deposits_withdrawals_avalanche_c
 )
 
 -- combine results
