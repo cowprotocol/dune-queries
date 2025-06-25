@@ -29,7 +29,7 @@ auction_data as (
         ad.total_network_fee,
         ad.total_execution_cost,
         ad.capped_payment
-    from "query_5270914(blockchain='{{blockchain}}')" as ad
+    from "query_5270914(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')" as ad
     inner join auction_range on ad.environment = auction_range.environment
     where ad.auction_id >= auction_range.min_auction_id and ad.auction_id <= auction_range.max_auction_id
 ),
