@@ -1,4 +1,3 @@
-
 select 'ethereum' as blockchain, 0x63695eee2c3141bde314c5a6f89b98e62808d716 as partner_recipient, 'CoW Swap-SafeApp' as app_code_to_excl, 0.9 as partner_share
 union select 'ethereum', 0x352a3666b27bb09aca7b4a71ed624429b7549551, '_', 0.85
 union select 'ethereum', 0xe37da2d07e769b7fcb808bdeaeffb84561ff4eca, '_', 0.85
@@ -42,9 +41,6 @@ union select 'base', 0x8025bacf968aa82bdfe51b513123b55bfb0060d3, '_', 0.45
 union select 'base', 0xe423c63e8a25811c9cbe71c8585c4505117397c6, '_', 0.75
 union select 'base', 0x1713b79e3dbb8a76d80e038ca701a4a781ac69eb, '_', 0.75
 union select 'base', 0xc542c2f197c4939154017c802b0583c596438380, '_', 0.875
-
-
-
 
 -- example of usage:
 -- select coalesce(partner_fee_splits.partner_share, 0.5) * partner_fee * native_token_price/1e18 as partner_share_of_partner_fee
