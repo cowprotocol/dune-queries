@@ -47,7 +47,7 @@ example of usage:
 select coalesce(partner_fee_splits.partner_share, 0.5) * partner_fee * native_token_price/1e18 as partner_share_of_partner_fee
 ...
 left join "query_5333695" as partner_fee_splits
-   on partner_fee_shares.blockchain = <<blockchain parameter>>
-   and app_data.partner_recipient = partner_fee_splits.partner_recipient 
+   on partner_fee_splits.blockchain = <<blockchain parameter>>
+   and FROM_HEX(SUBSTRING(app_data.partner_recipient, 3)) = partner_fee_splits.partner_recipient 
    and app_data.app_code != partner_fee_splits.app_code_to_excl
 */
