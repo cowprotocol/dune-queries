@@ -226,7 +226,6 @@ where
 
     -- for week of June 17 - June 2024, 2025 on mainnet
     or tx_hash = 0x939879ff06f5c9e94d3e27f3b78cbcbb8eae72782a5fdcac831c743e2a5492e1
-    
     -- for the week of June 24 - June 30, 2025 on mainnet
     or tx_hash = 0xC60E65F001E2CEDE1A2399FBF40E049B7F7BD57D8A982DE66EF4E44C23967589
 
