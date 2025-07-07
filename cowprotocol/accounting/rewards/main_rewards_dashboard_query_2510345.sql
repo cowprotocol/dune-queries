@@ -83,6 +83,8 @@ conversion_prices as (
                             when '{{blockchain}}' = 'gnosis' then 0xe91d153e0b41518a2ce8dd3d7944fa863463a97d
                             when '{{blockchain}}' = 'arbitrum' then 0x82aF49447D8a07e3bd95BD0d56f35241523fBab1
                             when '{{blockchain}}' = 'base' then 0x4200000000000000000000000000000000000006
+                            when '{{blockchain}}' = 'avalanche_c' then 0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7
+                            when '{{blockchain}}' = 'polygon' then 0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270
                         end
                 )
                 and date(minute) = cast('{{end_time}}' as timestamp) - interval '1' day

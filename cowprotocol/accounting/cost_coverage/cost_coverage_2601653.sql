@@ -14,6 +14,8 @@ wrapped_native_token as (
             when 'gnosis' then 0xe91d153e0b41518a2ce8dd3d7944fa863463a97d -- WXDAI
             when 'arbitrum' then 0x82af49447d8a07e3bd95bd0d56f35241523fbab1 -- WETH
             when 'base' then 0x4200000000000000000000000000000000000006 -- WETH
+            when 'avalanche_c' then 0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7 -- WAVAX
+            when 'polygon' then 0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270 -- WPOL
         end as native_token_address
 ),
 
@@ -34,6 +36,8 @@ rewards_safe as (
             when 'gnosis' then 0xa03be496e67ec29bc62f01a428683d7f9c204930
             when 'arbitrum' then 0x66331f0b9cb30d38779c786bda5a3d57d12fba50
             when 'base' then 0xa03be496e67ec29bc62f01a428683d7f9c204930
+            when 'avalanche_c' then 0xa03be496e67ec29bc62f01a428683d7f9c204930
+            when 'polygon' then 0x66331f0b9cb30d38779c786bda5a3d57d12fba50
         end as rewards_safe_address
 ),
 
