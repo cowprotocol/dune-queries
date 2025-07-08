@@ -28,11 +28,21 @@ txs_block_range as (
     where block_deadline >= (select start_block from block_range) and block_deadline <= (select end_block from block_range)
 ),
 
+block_data as (
+select first_block, min_block.date min_block_date, last_block, max_block.date as max_block_date
+from txs_block_range tx
+inner join {{blockchain}}.blocks max_block
+on tx.last_block = max_block.number
+inner join {{blockchain}}.blocks min_block
+on tx.last_block = min_block.number
+),
+
 -- the following table is a restriction of the transactions table, with the goal to speed up subsequent computations
 candidate_txs as (
     select *
     from {{blockchain}}.transactions
-    where block_number >= (select first_block from txs_block_range) and block_number <= (select last_block from txs_block_range)
+    where block_date >= (select min_block_date from block_data) and block_date <= (select max_block_date from block_data)
+    and block_number >= (select first_block from txs_block_range) and block_number <= (select last_block from txs_block_range)
 ),
 
 relevant_txs as (
