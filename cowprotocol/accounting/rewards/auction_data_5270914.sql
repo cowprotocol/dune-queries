@@ -29,7 +29,11 @@ txs_block_range as (
 ),
 
 block_data as (
-select first_block, min_block.date min_block_date, last_block, max_block.date as max_block_date
+select 
+tx.first_block,
+min_block.date min_block_date,
+tx.last_block,
+max_block.date as max_block_date
 from txs_block_range tx
 inner join {{blockchain}}.blocks max_block
 on tx.last_block = max_block.number
