@@ -29,16 +29,16 @@ txs_block_range as (
 ),
 
 block_data as (
-select 
-tx.first_block,
-min_block.date min_block_date,
-tx.last_block,
-max_block.date as max_block_date
-from txs_block_range tx
-inner join {{blockchain}}.blocks max_block
-on tx.last_block = max_block.number
-inner join {{blockchain}}.blocks min_block
-on tx.last_block = min_block.number
+    select 
+        tx.first_block,
+        min_block.date min_block_date,
+        tx.last_block,
+        max_block.date as max_block_date
+    from txs_block_range tx
+    inner join {{blockchain}}.blocks max_block
+    on tx.last_block = max_block.number
+    inner join {{blockchain}}.blocks min_block
+    on tx.last_block = min_block.number
 ),
 
 -- the following table is a restriction of the transactions table, with the goal to speed up subsequent computations
