@@ -230,6 +230,10 @@ where
     -- for the week of June 24 - June 30, 2025 on mainnet
     or tx_hash = 0xC60E65F001E2CEDE1A2399FBF40E049B7F7BD57D8A982DE66EF4E44C23967589
 
+    -- for the week of July 1 - July 8, 2025 on mainnet
+    or tx_hash = 0x46CBD1134448F5721CB6D28372DB0FF4676E5EC1855B843ABF6059CF7B244BE9
+    or tx_hash = 0xA91FA23E7F971AA883E3CE52C6B555C6CC687A736CFA2D3F3AD5EA9088C373AA
+
 -- Base
 union all
 select distinct tx_hash
