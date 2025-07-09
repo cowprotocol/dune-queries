@@ -14,8 +14,11 @@
 --   0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee for native token
 -- - amount: signed value of slippage in atoms of the token; fees are represented as negative
 --   integers since they will be removed from imbalances
--- - slippage_type: 'raw_imbalance' for imbalance observable on chain, 'protocol_fee' for the total
---   protocol fee (including partner fee), 'network_fee' for network fees
+-- - slippage_type:
+--     'raw_imbalance' for imbalance observable on chain,
+--     'protocol_fee' for the total protocol fee (including partner fee),
+--     'network_fee' for network fees,
+--     'settlement_contract_sell' for corrections due to fee withdrawals
 -- - price_unit: USD price of one unit (i.e. pow(10, decimals) atoms) of a token
 -- - price_atom: USD price of one atom (i.e. 1. / pow(10, decimals) units) of a token
 -- - slippage_usd: USD value of slippage
@@ -49,10 +52,33 @@ fees as (
     from "query_4058574(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')"
 ),
 
-imbalances as (
+-- In fee withdrawals, buffers are decreasead by sell amounts. This must not be classified as 
+-- negative slippage. We therefore correct imbalances by these amounts.
+-- Only trades from the settlement contract to respective solver rewards safes are corrected for.
+settlement_contract_sells as (
+    select
+        block_time,
+        tx_hash,
+        sell_token_address as token_address,
+        atoms_sold as amount,
+        'settlement_contract_sell' as slippage_type,
+        date_trunc('hour', block_time) as hour --noqa: RF04
+    from cow_protocol_{{blockchain}}.trades
+    where
+        block_time >= timestamp '{{start_time}}' and block_time < timestamp '{{end_time}}'
+        and trader = 0x9008D19f58AAbD9eD0D60971565AA8510560ab41
+        and receiver = case
+            when '{{blockchain}}' in ('ethereum', 'gnosis', 'base', 'avalanche_c') then 0xa03be496e67ec29bc62f01a428683d7f9c204930
+            when '{{blockchain}}' in ('arbitrum', 'polygon') then 0x66331f0b9cb30d38779c786bda5a3d57d12fba50
+        end
+),
+
+corrected_imbalances as (
     select * from raw_token_imbalances
     union all
     select * from fees
+    union all
+    select * from settlement_contract_sells
 ),
 
 prices as (
@@ -71,7 +97,7 @@ raw_slippage_breakdown as (
         amount * p.price_atom as slippage_usd,
         cast(amount * p.price_atom / np.price_atom as int256) as slippage_wei
     from
-        imbalances as i
+        corrected_imbalances as i
     left join prices as p
         on
             i.token_address = p.token_address
