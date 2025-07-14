@@ -307,7 +307,6 @@ special_balance_changes_avalanche_c as ( -- noqa: ST03
     select * from wavax_deposits_withdrawals_avalanche_c
 ),
 
-
 -- 2.6) polygon
 -- special treatment of
 -- 2.6.1) WPOL
