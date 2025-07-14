@@ -65,8 +65,8 @@ reserves_delta as (
     left join erc20_{{blockchain}}.evt_transfer as t
         on
             (
-                t."from" = p.contract_address
-                or t.to = p.contract_address
+                p.contract_address = t."from"
+                or p.contract_address = t.to
             )
     where
         t.contract_address in (p.token0, p.token1)

@@ -168,10 +168,10 @@ results as (
         batch_rewards_aggregate --noqa: ST09
     left outer join quote_numbers
         on
-            quote_numbers.week_start = batch_rewards_aggregate.week_start
+            batch_rewards_aggregate.week_start = quote_numbers.week_start
             and batch_rewards_aggregate.solver = quote_numbers.solver
     left outer join week_data_with_caps
-        on week_data_with_caps.week_start = batch_rewards_aggregate.week_start
+        on batch_rewards_aggregate.week_start = week_data_with_caps.week_start
     left outer join conversion_prices
         on batch_rewards_aggregate.week_start = conversion_prices.week_start
     left outer join cow_protocol_ethereum.solvers

@@ -49,7 +49,7 @@ lp_balance_delta as (
         sum(case when "from" = 0x0000000000000000000000000000000000000000 then value else -value end) as lp_transfer
     from erc20_{{blockchain}}.evt_transfer
     inner join uni_style_pools as u
-        on u.contract_address = evt_transfer.contract_address
+        on evt_transfer.contract_address = u.contract_address
     where
         ("from" = 0x0000000000000000000000000000000000000000 or "to" = 0x0000000000000000000000000000000000000000)
         and evt_block_time >= date(u.created_at)

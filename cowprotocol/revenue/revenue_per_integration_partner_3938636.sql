@@ -31,7 +31,7 @@ from cow_protocol_ethereum.trades as t --noqa: ST09
 left join protocol_fees_collected as f
     on t.order_uid = f.order_uid and t.tx_hash = f.tx_hash
 left join dune.cowprotocol.result_cow_protocol_ethereum_app_data as a
-    on a.app_hash = t.app_data
+    on t.app_data = a.app_hash
 where block_date >= date '2024-01-23' and block_number > 19068880
 group by 1, 2
 order by 1 desc
