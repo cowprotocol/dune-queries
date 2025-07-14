@@ -27,8 +27,8 @@ competitors as (
     from dune.cowprotocol.result_amm_lp_infos as i --noqa: ST09
     inner join cow_amm as c
         on
-            (c.token0 = i.token0 and c.token1 = i.token1 and c.weight0 = i.weight0 and c.weight1 = i.weight1)
-            or (c.token1 = i.token0 and c.token0 = i.token1 and c.weight1 = i.weight0 and c.weight0 = i.weight1)
+            (i.token0 = c.token0 and i.token1 = c.token1 and i.weight0 = c.weight0 and i.weight1 = c.weight1)
+            or (i.token0 = c.token1 and i.token1 = c.token0 and i.weight0 = c.weight1 and i.weight1 = c.weight0)
     where
         (project != 'cow_amm' or i.contract_address = {{cow_amm}})
         and reserve0 > 0

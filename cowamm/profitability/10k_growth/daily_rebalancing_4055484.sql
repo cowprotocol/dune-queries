@@ -29,7 +29,7 @@ daily_price_change as (
     from date_series as ds
     inner join prices.day as p1
         on
-            p1.timestamp = ds.day
+            ds.day = p1.timestamp
             and p1.contract_address = {{token_a}}
     left join prices.day as previous_p1
         on
@@ -39,7 +39,7 @@ daily_price_change as (
             and previous_p1.contract_address = {{token_a}}
     inner join prices.day as p2
         on
-            p2.timestamp = ds.day
+            ds.day = p2.timestamp
             and p2.contract_address = {{token_b}}
     left join prices.day as previous_p2
         on

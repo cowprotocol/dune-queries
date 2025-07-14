@@ -36,8 +36,8 @@ per_trade_protocol_fees as (
     left join dune.cowprotocol.result_cow_protocol_{{blockchain}}_app_data as a on t.app_data = a.app_hash
     left join "query_4364122(blockchain='{{blockchain}}')" as r
         on
-            r.order_uid = t.order_uid
-            and r.tx_hash = t.tx_hash
+            t.order_uid = r.order_uid
+            and t.tx_hash = r.tx_hash
     where
         a.partner_recipient is not null
         and t.block_number >= (select start_block from "query_3333356(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')")

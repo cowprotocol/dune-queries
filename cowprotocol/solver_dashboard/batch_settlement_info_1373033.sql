@@ -50,7 +50,7 @@ select
         else null
     end as coverage
 from cow_protocol_{{blockchain}}.batches as b
-inner join num_tokens_traded as n on n.tx_hash = b.tx_hash
+inner join num_tokens_traded as n on b.tx_hash = n.tx_hash
 inner join cow_protocol_{{blockchain}}.solvers
     on solver_address = address
 where block_time > now() - interval '3' month
