@@ -305,6 +305,44 @@ wavax_deposits_withdrawals_avalanche_c as (
 
 special_balance_changes_avalanche_c as ( -- noqa: ST03
     select * from wavax_deposits_withdrawals_avalanche_c
+),
+
+
+-- 2.6) polygon
+-- special treatment of
+-- 2.6.1) WPOL
+
+-- 2.6.1) all deposit and withdrawal events for WPOL
+wpol_deposits_withdrawals_polygon as (
+    -- deposits (contract deposits POL to get WPOL)
+    select
+        evt_block_time as block_time,
+        evt_tx_hash as tx_hash,
+        contract_address as token_address,
+        0x0000000000000000000000000000000000000000 as sender,
+        0x9008d19f58aabd9ed0d60971565aa8510560ab41 as receiver,
+        wad as amount
+    from mahadao_polygon.wmatic_evt_deposit
+    where
+        evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
+        and dst = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
+    union all
+    -- withdrawals (contract withdraws POL by returning WPOL)
+    select
+        evt_block_time as block_time,
+        evt_tx_hash as tx_hash,
+        contract_address as token_address,
+        0x9008d19f58aabd9ed0d60971565aa8510560ab41 as sender,
+        0x0000000000000000000000000000000000000000 as receiver,
+        wad as amount
+    from mahadao_polygon.wmatic_evt_withdrawal
+    where
+        evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
+        and src = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
+),
+
+special_balance_changes_polygon as ( -- noqa: ST03
+    select * from wpol_deposits_withdrawals_polygon
 )
 
 -- combine results
