@@ -109,21 +109,17 @@ raw_slippage_breakdown as (
 ),
 
 raw_slippage_breakdown_grouped as (
-select 
-    block_time, 
-    tx_hash, 
-    token_address, 
-    slippage_type, 
-    sum(slippage_atoms) as slippage_atoms,
-    sum(slippage_usd) as slippage_usd,
-    sum(slippage_wei) as slippage_wei
-from raw_slippage_breakdown
-where token_address is not null
-group by     
-    block_time, 
-    tx_hash, 
-    token_address, 
-    slippage_type
+    select
+        block_time,
+        tx_hash,
+        token_address,
+        slippage_type,
+        sum(slippage_atoms) as slippage_atoms,
+        sum(slippage_usd) as slippage_usd,
+        sum(slippage_wei) as slippage_wei
+    from raw_slippage_breakdown
+    where token_address is not null
+    group by 1, 2, 3, 4
 ),
 
 raw_slippage_per_transaction as (

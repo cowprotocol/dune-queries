@@ -3,4 +3,4 @@ start_time='2024-08-01 12:00'
 end_time='2024-08-02 12:00'
 blockchain='ethereum'
 slippage_table_name=slippage_per_solver,slippage_per_transaction
-raw_slippage_table_name=raw_slippage_breakdown,raw_slippage_per_transaction
+raw_slippage_table_name=raw_slippage_breakdown,raw_slippage_breakdown_grouped,raw_slippage_per_transaction
