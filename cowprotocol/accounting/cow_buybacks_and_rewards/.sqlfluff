@@ -16,8 +16,10 @@ indent_unit = space
 [sqlfluff:rules:capitalisation.keywords]
 capitalisation_policy = lower
 
-[sqlfluff:templater:jinja]
-undefined_variable_handling = ignore
+[sqlfluff:templater:jinja:context]
+start_time='2025-01-01'
+end_time='2025-01-02'
+time_frequency='month'
 
 [sqlfluff:rules:aliasing.table]
 aliasing = explicit
