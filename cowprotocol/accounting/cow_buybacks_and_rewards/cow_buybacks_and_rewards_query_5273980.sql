@@ -30,7 +30,7 @@ txs_to_exclude as (
             on t."from" = r.address
             and r.blockchain = 'ethereum'
         where
-            t.evt_block_time between timestamp'{{starttime}}' and timestamp'{{endtime}}'
+            t.evt_block_time between timestamp'{{start_time}}' and timestamp'{{end_time}}'
             and t.evt_tx_hash not in (select tx_hash from txs_to_exclude)
         group by 1
 
@@ -49,7 +49,7 @@ txs_to_exclude as (
             on t."from" = r.address
             and r.blockchain = 'gnosis'
         where
-            t.evt_block_time between timestamp'{{starttime}}' and timestamp'{{endtime}}'
+            t.evt_block_time between timestamp'{{start_time}}' and timestamp'{{end_time}}'
         group by 1
 
         union all
@@ -67,7 +67,7 @@ txs_to_exclude as (
             on t."from" = r.address
             and r.blockchain = 'base'
         where
-            t.evt_block_time between timestamp'{{starttime}}' and timestamp'{{endtime}}'
+            t.evt_block_time between timestamp'{{start_time}}' and timestamp'{{end_time}}'
         group by 1
 
         union all
@@ -85,7 +85,7 @@ txs_to_exclude as (
             on t."from" = r.address
             and r.blockchain = 'arbitrum'
         where
-            t.evt_block_time between timestamp'{{starttime}}' and timestamp'{{endtime}}'
+            t.evt_block_time between timestamp'{{start_time}}' and timestamp'{{end_time}}'
         group by 1
         )
     group by 1
@@ -102,7 +102,7 @@ txs_to_exclude as (
         and buy_token_address = 0xdef1ca1fb7fbcdc777520aa7f396b4e015f497ab
         and sell_token_address = 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2
         and project_contract_address = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
-        and block_time between timestamp '{{starttime}}' and timestamp '{{endtime}}'
+        and block_time between timestamp '{{start_time}}' and timestamp '{{end_time}}'
     group by 1
 )
 select
@@ -117,5 +117,5 @@ from solver_cow_rewards r
 full outer join cow_buyback b
     on r.time = b.time
 where
-    coalesce(r.time, b.time) between timestamp '{{starttime}}' and timestamp '{{endtime}}'
+    coalesce(r.time, b.time) between timestamp '{{start_time}}' and timestamp '{{end_time}}'
 order by 1 desc
