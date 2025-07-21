@@ -37,7 +37,7 @@ invalidations as (
         pool_address,
         creator,
         False as active
-    from "query_5513831(blockchain='{{blockchain}}')"
+    from "query_5143758(blockchain='{{blockchain}}')"
     inner join query_4056263
         on
             pool_address = bondingPool
