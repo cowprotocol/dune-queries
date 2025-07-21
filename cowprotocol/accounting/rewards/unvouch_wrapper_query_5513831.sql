@@ -14,7 +14,7 @@ with polygon_unvouching as (
         from_hex(substr(cast(topic3 as varchar), 27, 40)) as sender,
         from_hex(substr(cast(topic1 as varchar), 27, 40)) as solver
     from polygon.logs
-    where contract_address = 0xaaa4de096d02ae21729aa31d967e148d4e3ae501 and topic0 = 0xd30c692ff1e6e1e96d8aca701b7f8118d58f64ce4c680feda75c0fc76524f7fa
+    where contract_address = 0xaaa4de096d02ae21729aa31d967e148d4e3ae501 and topic0 = 0xfbe946aa1fb3fabb46cdd9f88982f3d42ef58fad11ed89cb15456b9fe4ea7d7d
 ),
 
 multichain_unvouching as (
