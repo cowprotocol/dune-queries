@@ -38,7 +38,7 @@ block_data as (
     inner join {{blockchain}}.blocks as max_block
         on tx.last_block = max_block.number
     inner join {{blockchain}}.blocks as min_block
-        on tx.last_block = min_block.number
+        on tx.first_block = min_block.number
 ),
 
 -- the following table is a restriction of the transactions table, with the goal to speed up subsequent computations
