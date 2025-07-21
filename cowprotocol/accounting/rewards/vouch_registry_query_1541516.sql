@@ -20,7 +20,7 @@ vouches as (
         pool_address,
         creator,
         True as active
-    from cow_protocol_{{blockchain}}.VouchRegister_evt_Vouch
+    from "query_5143848(blockchain='{{blockchain}}')"
     inner join query_4056263
         on
             pool_address = bondingPool
@@ -37,7 +37,7 @@ invalidations as (
         pool_address,
         creator,
         False as active
-    from cow_protocol_{{blockchain}}.VouchRegister_evt_InvalidateVouch
+    from "query_5143758(blockchain='{{blockchain}}')"
     inner join query_4056263
         on
             pool_address = bondingPool
