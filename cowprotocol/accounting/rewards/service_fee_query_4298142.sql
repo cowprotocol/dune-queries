@@ -40,7 +40,7 @@ all_cow_dao_solvers_ethereum as (
         end as solver_name,
         v.evt_block_time
     from
-        "query_5513654(blockchain='ethereum')" as v
+        "query_5143848(blockchain='ethereum')" as v
     inner join cow_protocol_ethereum.solvers as s on v.solver = s.address
     where
         v.bondingPool = 0x5d4020b9261f01b6f8a45db929704b0ad6f5e9e6
