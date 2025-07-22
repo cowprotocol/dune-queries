@@ -22,7 +22,6 @@ txs_to_exclude as (
         from erc20_ethereum.evt_transfer t
         join valid_reward_targets v
             on t."to" = v.cowrewardtarget
-            and v.blockchain = 'ethereum'
         join cow_token_address cow
             on t.contract_address = cow.address
             and cow.blockchain = 'ethereum'
@@ -41,7 +40,6 @@ txs_to_exclude as (
         from erc20_gnosis.evt_transfer t
         join valid_reward_targets v
             on t."to" = v.cowrewardtarget
-            and v.blockchain = 'gnosis'
         join cow_token_address cow
             on t.contract_address = cow.address
             and cow.blockchain = 'gnosis'
@@ -59,7 +57,6 @@ txs_to_exclude as (
         from erc20_base.evt_transfer t
         join valid_reward_targets v
             on t."to" = v.cowrewardtarget
-            and v.blockchain = 'base'
         join cow_token_address cow
             on t.contract_address = cow.address
             and cow.blockchain = 'base'
@@ -77,7 +74,6 @@ txs_to_exclude as (
         from erc20_arbitrum.evt_transfer t
         join valid_reward_targets v
             on t."to" = v.cowrewardtarget
-            and v.blockchain = 'arbitrum'
         join cow_token_address cow
             on t.contract_address = cow.address
             and cow.blockchain = 'arbitrum'
