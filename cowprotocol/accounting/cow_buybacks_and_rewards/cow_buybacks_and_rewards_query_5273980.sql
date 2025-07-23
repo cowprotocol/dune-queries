@@ -3,10 +3,10 @@ txs_to_exclude as (
     select 0x7684ba7c81b539f5a54d1e9a55dadd2fac1e355356b7b7fe99fc597345c59402 as tx_hash --mainnet
 )
 , cow_token_address as (
-      select * from query_5454278
+    select * from query_5454278
 )
 , rewards_safe as (
-      select * from query_5454283
+    select * from query_5454283
 )
 , valid_reward_targets as (
     select * from query_5492689
