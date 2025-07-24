@@ -15,7 +15,7 @@ jobs:
       - name: Install SQLFluff
         run: pip install sqlfluff
       - name: Run SQLFluff
-        run: sqlfluff lint .
+        run: sqlfluff lint . --config .sqlfluff
   nitpicker:
     runs-on: ubuntu-latest
     steps:
