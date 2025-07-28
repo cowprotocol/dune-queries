@@ -1,43 +1,6 @@
 --noqa: disable=all
-select distinct cowRewardTarget--, 'ethereum' as blockchain
-from cow_protocol_ethereum.VouchRegister_evt_Vouch
-inner join query_4056263 -- valid bonding pools
-    on pool_address = bondingPool
-    and sender = creator
-
-union distinct
-select distinct cowRewardTarget--, 'gnosis' as blockchain
-from cow_protocol_gnosis.VouchRegister_evt_Vouch
-inner join query_4056263 -- valid bonding pools
-    on pool_address = bondingPool
-    and sender = creator
-
-union distinct
-select distinct cowRewardTarget--, 'base' as blockchain
-from cow_protocol_base.VouchRegister_evt_Vouch
-inner join query_4056263 -- valid bonding pools
-    on pool_address = bondingPool
-    and sender = creator
-
-union distinct
-select distinct cowRewardTarget--, 'arbitrum' as blockchain
-from cow_protocol_arbitrum.VouchRegister_evt_Vouch
-inner join query_4056263 -- valid bonding pools
-    on pool_address = bondingPool
-    and sender = creator
-
-union distinct
-select distinct cowRewardTarget--, 'avalanche_c' as blockchain
-from cow_protocol_avalanche_c.VouchRegister_evt_Vouch
-inner join query_4056263 -- valid bonding pools
-    on pool_address = bondingPool
-    and sender = creator
-
-/*
-union distinct
-select distinct cowRewardTarget--, 'polygon' as blockchain
-from cow_protocol_polygon.VouchRegister_evt_Vouch
-inner join query_4056263 -- valid bonding pools
-    on pool_address = bondingPool
-    and sender = creator
-*/
+select distinct cowRewardTarget
+from dune.cowprotocol.result_multichain_vouching_events as ve --https://dune.com/queries/5533098
+inner join query_4056263 as vbp -- valid bonding pools
+    on vbp.pool_address = ve.bondingPool
+    and vbp.creator = ve.sender
