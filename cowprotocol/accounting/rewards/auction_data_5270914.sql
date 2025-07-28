@@ -20,43 +20,26 @@ with block_range as (
     select * from "query_3333356(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')"
 ),
 
-txs_block_range as (
+candidate_batches as (
     select
-        min(block_number) as first_block,
-        max(block_number) as last_block
-    from "query_4351957(blockchain='{{blockchain}}')"
-    where block_deadline >= (select start_block from block_range) and block_deadline <= (select end_block from block_range)
-),
-
-block_data as (
-    select
-        tx.first_block,
-        min_block.date as min_block_date,
-        tx.last_block,
-        max_block.date as max_block_date
-    from txs_block_range as tx
-    inner join {{blockchain}}.blocks as max_block
-        on tx.last_block = max_block.number
-    inner join {{blockchain}}.blocks as min_block
-        on tx.first_block = min_block.number
-),
-
--- the following table is a restriction of the transactions table, with the goal to speed up subsequent computations
-candidate_txs as (
-    select *
-    from {{blockchain}}.transactions
+        block_number,
+        tx_hash,
+        gas_price * gas_used as execution_cost
+    from cow_protocol_{{blockchain}}.batches
     where
-        block_date >= (select min_block_date from block_data) and block_date <= (select max_block_date from block_data)
-        and block_number >= (select first_block from txs_block_range) and block_number <= (select last_block from txs_block_range)
+        block_date >= cast('{{start_time}}' as timestamp) - interval '1' day
+        and block_date <= cast('{{end_time}}' as timestamp) + interval '1' day
 ),
 
 relevant_txs as (
     select
-        t.hash as tx_hash,
-        t.gas_price * t.gas_used as execution_cost
-    from "query_4351957(blockchain='{{blockchain}}')" as rbd inner join candidate_txs as t
-        on rbd.block_number = t.block_number and rbd.tx_hash = t.hash
-    where block_deadline >= (select start_block from block_range) and block_deadline <= (select end_block from block_range)
+        rbd.tx_hash,
+        b.execution_cost
+    from "query_4351957(blockchain='{{blockchain}}')" as rbd inner join candidate_batches as b
+        on rbd.block_number = b.block_number and rbd.tx_hash = b.tx_hash
+    where
+        block_deadline >= (select start_block from block_range)
+        and block_deadline <= (select end_block from block_range)
 )
 
 select --noqa: ST06
