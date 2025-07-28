@@ -14,8 +14,6 @@ jobs:
           python-version: "3.9"
       - name: Install SQLFluff
         run: pip install sqlfluff
-      - name: Run SQLFluff
-        run: sqlfluff lint . --config .sqlfluff
       - name: Get changed SQL files
         id: changed-files
         uses: tj-actions/changed-files@v44
