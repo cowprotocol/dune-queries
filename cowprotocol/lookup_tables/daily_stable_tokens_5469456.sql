@@ -1,4 +1,3 @@
--- noqa: disable=all
 -- this query returns a daily list of token addresses which fit into a few price stability criteria over the previous 30d
 with
 daily_prices as (
