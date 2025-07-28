@@ -28,7 +28,7 @@ candidate_batches as (
     from cow_protocol_{{blockchain}}.batches
     where
         block_date >= cast('{{start_time}}' as timestamp) - interval '1' day
-        and block_date <= cast('{{end_time}}' as timestamp)
+        and block_date <= cast('{{end_time}}' as timestamp) + interval '1' day
 ),
 
 relevant_txs as (
