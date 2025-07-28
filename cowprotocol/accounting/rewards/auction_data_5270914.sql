@@ -27,9 +27,8 @@ candidate_batches as (
         gas_price * gas_used as execution_cost
     from cow_protocol_{{blockchain}}.batches
     where
-        block_date between
-        cast('{{start_time}}' as timestamp) - interval '1' day
-        and cast('{{end_time}}' as timestamp)
+        block_date >= cast('{{start_time}}' as timestamp) - interval '1' day
+        and block_date <= cast('{{end_time}}' as timestamp)
 ),
 
 relevant_txs as (
