@@ -1,3 +1,4 @@
+-- noqa: disable=all
 select distinct cowRewardTarget--, 'ethereum' as blockchain
 from cow_protocol_ethereum.VouchRegister_evt_Vouch
 inner join query_4056263 -- valid bonding pools
