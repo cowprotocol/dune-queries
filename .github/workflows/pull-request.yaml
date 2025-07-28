@@ -14,8 +14,20 @@ jobs:
           python-version: "3.9"
       - name: Install SQLFluff
         run: pip install sqlfluff
-      - name: Run SQLFluff
-        run: sqlfluff lint .
+      - name: Get changed SQL files
+        id: changed-files
+        uses: tj-actions/changed-files@v44
+        with:
+          files: |
+            **/*.sql
+      - name: Run SQLFluff on changed files
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          echo "Changed files: ${{ steps.changed-files.outputs.all_changed_files }}"
+          sqlfluff lint ${{ steps.changed-files.outputs.all_changed_files }}
+      - name: Skip SQLFluff (no SQL files changed)
+        if: steps.changed-files.outputs.any_changed == 'false'
+        run: echo "No SQL files changed, skipping SQLFluff"        
   nitpicker:
     runs-on: ubuntu-latest
     steps:
