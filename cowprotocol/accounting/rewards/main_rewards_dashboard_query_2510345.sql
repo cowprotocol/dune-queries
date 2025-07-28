@@ -65,30 +65,13 @@ fees_and_costs as (
 
 conversion_prices as (
     select
-        (
-            select avg(price) from prices.usd
-            where
-                blockchain = 'ethereum' -- use cow price from mainnet
-                and contract_address = 0xdef1ca1fb7fbcdc777520aa7f396b4e015f497ab
-                and date(minute) = cast('{{end_time}}' as timestamp) - interval '1' day
-        ) as cow_price,
-        (
-            select avg(price) from prices.usd
-            where
-                blockchain = '{{blockchain}}' -- use native prices from respective chains
-                and contract_address = (
-                    select
-                        case
-                            when '{{blockchain}}' = 'ethereum' then 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2
-                            when '{{blockchain}}' = 'gnosis' then 0xe91d153e0b41518a2ce8dd3d7944fa863463a97d
-                            when '{{blockchain}}' = 'arbitrum' then 0x82aF49447D8a07e3bd95BD0d56f35241523fBab1
-                            when '{{blockchain}}' = 'base' then 0x4200000000000000000000000000000000000006
-                            when '{{blockchain}}' = 'avalanche_c' then 0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7
-                            when '{{blockchain}}' = 'polygon' then 0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270
-                        end
-                )
-                and date(minute) = cast('{{end_time}}' as timestamp) - interval '1' day
-        ) as native_token_price
+        cow_price,
+        native_token_price
+    from dune.cowprotocol.result_accounting_cow_and_native_prices_per_chain
+    where
+        blockchain = '{{blockchain}}'
+        and end_time > date_add('day', -1, cast('{{end_time}}' as timestamp))
+        and end_time < date_add('day', +1, cast('{{end_time}}' as timestamp))
 ),
 
 -- BEGIN QUOTE REWARDS

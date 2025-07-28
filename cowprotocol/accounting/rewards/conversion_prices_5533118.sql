@@ -21,12 +21,12 @@ native_token_prices as (
         avg(price) as native_token_price
     from prices.usd
     where (
-        blockchain = 'ethereum' and contract_address = 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2 or
-        blockchain = 'gnosis' and contract_address = 0xe91d153e0b41518a2ce8dd3d7944fa863463a97d or
-        blockchain = 'arbitrum' and contract_address = 0x82af49447d8a07e3bd95bd0d56f35241523fbab1 or
-        blockchain = 'base' and contract_address = 0x4200000000000000000000000000000000000006 or
-        blockchain = 'avalanche_c' and contract_address = 0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7 or
-        blockchain = 'polygon' and contract_address = 0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270
+        blockchain = 'ethereum' and contract_address = 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2
+        or blockchain = 'gnosis' and contract_address = 0xe91d153e0b41518a2ce8dd3d7944fa863463a97d
+        or blockchain = 'arbitrum' and contract_address = 0x82af49447d8a07e3bd95bd0d56f35241523fbab1
+        or blockchain = 'base' and contract_address = 0x4200000000000000000000000000000000000006
+        or blockchain = 'avalanche_c' and contract_address = 0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7
+        or blockchain = 'polygon' and contract_address = 0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270
     )
     group by 1, 2, 3
 )
