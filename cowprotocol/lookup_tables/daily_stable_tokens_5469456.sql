@@ -1,4 +1,5 @@
 -- this query returns a daily list of token addresses which fit into a few price stability criteria over the previous 30d
+-- criteria = relative volatility < 1% and price range < 5%, allowing price to be missing in up to 5d 
 with
 daily_prices as (
     select
@@ -8,7 +9,7 @@ daily_prices as (
         min(price) as daily_min_price -- to avoid temporary pricing errors
     from prices.hour
     where
-        timestamp >= timestamp '2022-01-01'
+        timestamp >= timestamp '2024-01-01'
     group by 1, 2, 3
 )
 , volatility as (
