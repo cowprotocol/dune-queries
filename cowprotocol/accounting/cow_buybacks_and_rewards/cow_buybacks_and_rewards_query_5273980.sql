@@ -103,12 +103,12 @@ txs_to_exclude as (
 )
 select
     coalesce(r.time, b.time) as time,
-    coalesce(cow_rewarded,0) as cow_rewarded,
-    sum(coalesce(cow_rewarded,0)) over (order by coalesce(r.time, b.time) nulls first) as cumulative_rewards,
-    coalesce(cow_bought_back,0) as cow_bought_back,
-    sum(coalesce(cow_bought_back,0)) over (order by coalesce(r.time, b.time) nulls first) as cumulative_buybacks,
-    sum(coalesce(cow_rewarded,0)) over (order by coalesce(r.time, b.time) nulls first)
-        - sum(coalesce(cow_bought_back,0)) over (order by coalesce(r.time, b.time) nulls first) as net_emissions
+    coalesce(cow_rewarded, 0) as cow_rewarded,
+    sum(coalesce(cow_rewarded, 0)) over (order by coalesce(r.time, b.time) nulls first) as cumulative_rewards,
+    coalesce(cow_bought_back, 0) as cow_bought_back,
+    sum(coalesce(cow_bought_back, 0)) over (order by coalesce(r.time, b.time) nulls first) as cumulative_buybacks,
+    sum(coalesce(cow_rewarded, 0)) over (order by coalesce(r.time, b.time) nulls first)
+        - sum(coalesce(cow_bought_back, 0)) over (order by coalesce(r.time, b.time) nulls first) as net_emissions
 from solver_cow_rewards r
 full outer join cow_buyback b
     on r.time = b.time
