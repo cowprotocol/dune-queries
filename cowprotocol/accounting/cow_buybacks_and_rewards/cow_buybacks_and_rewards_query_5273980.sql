@@ -3,10 +3,10 @@ txs_to_exclude as (
     select 0x7684ba7c81b539f5a54d1e9a55dadd2fac1e355356b7b7fe99fc597345c59402 as tx_hash --mainnet
 )
 , cow_token_address as (
-    select * from query_5454278
+      select * from query_5454278
 )
 , rewards_safe as (
-    select * from query_5454283
+      select * from query_5454283
 )
 , valid_reward_targets as (
     select * from query_5492689
@@ -103,12 +103,12 @@ txs_to_exclude as (
 )
 select
     coalesce(r.time, b.time) as time,
-    cow_rewarded,
-    sum(cow_rewarded) over (order by coalesce(r.time, b.time) nulls first) as cumulative_rewards,
-    cow_bought_back,
-    sum(cow_bought_back) over (order by coalesce(r.time, b.time) nulls first) as cumulative_buybacks,
-    sum(cow_rewarded) over (order by coalesce(r.time, b.time) nulls first)
-        - sum(cow_bought_back) over (order by coalesce(r.time, b.time) nulls first) as net_emissions
+    coalesce(cow_rewarded,0) as cow_rewarded,
+    sum(coalesce(cow_rewarded,0)) over (order by coalesce(r.time, b.time) nulls first) as cumulative_rewards,
+    coalesce(cow_bought_back,0) as cow_bought_back,
+    sum(coalesce(cow_bought_back,0)) over (order by coalesce(r.time, b.time) nulls first) as cumulative_buybacks,
+    sum(coalesce(cow_rewarded,0)) over (order by coalesce(r.time, b.time) nulls first)
+        - sum(coalesce(cow_bought_back,0)) over (order by coalesce(r.time, b.time) nulls first) as net_emissions
 from solver_cow_rewards r
 full outer join cow_buyback b
     on r.time = b.time
