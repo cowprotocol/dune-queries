@@ -1,3 +1,4 @@
+-- noqa: disable = all
 with
 auction_range as (
     select
