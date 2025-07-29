@@ -1,3 +1,20 @@
+-- This query returns a detailed breakdown on the different types of reward or reimbursement solvers get, on a block_time basis
+
+-- params:
+-- quote_cap_native_token and quote_reward: chain-specific limits for rewards on a batch basis, more details in https://docs.cow.fi/cow-protocol/reference/core/auctions/rewards#price-estimation-competition-rewards-cips-27-57
+-- start and end_time: period to consider (usually Tuesday 00:00 UTC to Tuesday 00:00 UTC to consider the payout cycle)
+
+-- columns:
+-- quote rewards = reward for offering the winning quote
+-- primary rewards = performance reward / reward for solving
+-- network fee = amounts the solvers should be reimbursed due to their gas spend
+-- execution costs = actual gas cost of that batch for the solver 
+-- slippage = imbalance generated in the settlement contract during a given auction
+-- reimbursement = slippage + network fees
+-- overdraft = when the sum of primary_reward + slippage + network_fee is negative
+-- native_token_transfer = amount due to the solver in native token, depends on specific logic that can be seen in the end of this code 
+-- cow_transfer = amount due to the solver in COW token, depends on specific logic that can be seen in the end of this code (does not including quote rewards)
+
 --noqa: disable=all
 with
 auction_range as (
