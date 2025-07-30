@@ -1,6 +1,6 @@
 with
 txs_to_exclude as (
-    select 0x7684ba7c81b539f5a54d1e9a55dadd2fac1e355356b7b7fe99fc597345c59402 as tx_hash --mainnet
+    select 0x7684ba7c81b539f5a54d1e9a55dadd2fac1e355356b7b7fe99fc597345c59402 as tx_hash --mainnet, exclusion due to CoW transfer between CoW and Gnosis DAO safes
 )
 , cow_token_address as (
       select * from query_5454278
