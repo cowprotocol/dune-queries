@@ -99,8 +99,10 @@ txs_to_exclude as (
         from
             cow_protocol_ethereum.trades
         where
-            trader in (0xb64963f95215fde6510657e719bd832bb8bb941b, 0x523732d31b4432bcdd4baad108f7ebe54ad478b0
-            , 0x616de58c011f8736fa20c7ae5352f7f6fb9f0669, 0x22af3d38e50ddedeb7c47f36fab321ec3bb72a76)
+            trader in (
+                0xb64963f95215fde6510657e719bd832bb8bb941b, 0x523732d31b4432bcdd4baad108f7ebe54ad478b0
+                , 0x616de58c011f8736fa20c7ae5352f7f6fb9f0669, 0x22af3d38e50ddedeb7c47f36fab321ec3bb72a76
+            )
             and buy_token_address = 0xdef1ca1fb7fbcdc777520aa7f396b4e015f497ab
             and sell_token_address = 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2
             and project_contract_address = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
@@ -114,7 +116,7 @@ txs_to_exclude as (
         from
             cow_protocol_gnosis.trades
         where
-            trader in (0x6b3214fD11dc91De14718DeE98Ef59bCbFcfB432)
+            trader = 0x6b3214fD11dc91De14718DeE98Ef59bCbFcfB432
             and buy_token_address = 0x177127622c4a00f3d409b75571e12cb3c8973d3c
             and sell_token_address = 0x6a023ccd1ff6f2045c3309768ead9e68f978f6e1
             and project_contract_address = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
