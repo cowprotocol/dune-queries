@@ -19,7 +19,7 @@ txs_to_exclude as (
         , sum(cow_rewarded) as cow_rewarded
     from (
         select
-            date_trunc('{{time_frequency}}', t.evt_block_time) as time
+            date_trunc('{{date_granularity}}', t.evt_block_time) as time
             , sum(value / pow(10, 18)) as cow_rewarded
         from erc20_ethereum.evt_transfer as t
         join valid_reward_targets as v
@@ -37,7 +37,7 @@ txs_to_exclude as (
 
         union all
         select
-            date_trunc('{{time_frequency}}', t.evt_block_time) as time
+            date_trunc('{{date_granularity}}', t.evt_block_time) as time
             , sum(value / pow(10, 18)) as cow_rewarded
         from erc20_gnosis.evt_transfer as t
         join valid_reward_targets as v
@@ -54,7 +54,7 @@ txs_to_exclude as (
 
         union all
         select
-            date_trunc('{{time_frequency}}', t.evt_block_time) as time
+            date_trunc('{{date_granularity}}', t.evt_block_time) as time
             , sum(value / pow(10, 18)) as cow_rewarded
         from erc20_base.evt_transfer as t
         join valid_reward_targets as v
@@ -71,7 +71,7 @@ txs_to_exclude as (
 
         union all
         select
-            date_trunc('{{time_frequency}}', t.evt_block_time) as time
+            date_trunc('{{date_granularity}}', t.evt_block_time) as time
             , sum(value / pow(10, 18)) as cow_rewarded
         from erc20_arbitrum.evt_transfer as t
         join valid_reward_targets as v
@@ -94,7 +94,7 @@ txs_to_exclude as (
         , sum(cow_bought_back) as cow_bought_back
     from (
         select
-            date_trunc('{{time_frequency}}', block_date) as time
+            date_trunc('{{date_granularity}}', block_date) as time
             , sum(units_bought) as cow_bought_back
         from
             cow_protocol_ethereum.trades
@@ -111,7 +111,7 @@ txs_to_exclude as (
     
         union all 
         select
-            date_trunc('{{time_frequency}}', block_date) as time
+            date_trunc('{{date_granularity}}', block_date) as time
             , sum(units_bought) as cow_bought_back
         from
             cow_protocol_gnosis.trades
