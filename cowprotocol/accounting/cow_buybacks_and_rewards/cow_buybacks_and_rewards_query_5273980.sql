@@ -116,7 +116,7 @@ txs_to_exclude as (
         from
             cow_protocol_gnosis.trades
         where
-            trader = 0x6b3214fD11dc91De14718DeE98Ef59bCbFcfB432
+            trader = 0x6b3214fd11dc91de14718dee98ef59bcbfcfb432
             and buy_token_address = 0x177127622c4a00f3d409b75571e12cb3c8973d3c
             and sell_token_address = 0x6a023ccd1ff6f2045c3309768ead9e68f978f6e1
             and project_contract_address = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
