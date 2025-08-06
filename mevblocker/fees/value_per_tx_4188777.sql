@@ -37,6 +37,9 @@ mev_blocker_filtered AS (
         blocknumber >= (SELECT start_block FROM block_range)
         AND blocknumber < (SELECT end_block FROM block_range)
         AND COALESCE(referrer, 'No referrer') LIKE '{{referrer}}'
+        AND transactions IS NOT NULL
+        AND TRY(JSON_PARSE(transactions)) IS NOT NULL
+        AND JSON_SIZE(JSON_PARSE(transactions), '$') < 10  -- exclude megabundles
 ),
 
 -- perfomance optimisation: relevant ethereum transactions during that timeframe
