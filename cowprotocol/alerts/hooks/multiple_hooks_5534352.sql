@@ -20,7 +20,9 @@ all_hooks as (
 )
 select *
 from (
-    select count(1) over (partition by hook_call_data) as hook_calls, *
+    select 
+        *,
+        count(1) over (partition by hook_call_data) as hook_calls
     from all_hooks
 )
 where 
