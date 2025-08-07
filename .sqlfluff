@@ -5,7 +5,7 @@ max_line_length = 200
 rules = AL01,AL02,AL03,AL04,AL08,AM01,AM02,AM08,CP01,CP02,CP03,CP04,CP05,CV12,LT02,LT07,LT09,LT10,LT13,RF03,ST04
 
 [sqlfluff:rules:capitalisation.keywords] 
-capitalisation_policy = lower
+capitalisation_policy = consistent
 
 [sqlfluff:indentation] # See https://docs.sqlfluff.com/en/stable/perma/indent_locations.html
 indent_unit = space
@@ -16,6 +16,8 @@ indented_on_contents = False
 blockchain = 'ethereum'
 starttime = '2023-01-01'
 endtime = '2024-01-01'
+start_time = '2023-01-01'
+end_time = '2024-01-01'
 period = 'last 3m'
 date_granularity = 'month'
 aggregate_by = 'month'
