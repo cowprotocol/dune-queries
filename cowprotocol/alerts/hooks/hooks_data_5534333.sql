@@ -83,4 +83,4 @@ left outer join traces
     on hooks.call_data = traces.input
 where 
     t.block_time >= date_add('{{lookback_time_unit}}', -{{lookback_units}}, now())
-    and hooks.app_id is not null -- makes sure the order contains a hook
+    and hooks.call_data is not null -- makes sure the order contains a hook
