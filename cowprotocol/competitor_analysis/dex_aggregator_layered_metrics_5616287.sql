@@ -1,3 +1,4 @@
+-- Calculates metrics based on the project of the top layer of a transaction, regardless of whether its routing touches other dex aggregators
 with
 static as (
     select 
