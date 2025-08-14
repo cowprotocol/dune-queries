@@ -27,5 +27,5 @@ from (
 )
 where 
     hook_calls > 1 
-    and hook_app_id not in ('PERMIT_TOKEN', '1db4bacb661a90fb6b475fd5b585acba9745bc373573c65ecc3e8f5bfd5dee1f')
+    and hook_app_id not in ('cow-swap://libs/hook-dapp-lib/permit', 'PERMIT_TOKEN', '1db4bacb661a90fb6b475fd5b585acba9745bc373573c65ecc3e8f5bfd5dee1f')
 order by block_time desc, order_uid
