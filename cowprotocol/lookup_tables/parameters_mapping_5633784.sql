@@ -1,3 +1,4 @@
+--noqa: disable=all
 select
     map_from_entries(
         array[
