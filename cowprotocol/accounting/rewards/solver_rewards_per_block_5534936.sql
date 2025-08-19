@@ -31,8 +31,7 @@ auction_range as (
 , conv_native_to_cow as (
     select
         end_time as date,
-        cow_price,
-        native_token_price as native_to_cow_rate
+        native_token_price / nullif(cow_price, 0) as native_to_cow_rate
     from dune.cowprotocol.result_accounting_cow_and_native_prices_per_chain
     where
         blockchain = '{{blockchain}}'
