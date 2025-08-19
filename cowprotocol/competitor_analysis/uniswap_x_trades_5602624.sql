@@ -1,3 +1,4 @@
+--noqa: disable=LT09
 with 
 static as (
     select (select start_date['{{period}}'] from "query_5633784") as start_date
@@ -19,58 +20,64 @@ static as (
 --------------------------------------------------------------------------------------------------------------------------------------------
 -- fills from tables above have no data on which tokens are being traded and their amounts, so we must add them manually
 , transfers as (
-    --ethereum
+    --erc20 tokens 
     select 'ethereum' as blockchain, evt_tx_hash as tx_hash, "from", "to", value, contract_address
     from erc20_ethereum.evt_transfer, static  --erc20 tokens
-    where evt_block_time >= static.start_date  
+    where 
+        evt_block_time >= static.start_date  
         and value > 0
-    
-    union all     
-    select 'ethereum' as blockchain, tx_hash, "from", "to", value, 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2 as contract_address -- make it WETH to join with prices.usd
-    from ethereum.traces, static  -- native token
-    where success
-        and block_time >= static.start_date 
-        and value > 0
-        
-    --arbitrum
+
     union all 
     select 'arbitrum' as blockchain, evt_tx_hash as tx_hash, "from", "to", value, contract_address
     from erc20_arbitrum.evt_transfer, static  --erc20 tokens
-    where evt_block_time >= static.start_date  
+    where 
+        evt_block_time >= static.start_date  
+        and value > 0        
+
+    union all 
+    select 'base' as blockchain, evt_tx_hash as tx_hash, "from", "to", value, contract_address
+    from erc20_base.evt_transfer, static  --erc20 tokens
+    where 
+        evt_block_time >= static.start_date  
+        and value > 0 
+
+    union all 
+    select 'unichain' as blockchain, evt_tx_hash as tx_hash, "from", "to", value, contract_address
+    from erc20_unichain.evt_transfer, static  --erc20 tokens
+    where 
+        evt_block_time >= static.start_date  
+        and value > 0
+    
+    --native tokens
+    union all
+    select 'ethereum' as blockchain, tx_hash, "from", "to", value, 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2 as contract_address -- make it WETH to join with prices.usd
+    from ethereum.traces, static  -- native token
+    where 
+        success
+        and block_time >= static.start_date 
         and value > 0
     
     union all     
     select 'arbitrum' as blockchain, tx_hash, "from", "to", value, 0x82af49447d8a07e3bd95bd0d56f35241523fbab1 as contract_address -- make it WETH to join with prices.usd
     from arbitrum.traces, static  -- native token
-    where success
+    where 
+        success
         and block_time >= static.start_date 
-        and value > 0
-        
-    --base
-    union all 
-    select 'base' as blockchain, evt_tx_hash as tx_hash, "from", "to", value, contract_address
-    from erc20_base.evt_transfer, static  --erc20 tokens
-    where evt_block_time >= static.start_date  
         and value > 0
 
     union all 
     select 'base' as blockchain, tx_hash, "from", "to", value, 0x4200000000000000000000000000000000000006 as contract_address -- make it WETH to join with prices.usd
     from base.traces, static  -- native token
-    where success
+    where 
+        success
         and block_time >= static.start_date 
-        and value > 0
-        
-    --unichain
-    union all 
-    select 'unichain' as blockchain, evt_tx_hash as tx_hash, "from", "to", value, contract_address
-    from erc20_unichain.evt_transfer, static  --erc20 tokens
-    where evt_block_time >= static.start_date  
         and value > 0
 
     union all 
     select 'unichain' as blockchain, tx_hash, "from", "to", value, 0x8f187aa05619a017077f5308904739877ce9ea21 as contract_address -- UNI token
     from unichain.traces, static  -- native token
-    where success
+    where 
+        success
         and block_time >= static.start_date 
         and value > 0
 )
@@ -81,7 +88,7 @@ static as (
     from prices.usd , static 
     where 
         minute >= static.start_date
-        and blockchain IN ('ethereum', 'arbitrum', 'base', 'unichain')
+        and blockchain in ('ethereum', 'arbitrum', 'base', 'unichain')
 )
 --------------------------------------------------------------------------------------------------------------------------------------------
 select 
@@ -92,7 +99,7 @@ select
     , greatest(
         coalesce(tfr_sell.value / pow(10, pr_sell.decimals) * pr_sell.price, 0)
         , coalesce(tfr_buy.value / pow(10, pr_buy.decimals) * pr_buy.price, 0)
-        ) as amount_usd
+    ) as amount_usd
         
 from uniswap_x_fills as f
 cross join static     
