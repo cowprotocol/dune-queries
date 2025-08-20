@@ -28,6 +28,21 @@ auction_range as (
 , vouch_registry as (
     select * from "query_1541516(blockchain='{{blockchain}}', end_time='{{end_time}}', vouch_cte_name='named_results')"
 )
+, quote_cap_mapping (
+    select '2010-01-01 00:00' as from_ts, '2025-08-12 00:00' as until_ts, 0.0006 as quote_cap_native, 6 as quote_cap_cow, 'ethereum' as blockchain union all 
+    select '2010-01-01 00:00' as from_ts, '2025-08-12 00:00' as until_ts, 0.15   as quote_cap_native, 6 as quote_cap_cow, 'gnosis' as blockchain union all 
+    select '2010-01-01 00:00' as from_ts, '2025-08-12 00:00' as until_ts, 0.0002 as quote_cap_native, 6 as quote_cap_cow, 'base' as blockchain union all 
+    select '2010-01-01 00:00' as from_ts, '2025-08-12 00:00' as until_ts, 0.0002 as quote_cap_native, 6 as quote_cap_cow, 'arbitrum' as blockchain union all  
+    select '2010-01-01 00:00' as from_ts, '2025-08-12 00:00' as until_ts, 0.0005 as quote_cap_native, 6 as quote_cap_cow, 'avalanche_c' as blockchain union all 
+    select '2010-01-01 00:00' as from_ts, '2025-08-12 00:00' as until_ts, 0.5    as quote_cap_native, 6 as quote_cap_cow, 'polygon' as blockchain union all 
+    
+    select '2025-08-12 00:00' as from_ts, '2099-01-01 00:00' as until_ts, 0.0007  as quote_cap_native, 6 as quote_cap_cow, 'ethereum' as blockchain union all 
+    select '2025-08-12 00:00' as from_ts, '2099-01-01 00:00' as until_ts, 0.15    as quote_cap_native, 6 as quote_cap_cow, 'gnosis' as blockchain union all 
+    select '2025-08-12 00:00' as from_ts, '2099-01-01 00:00' as until_ts, 0.00024 as quote_cap_native, 6 as quote_cap_cow, 'base' as blockchain union all 
+    select '2025-08-12 00:00' as from_ts, '2099-01-01 00:00' as until_ts, 0.00024 as quote_cap_native, 6 as quote_cap_cow, 'arbitrum' as blockchain union all 
+    select '2025-08-12 00:00' as from_ts, '2099-01-01 00:00' as until_ts, 0.0006  as quote_cap_native, 6 as quote_cap_cow, 'avalanche_c' as blockchain union all 
+    select '2025-08-12 00:00' as from_ts, '2099-01-01 00:00' as until_ts, 0.6     as quote_cap_native, 6 as quote_cap_cow, 'polygon' as blockchain
+)
 , conv_native_to_cow as (
     select
         end_time as date,
@@ -100,24 +115,21 @@ auction_range as (
         on oq.order_uid = t.order_uid 
         and oq.quote_solver != 0x0000000000000000000000000000000000000000
 )
-, quote_rewards_in_native as (
-    select
-        solver,
-        block_time,
-        least({{quote_reward}}, {{quote_cap_native_token}}) * count(1) as quote_reward_native
-    from winning_quotes as wq
-    group by 1,2
-)
 , quote_rewards as (
     select
-        solver,
-        block_time,
-        quote_reward_native,
-        quote_reward_native * p.native_to_cow_rate as quote_reward_cow
-    from quote_rewards_in_native as qr
+        wq.solver,
+        wq.block_time,
+        count(1) * least(cap.quote_cap_cow, cap.quote_cap_native * p.native_to_cow_rate)  as quote_reward_cow,
+        count(1) * least(cap.quote_cap_cow, cap.quote_cap_native * p.native_to_cow_rate) / p.native_to_cow_rate  as quote_reward_native
+    from winning_quotes as wq
+    left join quote_cap_mapping as cap
+        on wq.block_time > cap.from_ts
+        and wq.block_time >= cap.from_ts
+        and cap.blockchain = '{{blockchain}}'
     -- get avg prices on day before payout date
     left join conv_native_to_cow as p 
         on date_trunc('week', qr.block_time - interval '1' day) + interval '7' day = p.date 
+    group by 1,2
 )
 --------------------------------------------------------------------------------
 -- SLIPPAGE
