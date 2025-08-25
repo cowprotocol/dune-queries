@@ -1,7 +1,7 @@
 with tuesdays as (
-    select cast(date_add('week', n, date '2025-06-03') as timestamp) as end_time
+    select cast(date_add('week', n, date '2024-12-31') as timestamp) as end_time
     from unnest(sequence(0, 9999)) as t(n) --noqa: AL05, LT01
-    where date_add('week', n, date '2025-06-03') <= current_date
+    where date_add('week', n, date '2024-12-31') <= current_date
 ),
 
 cow_prices as (
