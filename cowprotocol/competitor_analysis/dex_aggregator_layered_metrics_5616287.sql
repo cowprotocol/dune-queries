@@ -44,6 +44,7 @@ static as (
     cross join static
     left join fusion_txs as f
         on t.tx_hash = f.tx_hash
+        and t.blockchain = f.blockchain
     left join uniswap_x_txs as u
         on t.tx_hash = u.tx_hash
         and t.blockchain = u.blockchain
