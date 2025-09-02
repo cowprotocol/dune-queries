@@ -1,27 +1,28 @@
 -- Exclude the following txs/trades from slippage accounting due to wrong Dune prices
+
 select distinct tx_hash
 from
     cow_protocol_ethereum.trades
 where
     0xf5d669627376ebd411e34b98f19c868c8aba5ada in (buy_token_address, sell_token_address) -- exclude AXS (Old)
     -- mixed ERC20/ERC721 tokens:
-    or 0xf66434c34f3644473d91f065bF35225aec9e0Cfd in (buy_token_address, sell_token_address) -- exclude 404
-    or 0x9E9FbDE7C7a83c43913BddC8779158F1368F0413 in (buy_token_address, sell_token_address) -- exclude PANDORA
-    or 0x6C061D18D2b5bbfBe8a8D1EEB9ee27eFD544cC5D in (buy_token_address, sell_token_address) -- exclude MNRCH
-    or 0xbE33F57f41a20b2f00DEc91DcC1169597f36221F in (buy_token_address, sell_token_address) -- exclude Rug
-    or 0x938403C5427113C67b1604d3B407D995223C2B78 in (buy_token_address, sell_token_address) -- exclude OOZ
-    or 0x54832d8724f8581e7Cc0914b3A4e70aDC0D94872 in (buy_token_address, sell_token_address) -- exclude DN404
+    or 0xf66434c34f3644473d91f065bf35225aec9e0cfd in (buy_token_address, sell_token_address) -- exclude 404
+    or 0x9e9fbde7c7a83c43913bddc8779158f1368f0413 in (buy_token_address, sell_token_address) -- exclude PANDORA
+    or 0x6c061d18d2b5bbfbe8a8d1eeb9ee27efd544cc5d in (buy_token_address, sell_token_address) -- exclude MNRCH
+    or 0xbe33f57f41a20b2f00dec91dcc1169597f36221f in (buy_token_address, sell_token_address) -- exclude Rug
+    or 0x938403c5427113c67b1604d3b407d995223c2b78 in (buy_token_address, sell_token_address) -- exclude OOZ
+    or 0x54832d8724f8581e7cc0914b3a4e70adc0d94872 in (buy_token_address, sell_token_address) -- exclude DN404
     -- Temporary exceptions for Feb 13..Feb20, 2024 are starting here
-    or 0xB5C457dDB4cE3312a6C5a2b056a1652bd542a208 in (buy_token_address, sell_token_address) -- exclude EtherRock404
-    or 0xd555498a524612c67f286dF0e0a9a64a73a7Cdc7 in (buy_token_address, sell_token_address) -- exclude DeFrogs
-    or 0x73576A927Cd93a578a9dFD61c75671D97c779da7 in (buy_token_address, sell_token_address) -- exclude Forge
-    or 0x3F73EAEBA8f2b2699D6cC7581678bA631de5F183 in (buy_token_address, sell_token_address) -- exclude DEV404
-    or 0x7c6314cCd4e34346Ba9C9bd9900FaafB4E3711B0 in (buy_token_address, sell_token_address) -- exclude ERC404X
-    or 0xe2f95ee8B72fFed59bC4D2F35b1d19b909A6e6b3 in (buy_token_address, sell_token_address) -- exclude EGGX
-    or 0xd5C02bB3e40494D4674778306Da43a56138A383E in (buy_token_address, sell_token_address) -- exclude OMNI404
-    or 0x92715b8F93729c0B014213f769EF493baecEDACC in (buy_token_address, sell_token_address) -- exclude WIFU 404 
-    or 0x413530a7beB9Ff6C44e9e6C9001C93B785420C32 in (buy_token_address, sell_token_address) -- exclude PFPAsia. 
-    or 0xe7468080c033cE50Dd09A22ad1E58D1BDA69E436 in (buy_token_address, sell_token_address) -- exclude YUMYUM. 
+    or 0xb5c457ddb4ce3312a6c5a2b056a1652bd542a208 in (buy_token_address, sell_token_address) -- exclude EtherRock404
+    or 0xd555498a524612c67f286df0e0a9a64a73a7cdc7 in (buy_token_address, sell_token_address) -- exclude DeFrogs
+    or 0x73576a927cd93a578a9dfd61c75671d97c779da7 in (buy_token_address, sell_token_address) -- exclude Forge
+    or 0x3f73eaeba8f2b2699d6cc7581678ba631de5f183 in (buy_token_address, sell_token_address) -- exclude DEV404
+    or 0x7c6314ccd4e34346ba9c9bd9900faafb4e3711b0 in (buy_token_address, sell_token_address) -- exclude ERC404X
+    or 0xe2f95ee8b72ffed59bc4d2f35b1d19b909a6e6b3 in (buy_token_address, sell_token_address) -- exclude EGGX
+    or 0xd5c02bb3e40494d4674778306da43a56138a383e in (buy_token_address, sell_token_address) -- exclude OMNI404
+    or 0x92715b8f93729c0b014213f769ef493baecedacc in (buy_token_address, sell_token_address) -- exclude WIFU 404 
+    or 0x413530a7beb9ff6c44e9e6c9001c93b785420c32 in (buy_token_address, sell_token_address) -- exclude PFPAsia. 
+    or 0xe7468080c033ce50dd09a22ad1e58d1bda69e436 in (buy_token_address, sell_token_address) -- exclude YUMYUM. 
     or tx_hash = 0x41418cef26e608ed47a5c4997833caaa2366a0163173286140da28a32e37b25d -- temporary solution
     or tx_hash = 0xdf415f3048d401c9ca7bf079722be96aaed3d2d2b5c0e12b7dc75d6eec30b3d4 -- temporary solution
     or tx_hash = 0x15b9906aa2039ccbc9ae9fab0f0c7517e9c88c41b74cd8a09f202803d37f6341 -- temporary solution
@@ -62,7 +63,7 @@ where
     or tx_hash = 0x7b2588fda96cb480d6a055f327c368b3e1a5638f489e1b1ede9d143361b94c65
     or tx_hash = 0x00198fdad1047b31299d8d91afa71467cc491d643e730f9ef5bb9a9e7a5cfdad
     -- for week of March 12, 2024 until March 19, 2024
-    or 0x382E57cA8e4c4DB9649884ca77B0a355692D14AC in (buy_token_address, sell_token_address) -- exclude XYXYX
+    or 0x382e57ca8e4c4db9649884ca77b0a355692d14ac in (buy_token_address, sell_token_address) -- exclude XYXYX
     or tx_hash = 0x46c5064ffae9d4f0132fcaf9e75b169aecd23b0834b7743bc5280770ace3a10e
     or tx_hash = 0xba20e80f1e055865e594f868843f5f642b896291c91afa39cde1820e3129f543
     or tx_hash = 0xeb18483d07998f33952bba494aff9542283afcd2867b12fcfdc82672f87a97a3
@@ -92,7 +93,7 @@ where
     -- for week of April 16, 2024 until April 23, 2024
     or tx_hash = 0x142adfe0b863a6621579f501859733de243d4b8d673b9d50150c8e99ec7387eb
     -- for week of April 30, 2024 until May 7, 2024
-    or 0x730BCBe5Cdc1a3061Dfe700774b7B8dd1d4173DB in (buy_token_address, sell_token_address) -- exclude DaVinci ERC-721
+    or 0x730bcbe5cdc1a3061dfe700774b7b8dd1d4173db in (buy_token_address, sell_token_address) -- exclude DaVinci ERC-721
     -- for week of May 7, 2024 until May 14, 2024
     or tx_hash = 0x360803f2df15d66fef4afdeb981798c988d72078c400acdb20e10d5018cb1f46
     or tx_hash = 0xca73fed6c8e0a7b44685d74884025d25bee4c1fba836e7f211331e2b2bfcdc09
@@ -171,44 +172,44 @@ where
     or tx_hash = 0x4b2abb45491995674442a041a82e94a863428bca4f4c956805f8ec9f802c9fba
 
     -- for week of Dec 17 - Dec 24, 2024
-    or tx_hash = 0xF7A16B761CB5B09F68350607675AF07CE48DC772D4FF1C6E9EDA5E4E3F62A139
-    or tx_hash = 0xD5295F40E2685C5FD4DE432C2D377F9D5E71877C187FAE5D0FC44A5ED66FC142 -- involving token that basically couldn't trade afterwards
-    or tx_hash = 0x6C43B1A12293D014CEC6F77078D7947A85AFD849F159356E56E8FC336CDB6A7C
+    or tx_hash = 0xf7a16b761cb5b09f68350607675af07ce48dc772d4ff1c6e9eda5e4e3f62a139
+    or tx_hash = 0xd5295f40e2685c5fd4de432c2d377f9d5e71877c187fae5d0fc44a5ed66fc142 -- involving token that basically couldn't trade afterwards
+    or tx_hash = 0x6c43b1a12293d014cec6f77078d7947a85afd849f159356e56e8fc336cdb6a7c
 
     -- for week of Dec 31, 2024 - Jan 7, 2025
     or tx_hash = 0xd1ca15a5921781979d4a156da233668940d580cf5e04a721f874aeae7c4748e4
 
     -- for week of Jan 7 - Jan 14, 2025
-    or tx_hash = 0x132BDC1984EA83665DD590FA5C98C82752426EA060E32CA2151E38643C6EFBD6
-    or tx_hash = 0xBBFFB1584A20BDFF8ABFABFD66C773EE3BEF16E7BF9549FFDFA88781BAE347EB
+    or tx_hash = 0x132bdc1984ea83665dd590fa5c98c82752426ea060e32ca2151e38643c6efbd6
+    or tx_hash = 0xbbffb1584a20bdff8abfabfd66c773ee3bef16e7bf9549ffdfa88781bae347eb
 
     -- for week of Jan 14 - Jan 21, 2025 on mainnet
-    or tx_hash = 0x8254AE2FC56214657139B0A1E934D00937019BD8B6F873641A34F1EDBE0FBC91
-    or tx_hash = 0xA8C8F763A7039FD76ADA9067C5868A2A249C1B00C1B30533DFF73B08DDF309D7
-    or tx_hash = 0xBD232581323F79D6A5E31D3F42209B3769E1CBA010469948FB7D3D3F0E5C8060
-    or tx_hash = 0xA9813D70A87C609F76111FC74C52D820D2FFF2BA68F179C0A339387034555EF8
+    or tx_hash = 0x8254ae2fc56214657139b0a1e934d00937019bd8b6f873641a34f1edbe0fbc91
+    or tx_hash = 0xa8c8f763a7039fd76ada9067c5868a2a249c1b00c1b30533dff73b08ddf309d7
+    or tx_hash = 0xbd232581323f79d6a5e31d3f42209b3769e1cba010469948fb7d3d3f0e5c8060
+    or tx_hash = 0xa9813d70a87c609f76111fc74c52d820d2fff2ba68f179c0a339387034555ef8
 
     -- for week of Jan 21 - Jan 28, 2025 on mainnet
-    or tx_hash = 0xB99EA4B15A54EE68D02D695C5CDD1F60CB33D2F2D50DA5BCA277C8ADAE108208
+    or tx_hash = 0xb99ea4b15a54ee68d02d695c5cdd1f60cb33d2f2d50da5bca277c8adae108208
     or tx_hash = 0x74e730407d3061e60527629123c1e7b43e3e73b4ba4232bd077c7109ac5e8325
     or tx_hash = 0x08afb56d779bc2034bfcc78a1d470cc82c8c55c4394fda3875d426de869f8ca2
 
     -- for week of Feb 4 - Feb 11, 2025 on mainnet
     or tx_hash = 0xf5a574a1bac9d5ffabeb9c959af3018a41b1570cbf4a0ddf84e9ddda83dac6df
-    or tx_hash = 0x069B2C966D9C95119983EA51995D642F320AE3B8252EE9AF643AFEB6D7CA3D69
-    or tx_hash = 0x588397A4C1D4671E65A3D8355F3E7C9CE2DC6D6013E06BB3332C3357EE284BA8
-    or tx_hash = 0xCA7672EF67787948743F5D2C6C56DB8946488BFEFD0566F9F91A7F91F66EF2A3
-    or tx_hash = 0x1082AD668F906AC04231296C427BF57E6589E3A907F3F876752413FC3B98420D
+    or tx_hash = 0x069b2c966d9c95119983ea51995d642f320ae3b8252ee9af643afeb6d7ca3d69
+    or tx_hash = 0x588397a4c1d4671e65a3d8355f3e7c9ce2dc6d6013e06bb3332c3357ee284ba8
+    or tx_hash = 0xca7672ef67787948743f5d2c6c56db8946488bfefd0566f9f91a7f91f66ef2a3
+    or tx_hash = 0x1082ad668f906ac04231296c427bf57e6589e3a907f3f876752413fc3b98420d
 
     -- for week of Feb 11 - Feb 18, 2025 on mainnet
-    or tx_hash = 0x33955F26DCFA23CF4C20C0ECA1C914C140C01397C0E521ADF494B71F871B9F7F
-    or tx_hash = 0x50D5F477B7F62BF2F4CB258E9D5AC375033DF56F4C0CC07DE4E9C585D90AA390
+    or tx_hash = 0x33955f26dcfa23cf4c20c0eca1c914c140c01397c0e521adf494b71f871b9f7f
+    or tx_hash = 0x50d5f477b7f62bf2f4cb258e9d5ac375033df56f4c0cc07de4e9c585d90aa390
 
     -- for week of Feb 25 - March 4, 2025 on mainnet
-    or tx_hash = 0x34AD176862C6D51BDD8232B67BF4C689CF0707CEC18E17E9731017A1F3823F6A
+    or tx_hash = 0x34ad176862c6d51bdd8232b67bf4c689cf0707cec18e17e9731017a1f3823f6a
 
     -- for week of March 4 - March 11, 2025 on mainnet
-    or tx_hash = 0x1F14B47CCA77FBA18F6AD87372C9F942617FAF9C787622BBD8F56D187EF069FA
+    or tx_hash = 0x1f14b47cca77fba18f6ad87372c9f942617faf9c787622bbd8f56d187ef069fa
 
     -- for week of April 15 - April 22, 2025 on mainnet
     or tx_hash = 0x91f810f43903c11b99ccb6b4deeda464261b655b0bd546ef4edbcfdd6bad5ddd
@@ -228,21 +229,24 @@ where
     or tx_hash = 0x939879ff06f5c9e94d3e27f3b78cbcbb8eae72782a5fdcac831c743e2a5492e1
 
     -- for the week of June 24 - June 30, 2025 on mainnet
-    or tx_hash = 0xC60E65F001E2CEDE1A2399FBF40E049B7F7BD57D8A982DE66EF4E44C23967589
+    or tx_hash = 0xc60e65f001e2cede1a2399fbf40e049b7f7bd57d8a982de66ef4e44c23967589
 
     -- for the week of July 1 - July 8, 2025 on mainnet
-    or tx_hash = 0x46CBD1134448F5721CB6D28372DB0FF4676E5EC1855B843ABF6059CF7B244BE9
-    or tx_hash = 0xA91FA23E7F971AA883E3CE52C6B555C6CC687A736CFA2D3F3AD5EA9088C373AA
+    or tx_hash = 0x46cbd1134448f5721cb6d28372db0ff4676e5ec1855b843abf6059cf7b244be9
+    or tx_hash = 0xa91fa23e7f971aa883e3ce52c6b555c6cc687a736cfa2d3f3ad5ea9088c373aa
 
     -- for the week of July 8 - July 15, 2025 on mainnet
-    or tx_hash = 0xDC12EFA6448ABA96BA49D444C1F9D950A846421771007B2089332B7B5580EB22
-    or tx_hash = 0xC045588E98E1F3B7A8DC333327A62C52A6B251AE9D6B27E7ABD07EDF3A34D0BE
-    or tx_hash = 0x235226999DA35CEF46825156EB6B27EEC3101A759C867907F931528B8B6F1EBD
-    or tx_hash = 0x9305CB182849223F18422F1B469FA14CADE009F8427B2F409A16EF6B968AD8A0
+    or tx_hash = 0xdc12efa6448aba96ba49d444c1f9d950a846421771007b2089332b7b5580eb22
+    or tx_hash = 0xc045588e98e1f3b7a8dc333327a62c52a6b251ae9d6b27e7abd07edf3a34d0be
+    or tx_hash = 0x235226999da35cef46825156eb6b27eec3101a759c867907f931528b8b6f1ebd
+    or tx_hash = 0x9305cb182849223f18422f1b469fa14cade009f8427b2f409a16ef6b968ad8a0
 
     -- for the week of July 15 - July 22, 2025 on mainnet
-    or tx_hash = 0x71AEA9D790FAE3539CD45D0A01D3B8651C5A4C5CEAAADF1E224F7A2C86F2794A
-    or tx_hash = 0x2F7B5C5942103F781C57022816B74F19069CF8546F26373E6CC227972DA75D48
+    or tx_hash = 0x71aea9d790fae3539cd45d0a01d3b8651c5a4c5ceaaadf1e224f7a2c86f2794a
+    or tx_hash = 0x2f7b5c5942103f781c57022816b74f19069cf8546f26373e6cc227972da75d48
+
+    -- for the week of August 29 - Sept 2, 2025 on mainnet
+    or tx_hash = 0x5c550c99a39a7315a699d6e5c6592038f26f7d93b787cf63312e38a72df17e2a
 
 -- Base
 union all
@@ -252,13 +256,13 @@ from
 where
     -- for week of Jan 14 - Jan 21, 2025 on Base
     tx_hash = 0x64eddc682e60f965378af9ebfa4095b07cfababd2e16289eb7a309c7c4e57969
-    or tx_hash = 0x6E2966F68E44533E91AFE81311E0CD6FE0866DC8C9328B7BB2FE9B3F6813A6D7
-    or tx_hash = 0x7F50F5CB2893D688D695C391DAFC60B6A22EB76670E6C699104D979A1FFC2B20
-    or tx_hash = 0xADEA382EDEF5E7B99C80A27B8B67ABEA8BA513AD15BA7681D0C5A7D1FF01B0DF
-    or tx_hash = 0xDCA910D167B67FD94DF3328E6DD065E1FC6DE277013AF4826B8C35EB5F5A13B4
+    or tx_hash = 0x6e2966f68e44533e91afe81311e0cd6fe0866dc8c9328b7bb2fe9b3f6813a6d7
+    or tx_hash = 0x7f50f5cb2893d688d695c391dafc60b6a22eb76670e6c699104d979a1ffc2b20
+    or tx_hash = 0xadea382edef5e7b99c80a27b8b67abea8ba513ad15ba7681d0c5a7d1ff01b0df
+    or tx_hash = 0xdca910d167b67fd94df3328e6dd065e1fc6de277013af4826b8c35eb5f5a13b4
 
     -- for week of Feb 11 - Feb 18, 2025 on Base
-    or tx_hash = 0xFF82DE50012062CE5672C086CCAF2B6B5B13B8440736720B1BBA83454034C697
+    or tx_hash = 0xff82de50012062ce5672c086ccaf2b6b5b13b8440736720b1bba83454034c697
 
     -- for week of March 18 - March 25, 2025 on Base
     or 0x22af33fe49fd1fa80c7149773dde5890d3c76f3b in (buy_token_address) -- exclude BNKR
