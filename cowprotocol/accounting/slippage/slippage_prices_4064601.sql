@@ -116,10 +116,14 @@ prices as (
         decimals,
         case
             when '{{blockchain}}' = 'base' and token_address = 0x22af33fe49fd1fa80c7149773dde5890d3c76f3b and hour >= timestamp '2025-03-04 00:00' and hour <= timestamp '2025-03-11 00:00' then 0.00029585
+            when '{{blockchain}}' = 'ethereum' and token_address = 0x4d5f47fa6a74757f35c14fd3a6ef8e3c9bc514e8 and hour >= timestamp '2025-08-31 03:00' and hour <= timestamp '2025-08-31 04:00' then 4459.365
+            when '{{blockchain}}' = 'ethereum' and token_address = 0x0b925ed163218f6662a35e0f0371ac234f9e9371 and hour >= timestamp '2025-08-29 19:00' and hour <= timestamp '2025-08-29 20:00' then 5254.7182
             else price_unit
         end as price_unit,
         case
             when '{{blockchain}}' = 'base' and token_address = 0x22af33fe49fd1fa80c7149773dde5890d3c76f3b and hour >= timestamp '2025-03-04 00:00' and hour <= timestamp '2025-03-11 00:00' then 0.00029585 / pow(10, 18)
+            when '{{blockchain}}' = 'ethereum' and token_address = 0x4d5f47fa6a74757f35c14fd3a6ef8e3c9bc514e8 and hour >= timestamp '2025-08-31 03:00' and hour <= timestamp '2025-08-31 04:00' then 4459.365 / pow(10, 18)
+            when '{{blockchain}}' = 'ethereum' and token_address = 0x0b925ed163218f6662a35e0f0371ac234f9e9371 and hour >= timestamp '2025-08-29 19:00' and hour <= timestamp '2025-08-29 20:00' then 5254.7182
             else price_atom
         end as price_atom
     from prices_pre
