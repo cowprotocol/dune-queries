@@ -1,4 +1,6 @@
 -- Exclude the following txs/trades from slippage accounting due to wrong Dune prices
+
+-- noqa: CP02
 select distinct tx_hash
 from
     cow_protocol_ethereum.trades
