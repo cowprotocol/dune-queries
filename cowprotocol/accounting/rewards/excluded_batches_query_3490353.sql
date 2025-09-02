@@ -244,6 +244,9 @@ where
     or tx_hash = 0x71AEA9D790FAE3539CD45D0A01D3B8651C5A4C5CEAAADF1E224F7A2C86F2794A
     or tx_hash = 0x2F7B5C5942103F781C57022816B74F19069CF8546F26373E6CC227972DA75D48
 
+    -- for the week of August 29 - Sept 2, 2025 on mainnet
+    or tx_hash = 0x5c550c99a39a7315a699d6e5c6592038f26f7d93b787cf63312e38a72df17e2a
+
 -- Base
 union all
 select distinct tx_hash
