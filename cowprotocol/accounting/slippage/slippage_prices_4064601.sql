@@ -37,9 +37,9 @@ precise_prices as (
         prices.usd
     inner join token_times
         on
-            date_trunc('hour', minute) = hour
-            and contract_address = token_address
-            and blockchain = '{{blockchain}}'
+        date_trunc('hour', minute) = hour
+        and contract_address = token_address
+        and blockchain = '{{blockchain}}'
     group by 1, 2, 3
 ),
 
@@ -101,12 +101,12 @@ prices_pre as (
     from token_times as tt
     left join precise_prices as precise
         on
-            tt.hour = precise.hour
-            and tt.token_address = precise.token_address
+        tt.hour = precise.hour
+        and tt.token_address = precise.token_address
     left join intrinsic_prices as intrinsic
         on
-            tt.hour = intrinsic.hour
-            and tt.token_address = intrinsic.token_address
+        tt.hour = intrinsic.hour
+        and tt.token_address = intrinsic.token_address
 ),
 
 prices as (
