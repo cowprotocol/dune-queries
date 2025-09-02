@@ -119,7 +119,7 @@ prices as (
             when '{{blockchain}}' = 'ethereum' and token_address = 0x4d5f47fa6a74757f35c14fd3a6ef8e3c9bc514e8 and hour >= timestamp '2025-08-31 03:00' and hour <= timestamp '2025-08-31 04:00' then 4459.365
             when '{{blockchain}}' = 'ethereum' and token_address = 0x23878914efe38d27c4d67ab83ed1b93a74d4086a and hour >= timestamp '2025-08-31 03:00' and hour <= timestamp '2025-08-31 04:00' then 0.9983
             when '{{blockchain}}' = 'ethereum' and token_address = 0x0b925ed163218f6662a35e0f0371ac234f9e9371 and hour >= timestamp '2025-08-29 19:00' and hour <= timestamp '2025-08-29 20:00' then 5254.7182
-            when '{{blockchain}}' = 'ethereum' and token_address = 0x23878914efe38d27c4d67ab83ed1b93a74d4086a and hour >= timestamp '2025-08-29 19:00' and hour <= timestamp '2025-08-29 20:00' then 5254.7182
+            when '{{blockchain}}' = 'ethereum' and token_address = 0x23878914efe38d27c4d67ab83ed1b93a74d4086a and hour >= timestamp '2025-08-29 19:00' and hour <= timestamp '2025-08-29 20:00' then 0.9983
             else price_unit
         end as price_unit,
         case
