@@ -46,13 +46,36 @@ per_trade_protocol_fees as (
         t.block_time desc
 ),
 
-per_trade_partner_fees as (
+per_trade_partner_fees_prelim as (
     select *
     from
         per_trade_protocol_fees
     where
         raw_integrator_fee_in_eth > 0
 ),
+
+per_trade_partner_fees as (
+    select
+        block_time,
+        block_number,
+        order_uid,
+        tx_hash,
+        case
+            when partner_recipient = 0x63695eee2c3141bde314c5a6f89b98e62808d716 and app_code != 'CoW Swap-SafeApp' and block_time >= cast('2025-08-26 00:00:00' as timestamp) then 0xe344241493d573428076c022835856a221db3e26
+            else partner_recipient
+        end as partner_recipient,  -- noqa: RF01
+        usd_value,
+        protocol_fee,  -- noqa: RF01
+        protocol_fee_token,  -- noqa: RF01
+        partner_bps,
+        widget_app_code,
+        app_code,
+        est_partner_revenue,  
+        est_cow_revenue  
+        raw_integrator_fee_in_eth
+    from per_trade_partner_fees_prelim
+),
+
 
 per_recipient_partner_fees_prelim as (
     select
