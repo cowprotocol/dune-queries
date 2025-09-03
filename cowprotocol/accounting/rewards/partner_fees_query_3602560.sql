@@ -71,7 +71,7 @@ per_trade_partner_fees as (
         widget_app_code,
         app_code,
         est_partner_revenue,  
-        est_cow_revenue  
+        est_cow_revenue,
         raw_integrator_fee_in_eth
     from per_trade_partner_fees_prelim
 ),
