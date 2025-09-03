@@ -245,8 +245,9 @@ where
     or tx_hash = 0x71aea9d790fae3539cd45d0a01d3b8651c5a4c5ceaaadf1e224f7a2c86f2794a
     or tx_hash = 0x2f7b5c5942103f781c57022816b74f19069cf8546f26373e6cc227972da75d48
 
-    -- for the week of August 29 - Sept 2, 2025 on mainnet
+    -- for the week of August 26 - Sept 2, 2025 on mainnet
     or tx_hash = 0x5c550c99a39a7315a699d6e5c6592038f26f7d93b787cf63312e38a72df17e2a
+    or tx_hash = 0xbd68462f2d22340ed4e2818b0fac68f9ab78afe07e9ed6e73f72cbde0c40735f
 
 -- Base
 union all
