@@ -5,37 +5,37 @@
 with cow_amms as (
     select
         'ethereum' as blockchain, t.*
-    from "query_4420687(blockchain = 'ethereum', start = '2024-07-29', end = '2100-01-01')" as t
+    from "query_4420687(blockchain = 'ethereum', start = '2024-07-29 00:00:00', end = '2100-01-01 00:00:00')" as t
     union all
     select
         'gnosis' as blockchain, t.*
-    from "query_4420687(blockchain = 'gnosis', start = '2024-07-29', end = '2100-01-01')" as t
+    from "query_4420687(blockchain = 'gnosis', start = '2024-07-29 00:00:00', end = '2100-01-01 00:00:00')" as t
     union all
     select
         'arbitrum' as blockchain, t.*
-    from "query_4420687(blockchain = 'arbitrum', start = '2024-07-29', end = '2100-01-01')" as t
+    from "query_4420687(blockchain = 'arbitrum', start = '2024-07-29 00:00:00', end = '2100-01-01 00:00:00')" as t
     union all
     select
         'base' as blockchain, t.*
-    from "query_4420687(blockchain = 'base', start = '2024-07-29', end = '2100-01-01')" as t
+    from "query_4420687(blockchain = 'base', start = '2024-07-29 00:00:00', end = '2100-01-01 00:00:00')" as t
 ),
 
 uni_style_pools as (
     select
         'ethereum' as blockchain, t.*
-    from "query_4420675(blockchain = 'ethereum', start = '2024-07-29', end = '2100-01-01')" as t
+    from "query_4420675(blockchain = 'ethereum', start = '2024-07-29 00:00:00', end = '2100-01-01 00:00:00')" as t
     union all
     select
         'gnosis' as blockchain, t.*
-    from "query_4420675(blockchain = 'gnosis', start = '2024-07-29', end = '2100-01-01')" as t
+    from "query_4420675(blockchain = 'gnosis', start = '2024-07-29 00:00:00', end = '2100-01-01 00:00:00')" as t
     union all
     select
         'arbitrum' as blockchain, t.*
-    from "query_4420675(blockchain = 'arbitrum', start = '2024-07-29', end = '2100-01-01')" as t
+    from "query_4420675(blockchain = 'arbitrum', start = '2024-07-29 00:00:00', end = '2100-01-01 00:00:00')" as t
     union all
     select
         'base' as blockchain, t.*
-    from "query_4420675(blockchain = 'base', start = '2024-07-29', end = '2100-01-01')" as t
+    from "query_4420675(blockchain = 'base', start = '2024-07-29 00:00:00', end = '2100-01-01 00:00:00')" as t
 )
 
 select
