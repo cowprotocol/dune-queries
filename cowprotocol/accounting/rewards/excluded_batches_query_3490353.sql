@@ -249,6 +249,14 @@ where
     or tx_hash = 0x5c550c99a39a7315a699d6e5c6592038f26f7d93b787cf63312e38a72df17e2a
     or tx_hash = 0xbd68462f2d22340ed4e2818b0fac68f9ab78afe07e9ed6e73f72cbde0c40735f
 
+    -- for the week of Sep 2 - Sep 9, 2025 on mainnet
+    -- contains some weird transfer from the vault relayer and the token is not there anymore while no transfers can be detected
+    or tx_hash = 0x8625c78713352b9bc1c5583d1f0fa25e0122bd7a2be0800f5d5af6fcf626d461
+    -- price of imbalance is near zero now
+    or tx_hash = 0xa9069cad6ecc62006f8abfacb7fb0919466682e054e59d14ae9876ca34fbaba1
+    -- wrong LUNA price
+    or tx_hash = 0x05515bfee30868311615c251eff71c1246dacca23fde35f665369d0ae50e03c1
+
 -- Base
 union all
 select distinct tx_hash
