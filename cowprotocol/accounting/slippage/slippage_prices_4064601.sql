@@ -46,6 +46,7 @@ aave_tokens_mapping as (
 ),
 
 token_times_enriched as (
+    -- All tokens are associated with a proxy address which is used for finding a price feed instead of the original contract address
     select
         tt.token_address,
         coalesce(atm.underlying_address, tt.token_address) as proxy_address,
