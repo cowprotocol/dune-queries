@@ -56,15 +56,15 @@ token_times_enriched as (
 
 -- Precise prices are prices from the Dune price feed.
 precise_prices as (
-    select -- noqa: ST06
-        date_trunc('hour', p.minute) as hour, --noqa: RF04
+    select
+        tte.hour,
         tte.token_address,
         p.decimals,
         avg(p.price) as price_unit,
         avg(p.price) / pow(10, p.decimals) as price_atom
     from token_times_enriched as tte inner join prices.usd as p
         on
-        date_trunc('hour', p.minute) = tte.hour
+        tte.hour = date_trunc('hour', p.minute)
         and p.contract_address = tte.proxy_address
         and p.blockchain = '{{blockchain}}'
     group by 1, 2, 3
