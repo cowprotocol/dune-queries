@@ -51,8 +51,7 @@ token_times_enriched as (
         coalesce(atm.underlying_address, tt.token_address) as proxy_address,
         tt.hour
     from token_times as tt left join aave_tokens_mapping as atm
-        on tt.token_address = atm.atoken_address
-    where atm.blockchain = '{{blockchain}}'
+        on tt.token_address = atm.atoken_address and atm.blockchain = '{{blockchain}}'
 ),
 
 -- Precise prices are prices from the Dune price feed.
