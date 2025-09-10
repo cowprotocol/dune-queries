@@ -25,21 +25,49 @@ with token_times as (
     group by 1, 2
 ),
 
+aave_tokens_mapping as (
+    select distinct
+        chain as blockchain,
+        atoken as atoken_address,
+        asset as underlying_address
+    from aave_v3_multichain.poolconfigurator_evt_reserveinitialized
+    union distinct
+    select distinct
+        'ethereum' as blockchain,
+        atoken as atoken_address,
+        asset as underlying_address
+    from aave_v3_lido_ethereum.poolconfigurator_evt_reserveinitialized
+    union distinct
+    select distinct
+        'ethereum' as blockchain,
+        atoken as atoken_address,
+        asset as underlying_address
+    from aave_v3_ethereum.etherfipoolconfiguratorinstance_evt_reserveinitialized
+),
+
+token_times_enriched as (
+    -- All tokens are associated with a proxy address which is used for finding a price feed instead of the original contract address
+    select
+        tt.token_address,
+        coalesce(atm.underlying_address, tt.token_address) as proxy_address,
+        tt.hour
+    from token_times as tt left join aave_tokens_mapping as atm
+        on tt.token_address = atm.atoken_address and atm.blockchain = '{{blockchain}}'
+),
+
 -- Precise prices are prices from the Dune price feed.
 precise_prices as (
-    select -- noqa: ST06
-        date_trunc('hour', minute) as hour, --noqa: RF04
-        token_address,
-        decimals,
-        avg(price) as price_unit,
-        avg(price) / pow(10, decimals) as price_atom
-    from
-        prices.usd
-    inner join token_times
+    select
+        tte.hour,
+        tte.token_address,
+        p.decimals,
+        avg(p.price) as price_unit,
+        avg(p.price) / pow(10, p.decimals) as price_atom
+    from token_times_enriched as tte inner join prices.usd as p
         on
-        date_trunc('hour', minute) = hour
-        and contract_address = token_address
-        and blockchain = '{{blockchain}}'
+        tte.hour = date_trunc('hour', p.minute)
+        and p.contract_address = tte.proxy_address
+        and p.blockchain = '{{blockchain}}'
     group by 1, 2, 3
 ),
 
