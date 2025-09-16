@@ -257,6 +257,13 @@ where
     -- wrong LUNA price
     or tx_hash = 0x05515bfee30868311615c251eff71c1246dacca23fde35f665369d0ae50e03c1
 
+    -- for the week of Sep 9 - Sep 16, 2025 on mainnet
+    -- contains some weird transfer from the vault relayer
+    or tx_hash = 0x149c90ed4aa005a8aefc4b8bb85bfeaf31f35151989953a7cac3187ae8e9cb2d
+    or tx_hash = 0xc3e9ab2accbc9ba20868a55df63374b81edc8d3e92b9528d61085792267f744b
+    or tx_hash = 0xf15e37449c1492b18088e42608a281430a8ad45feba5a7763c8e587582ac1dd9
+    
+
 -- Base
 union all
 select distinct tx_hash
