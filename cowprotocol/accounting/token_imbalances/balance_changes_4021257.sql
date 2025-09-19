@@ -53,7 +53,7 @@ native_transfers as (
     where
         block_time >= cast('{{start_time}}' as timestamp)
         and block_time < cast('{{end_time}}' as timestamp)
-        and value > cast(0 as uint256)
+        and value > cast(0 as uint256) --noqa: PRS
         and success = true
         and 0x9008d19f58aabd9ed0d60971565aa8510560ab41 in (to, "from")
 ),
