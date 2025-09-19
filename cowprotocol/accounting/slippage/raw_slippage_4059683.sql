@@ -88,17 +88,16 @@ prices as (
 
 raw_slippage_breakdown as (
     select -- noqa: ST06
-        block_time,
-        tx_hash,
+        i.block_time,
+        i.tx_hash,
         i.token_address,
-        amount as slippage_atoms,
-        slippage_type,
+        i.amount as slippage_atoms,
+        i.slippage_type,
         p.price_unit,
         p.price_atom,
-        amount * p.price_atom as slippage_usd,
-        cast((amount * p.price_atom / np.price_atom) as int256) as slippage_wei
-    from
-        corrected_imbalances as i
+        i.amount * p.price_atom as slippage_usd,
+        cast((i.amount * p.price_atom / np.price_atom) as int256) as slippage_wei --noqa: PRS, LT02
+    from corrected_imbalances as i
     left join prices as p
         on
         i.token_address = p.token_address
