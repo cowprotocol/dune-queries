@@ -5,8 +5,7 @@
 --  {{blockchain}} - network the query is run on
 --  {{vouch_cte_name}} - valid_vouches for the vouches only or named_results for additional information on solver and pool name
 
-with
-last_block_before_timestamp as (
+with last_block_before_timestamp as (
     select end_block from "query_3333356(blockchain='{{blockchain}}',start_time='2018-01-01 00:00:00',end_time='{{end_time}}')"
 ),
 
@@ -16,11 +15,11 @@ full_bonding_pools as (
         pool_name,
         case
             when pool_name ='Gnosis DAO' and '{{blockchain}}' = 'lens' then 0x010af2e55f0539282c2601915c98a5cd276862aa
-            when pool_name = 'CoW DAO' and '{{blockchain}}' = 'lens' then 0xe1Ab179644b841e22BF036E467A3C64882a1b7c6
+            when pool_name = 'CoW DAO' and '{{blockchain}}' = 'lens' then 0xe1ab179644b841e22bf036e467a3c64882a1b7c6
             else creator
         end as creator
     from query_4056263
-)
+),
 
 -- Query Logic Begins here!
 vouches as (
