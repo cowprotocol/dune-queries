@@ -393,13 +393,13 @@ wgho_deposits_withdrawals_lens as (
         wad as amount
     from wgho_all_deposits_withdrawals_lens
     where
-        evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
+        block_time >= cast('{{start_time}}' as timestamp) and block_time < cast('{{end_time}}' as timestamp) -- partition column
         and topic0 = 0x7fcf532c15f0a6db0bd6d0e038bea71d30d808c7d98cb3bf7268a95bf5081b65 
         and src_dst_address = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
 ),
 
 special_balance_changes_lens as ( -- noqa: ST03
-    select * from wpol_deposits_withdrawals_lens
+    select * from wgho_deposits_withdrawals_lens
 )
 
 
