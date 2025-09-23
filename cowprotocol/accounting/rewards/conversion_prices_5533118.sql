@@ -27,6 +27,7 @@ native_token_prices as (
         or blockchain = 'base' and contract_address = 0x4200000000000000000000000000000000000006
         or blockchain = 'avalanche_c' and contract_address = 0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7
         or blockchain = 'polygon' and contract_address = 0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270
+        or blockchain = 'lens' and contract_address = 0x6bdc36e20d267ff0dd6097799f82e78907105e2f
     )
     group by 1, 2, 3
 )

@@ -37,7 +37,7 @@ with erc20_transfers as (
     from erc20_{{blockchain}}.evt_transfer
     where
         evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
-        and 0x9008D19f58AAbD9eD0D60971565AA8510560ab41 in ("from", to)
+        and 0x9008d19f58aabd9ed0d60971565aa8510560ab41 in ("from", to)
 ),
 
 -- 1.2) all native token transfers
@@ -51,8 +51,9 @@ native_transfers as (
         value as amount
     from {{blockchain}}.traces
     where
-        block_time >= cast('{{start_time}}' as timestamp) and block_time < cast('{{end_time}}' as timestamp) -- partition column
-        and value > cast(0 as uint256)
+        block_time >= cast('{{start_time}}' as timestamp)
+        and block_time < cast('{{end_time}}' as timestamp)
+        and value > cast(0 as uint256) --noqa: PRS, LT02
         and success = true
         and 0x9008d19f58aabd9ed0d60971565aa8510560ab41 in (to, "from")
 ),
@@ -74,7 +75,7 @@ weth_deposits_withdrawals_ethereum as (
         0x0000000000000000000000000000000000000000 as sender,
         0x9008d19f58aabd9ed0d60971565aa8510560ab41 as receiver,
         wad as amount
-    from zeroex_ethereum.WETH9_evt_Deposit
+    from zeroex_ethereum.WETH9_evt_Deposit --noqa: CP02
     where
         evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and dst = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
@@ -87,7 +88,7 @@ weth_deposits_withdrawals_ethereum as (
         0x9008d19f58aabd9ed0d60971565aa8510560ab41 as sender,
         0x0000000000000000000000000000000000000000 as receiver,
         wad as amount
-    from zeroex_ethereum.WETH9_evt_Withdrawal
+    from zeroex_ethereum.WETH9_evt_Withdrawal  --noqa: CP02
     where
         evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and src = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
@@ -103,7 +104,7 @@ sdai_deposits_withdraws_ethereum as (
         0x0000000000000000000000000000000000000000 as sender,
         0x9008d19f58aabd9ed0d60971565aa8510560ab41 as receiver,
         shares as amount
-    from maker_ethereum.SavingsDai_evt_Deposit
+    from maker_ethereum.SavingsDai_evt_Deposit  --noqa: CP02
     where
         evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and owner = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
@@ -116,7 +117,7 @@ sdai_deposits_withdraws_ethereum as (
         0x9008d19f58aabd9ed0d60971565aa8510560ab41 as sender,
         0x0000000000000000000000000000000000000000 as receiver,
         shares as amount
-    from maker_ethereum.SavingsDai_evt_Withdraw
+    from maker_ethereum.SavingsDai_evt_Withdraw  --noqa: CP02
     where
         evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and owner = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
@@ -132,7 +133,7 @@ mkr_mint_burn_ethereum as (
         0x0000000000000000000000000000000000000000 as sender,
         0x9008d19f58aabd9ed0d60971565aa8510560ab41 as receiver,
         wad as amount
-    from maker_ethereum.mkr_evt_Mint
+    from maker_ethereum.mkr_evt_Mint  --noqa: CP02
     where
         evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and guy = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
@@ -145,7 +146,7 @@ mkr_mint_burn_ethereum as (
         0x9008d19f58aabd9ed0d60971565aa8510560ab41 as sender,
         0x0000000000000000000000000000000000000000 as receiver,
         wad as amount
-    from maker_ethereum.mkr_evt_Burn
+    from maker_ethereum.mkr_evt_Burn  --noqa: CP02
     where
         evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and guy = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
@@ -173,7 +174,7 @@ wxdai_deposits_withdrawals_gnosis as (
         0x0000000000000000000000000000000000000000 as sender,
         0x9008d19f58aabd9ed0d60971565aa8510560ab41 as receiver,
         wad as amount
-    from wxdai_gnosis.WXDAI_evt_Deposit
+    from wxdai_gnosis.WXDAI_evt_Deposit  --noqa: CP02
     where
         evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and dst = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
@@ -186,7 +187,7 @@ wxdai_deposits_withdrawals_gnosis as (
         0x9008d19f58aabd9ed0d60971565aa8510560ab41 as sender,
         0x0000000000000000000000000000000000000000 as receiver,
         wad as amount
-    from wxdai_gnosis.WXDAI_evt_Withdrawal
+    from wxdai_gnosis.WXDAI_evt_Withdrawal  --noqa: CP02
     where
         evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and src = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
@@ -210,7 +211,7 @@ weth_deposits_withdrawals_arbitrum as (
         0x0000000000000000000000000000000000000000 as sender,
         0x9008d19f58aabd9ed0d60971565aa8510560ab41 as receiver,
         wad as amount
-    from mindgames_weth_arbitrum.WETH9_evt_Deposit
+    from mindgames_weth_arbitrum.WETH9_evt_Deposit  --noqa: CP02
     where
         evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and dst = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
@@ -223,7 +224,7 @@ weth_deposits_withdrawals_arbitrum as (
         0x9008d19f58aabd9ed0d60971565aa8510560ab41 as sender,
         0x0000000000000000000000000000000000000000 as receiver,
         wad as amount
-    from mindgames_weth_arbitrum.WETH9_evt_Withdrawal
+    from mindgames_weth_arbitrum.WETH9_evt_Withdrawal  --noqa: CP02
     where
         evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and src = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
@@ -247,7 +248,7 @@ weth_deposits_withdrawals_base as (
         0x0000000000000000000000000000000000000000 as sender,
         0x9008d19f58aabd9ed0d60971565aa8510560ab41 as receiver,
         wad as amount
-    from weth_base.WETH9_evt_Deposit
+    from weth_base.WETH9_evt_Deposit  --noqa: CP02
     where
         evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and dst = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
@@ -260,7 +261,7 @@ weth_deposits_withdrawals_base as (
         0x9008d19f58aabd9ed0d60971565aa8510560ab41 as sender,
         0x0000000000000000000000000000000000000000 as receiver,
         wad as amount
-    from weth_base.WETH9_evt_Withdrawal
+    from weth_base.WETH9_evt_Withdrawal  --noqa: CP02
     where
         evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and src = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
@@ -342,7 +343,65 @@ wpol_deposits_withdrawals_polygon as (
 
 special_balance_changes_polygon as ( -- noqa: ST03
     select * from wpol_deposits_withdrawals_polygon
+),
+
+-- 2.7) lens
+-- special treatment of
+-- 2.7.1) WGHO
+
+-- 2.7.1) all deposit and withdrawal events for WGHO
+wgho_all_deposits_withdrawals_lens as (
+-- WGHO deposits & withdrawals on Lens
+    select
+        block_time,
+        block_number,
+        tx_hash,
+        contract_address,
+        topic0,
+        cast(lower('0x' || substr(cast(topic1 as varchar), 27)) as varbinary) as src_dst_address, -- indexed address (dst for Deposit, src for Withdrawal)
+        varbinary_to_uint256(data) as wad
+    from lens.logs
+    where contract_address = 0x6bdc36e20d267ff0dd6097799f82e78907105e2f and (
+        topic0 = 0xe1fffcc4923d04b559f4d29a8bfc6cda04eb5b0d3c460751c2402c5c5cc9109c -- Deposit(address,uint256)
+        or
+        topic0 = 0x7fcf532c15f0a6db0bd6d0e038bea71d30d808c7d98cb3bf7268a95bf5081b65  -- Withdrawal(address,uint256)
+    )
+),
+
+wgho_deposits_withdrawals_lens as (
+    -- deposits (contract deposits GHO to get WGHO)
+    select
+        block_time,
+        tx_hash,
+        contract_address as token_address,
+        0x0000000000000000000000000000000000000000 as sender,
+        0x9008d19f58aabd9ed0d60971565aa8510560ab41 as receiver,
+        wad as amount
+    from wgho_all_deposits_withdrawals_lens
+    where
+        block_time >= cast('{{start_time}}' as timestamp) and block_time < cast('{{end_time}}' as timestamp) -- partition column
+        and topic0 = 0xe1fffcc4923d04b559f4d29a8bfc6cda04eb5b0d3c460751c2402c5c5cc9109c
+        and src_dst_address = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
+    union all
+    -- withdrawals (contract withdraws GHO by returning WGHO)
+    select
+        block_time,
+        tx_hash,
+        contract_address as token_address,
+        0x9008d19f58aabd9ed0d60971565aa8510560ab41 as sender,
+        0x0000000000000000000000000000000000000000 as receiver,
+        wad as amount
+    from wgho_all_deposits_withdrawals_lens
+    where
+        evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
+        and topic0 = 0x7fcf532c15f0a6db0bd6d0e038bea71d30d808c7d98cb3bf7268a95bf5081b65 
+        and src_dst_address = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
+),
+
+special_balance_changes_lens as ( -- noqa: ST03
+    select * from wpol_deposits_withdrawals_lens
 )
+
 
 -- combine results
 select * from erc20_transfers

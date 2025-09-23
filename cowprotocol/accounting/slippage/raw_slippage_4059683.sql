@@ -66,10 +66,11 @@ settlement_contract_sells as (
     from cow_protocol_{{blockchain}}.trades
     where
         block_time >= timestamp '{{start_time}}' and block_time < timestamp '{{end_time}}'
-        and trader = 0x9008D19f58AAbD9eD0D60971565AA8510560ab41
+        and trader = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
         and receiver = case
             when '{{blockchain}}' in ('ethereum', 'gnosis', 'base', 'avalanche_c') then 0xa03be496e67ec29bc62f01a428683d7f9c204930
             when '{{blockchain}}' in ('arbitrum', 'polygon') then 0x66331f0b9cb30d38779c786bda5a3d57d12fba50
+            when '{{blockchain}}' = 'lens' then 0x798bb2d0ac591e34a4068e447782de05c27ed160
         end
 ),
 
@@ -87,25 +88,24 @@ prices as (
 
 raw_slippage_breakdown as (
     select -- noqa: ST06
-        block_time,
-        tx_hash,
+        i.block_time,
+        i.tx_hash,
         i.token_address,
-        amount as slippage_atoms,
-        slippage_type,
+        i.amount as slippage_atoms,
+        i.slippage_type,
         p.price_unit,
         p.price_atom,
-        amount * p.price_atom as slippage_usd,
-        cast(amount * p.price_atom / np.price_atom as int256) as slippage_wei
-    from
-        corrected_imbalances as i
+        i.amount * p.price_atom as slippage_usd,
+        cast((i.amount * p.price_atom / np.price_atom) as int256) as slippage_wei --noqa: PRS, LT02
+    from corrected_imbalances as i
     left join prices as p
         on
-            i.token_address = p.token_address
-            and i.hour = p.hour
+        i.token_address = p.token_address
+        and i.hour = p.hour
     left join prices as np
         on
-            i.hour = np.hour
-            and np.token_address = 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+        i.hour = np.hour
+        and np.token_address = 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 ),
 
 raw_slippage_breakdown_grouped as (

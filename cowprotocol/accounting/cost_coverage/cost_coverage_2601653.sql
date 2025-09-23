@@ -16,13 +16,14 @@ wrapped_native_token as (
             when 'base' then 0x4200000000000000000000000000000000000006 -- WETH
             when 'avalanche_c' then 0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7 -- WAVAX
             when 'polygon' then 0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270 -- WPOL
+            when 'lens' then 0x6bdc36e20d267ff0dd6097799f82e78907105e2f -- WGHO
         end as native_token_address
 ),
 
 cow_token_address as (
     select
         case '{{blockchain}}'
-            when 'ethereum' then 0xDEf1CA1fb7FBcDC777520aa7f396b4E015F497aB
+            when 'ethereum' then 0xdef1ca1fb7fbcdc777520aa7f396b4e015f497ab
             when 'gnosis' then 0x177127622c4a00f3d409b75571e12cb3c8973d3c
             when 'arbitrum' then 0xcb8b5cd20bdcaea9a010ac1f8d835824f5c87a04
             when 'base' then 0xc694a91e6b071bf030a18bd3053a7fe09b6dae69
@@ -38,6 +39,7 @@ rewards_safe as (
             when 'base' then 0xa03be496e67ec29bc62f01a428683d7f9c204930
             when 'avalanche_c' then 0xa03be496e67ec29bc62f01a428683d7f9c204930
             when 'polygon' then 0x66331f0b9cb30d38779c786bda5a3d57d12fba50
+            when 'lens' then 0x798bb2d0ac591e34a4068e447782de05c27ed160
         end as rewards_safe_address
 ),
 
@@ -51,7 +53,7 @@ purchased_native_token as (
             buy_token_address = (select native_token_address from wrapped_native_token)
             or buy_token_address = 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
         )
-        and trader in (0x84e5c8518c248de590d5302fd7c32d2ae6b0123c, 0x9008D19f58AAbD9eD0D60971565AA8510560ab41)
+        and trader in (0x84e5c8518c248de590d5302fd7c32d2ae6b0123c, 0x9008d19f58aabd9ed0d60971565aa8510560ab41)
         and receiver = (select rewards_safe_address from rewards_safe)
         and block_date between (timestamp '{{start_time}}' + interval '12' hour) and (timestamp '{{end_time}}' + interval '12' hour)
         -- fee withdrawals are currently executed daily at midnight UTC. However, the fee withdrawal at the end of an accounting period
@@ -65,7 +67,7 @@ transferred_native_token as (
     select
         evt_block_time as block_time,
         sum(value / 1e18) as fees
-    from erc20_{{blockchain}}.evt_Transfer
+    from erc20_{{blockchain}}.evt_transfer
     where
         "from" = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
         and to = (select rewards_safe_address from rewards_safe)
@@ -104,7 +106,7 @@ outgoing_native_token as (
 
 outgoing_cow as (
     select sum(value) / 1e18 as cow
-    from erc20_{{blockchain}}.evt_Transfer
+    from erc20_{{blockchain}}.evt_transfer
     where
         contract_address = (select cow_address from cow_token_address)
         and "from" = (select rewards_safe_address from rewards_safe)
