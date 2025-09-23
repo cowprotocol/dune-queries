@@ -10,6 +10,18 @@ last_block_before_timestamp as (
     select end_block from "query_3333356(blockchain='{{blockchain}}',start_time='2018-01-01 00:00:00',end_time='{{end_time}}')"
 ),
 
+full_bonding_pools as (
+    select
+        pool_address,
+        pool_name,
+        case
+            when pool_name ='Gnosis DAO' and '{{blockchain}}' = 'lens' then 0x010af2e55f0539282c2601915c98a5cd276862aa
+            when pool_name = 'CoW DAO' and '{{blockchain}}' = 'lens' then 0x798Bb2d0ac591E34a4068E447782De05c27eD160
+            else creator
+        end as creator
+    from query_4056263
+)
+
 -- Query Logic Begins here!
 vouches as (
     select
@@ -21,7 +33,7 @@ vouches as (
         creator,
         True as active
     from "query_5143848(blockchain='{{blockchain}}')"
-    inner join query_4056263
+    inner join full_bonding_pools
         on
             pool_address = bondingPool
             and sender = creator
@@ -38,7 +50,7 @@ invalidations as (
         creator,
         False as active
     from "query_5143758(blockchain='{{blockchain}}')"
-    inner join query_4056263
+    inner join full_bonding_pools
         on
             pool_address = bondingPool
             and sender = creator
@@ -102,7 +114,7 @@ named_results as (
     from valid_vouches as vv
     inner join cow_protocol_{{blockchain}}.solvers as s
         on vv.solver = s.address
-    inner join query_4056263 as bp
+    inner join full_bonding_pools as bp
         on vv.pool_address = bp.pool_address
 )
 
