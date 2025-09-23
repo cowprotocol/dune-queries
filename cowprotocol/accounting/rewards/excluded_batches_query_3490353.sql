@@ -262,6 +262,10 @@ where
     or tx_hash = 0x149c90ed4aa005a8aefc4b8bb85bfeaf31f35151989953a7cac3187ae8e9cb2d
     or tx_hash = 0xc3e9ab2accbc9ba20868a55df63374b81edc8d3e92b9528d61085792267f744b
     or tx_hash = 0xf15e37449c1492b18088e42608a281430a8ad45feba5a7763c8e587582ac1dd9
+
+    -- for the week of Sep 16 - Sep 23, 2025 on mainnet
+    -- wrong RIO price; see Univ4 USDC/RIO swap within the tx itself
+    or tx_hash = 0x4b3613d724978e33fbae601795e0895f47bee9e5382e24926a2bc3a3bf6d5284
     
 
 -- Base
