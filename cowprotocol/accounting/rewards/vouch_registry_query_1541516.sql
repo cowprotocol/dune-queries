@@ -16,7 +16,7 @@ full_bonding_pools as (
         pool_name,
         case
             when pool_name ='Gnosis DAO' and '{{blockchain}}' = 'lens' then 0x010af2e55f0539282c2601915c98a5cd276862aa
-            when pool_name = 'CoW DAO' and '{{blockchain}}' = 'lens' then 0x798Bb2d0ac591E34a4068E447782De05c27eD160
+            when pool_name = 'CoW DAO' and '{{blockchain}}' = 'lens' then 0xe1Ab179644b841e22BF036E467A3C64882a1b7c6
             else creator
         end as creator
     from query_4056263
