@@ -5,9 +5,20 @@
 --  {{blockchain}} - network the query is run on
 --  {{vouch_cte_name}} - valid_vouches for the vouches only or named_results for additional information on solver and pool name
 
-with
-last_block_before_timestamp as (
+with last_block_before_timestamp as (
     select end_block from "query_3333356(blockchain='{{blockchain}}',start_time='2018-01-01 00:00:00',end_time='{{end_time}}')"
+),
+
+full_bonding_pools as (
+    select
+        pool_address,
+        pool_name,
+        case
+            when pool_name ='Gnosis DAO' and '{{blockchain}}' = 'lens' then 0x010af2e55f0539282c2601915c98a5cd276862aa
+            when pool_name = 'CoW DAO' and '{{blockchain}}' = 'lens' then 0xe1ab179644b841e22bf036e467a3c64882a1b7c6
+            else creator
+        end as creator
+    from query_4056263
 ),
 
 -- Query Logic Begins here!
@@ -16,15 +27,12 @@ vouches as (
         evt_block_number,
         evt_index,
         solver,
-        cowRewardTarget as reward_target,
+        cowrewardtarget as reward_target,
         pool_address,
         creator,
         True as active
-    from "query_5143848(blockchain='{{blockchain}}')"
-    inner join query_4056263
-        on
-            pool_address = bondingPool
-            and sender = creator
+    from "query_5143848(blockchain='{{blockchain}}')" inner join full_bonding_pools
+        on pool_address = bondingpool and sender = creator
     where evt_block_number <= (select * from last_block_before_timestamp)
 ),
 
@@ -37,11 +45,8 @@ invalidations as (
         pool_address,
         creator,
         False as active
-    from "query_5143758(blockchain='{{blockchain}}')"
-    inner join query_4056263
-        on
-            pool_address = bondingPool
-            and sender = creator
+    from "query_5143758(blockchain='{{blockchain}}')" inner join full_bonding_pools
+        on pool_address = bondingpool and sender = creator
     where evt_block_number <= (select * from last_block_before_timestamp)
 ),
 
@@ -100,10 +105,8 @@ named_results as (
         bp.pool_name,
         concat(environment, '-', s.name) as solver_name
     from valid_vouches as vv
-    inner join cow_protocol_{{blockchain}}.solvers as s
-        on vv.solver = s.address
-    inner join query_4056263 as bp
-        on vv.pool_address = bp.pool_address
+    inner join cow_protocol_{{blockchain}}.solvers as s on vv.solver = s.address
+    inner join full_bonding_pools as bp on vv.pool_address = bp.pool_address
 )
 
 select * from {{vouch_cte_name}}
