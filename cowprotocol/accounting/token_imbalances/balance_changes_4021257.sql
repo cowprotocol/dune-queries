@@ -358,7 +358,7 @@ wgho_all_deposits_withdrawals_lens as (
         tx_hash,
         contract_address,
         topic0,
-        cast(lower('0x' || substr(cast(topic1 as varchar), 27)) as varbinary) as src_dst_address, -- indexed address (dst for Deposit, src for Withdrawal)
+        from_hex(substr(cast(topic1 as varchar), 27)) as src_dst_address, -- indexed address (dst for Deposit, src for Withdrawal)
         varbinary_to_uint256(data) as wad
     from lens.logs
     where contract_address = 0x6bdc36e20d267ff0dd6097799f82e78907105e2f and (
