@@ -38,6 +38,7 @@ with erc20_transfers as (
     where
         evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and 0x9008d19f58aabd9ed0d60971565aa8510560ab41 in ("from", to)
+        and (contract_address != 0x000000000000000000000000000000000000800a or '{{blockchain}}' != 'lens')
 ),
 
 -- 1.2) all native token transfers
