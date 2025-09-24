@@ -38,6 +38,12 @@ with erc20_transfers as (
     where
         evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
         and 0x9008d19f58aabd9ed0d60971565aa8510560ab41 in ("from", to)
+        -- the conditions that follow are only needed for Lens, where for some reason the native token
+        -- transfers, captured in the 0x000000000000000000000000000000000000800a address, are picked in
+        -- the erc20_lens.evt_transfer table.
+        -- As we are handling them later on in the same way as we do with all other chains, we decided to
+        -- filter them out from this cte
+        and (contract_address != 0x000000000000000000000000000000000000800a or '{{blockchain}}' != 'lens')
 ),
 
 -- 1.2) all native token transfers
@@ -358,7 +364,7 @@ wgho_all_deposits_withdrawals_lens as (
         tx_hash,
         contract_address,
         topic0,
-        cast(lower('0x' || substr(cast(topic1 as varchar), 27)) as varbinary) as src_dst_address, -- indexed address (dst for Deposit, src for Withdrawal)
+        from_hex(substr(cast(topic1 as varchar), 27)) as src_dst_address, -- indexed address (dst for Deposit, src for Withdrawal)
         varbinary_to_uint256(data) as wad
     from lens.logs
     where contract_address = 0x6bdc36e20d267ff0dd6097799f82e78907105e2f and (
