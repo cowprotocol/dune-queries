@@ -2,7 +2,8 @@
 
 with full_bonding_pools as (
     select *
-    from (values
+    from (
+        values
         (from_hex('0x8353713b6d2f728ed763a04b886b16aad2b16ebd'), 'Gnosis',        from_hex('0x6c642cafcbd9d8383250bb25f67ae409147f78b2')), -- deprecated
         (from_hex('0x5d4020b9261f01b6f8a45db929704b0ad6f5e9e6'), 'CoW DAO',       from_hex('0x423cec87f19f0778f549846e0801ee267a917935')),
         (from_hex('0xc96569dc132ebb6694a5f0b781b33f202da8ace8'), 'Project Blanc', from_hex('0xca99e3fc7b51167eac363a3af8c9a185852d1622')), -- deprecated
@@ -13,4 +14,4 @@ with full_bonding_pools as (
     ) as t(pool_address, pool_name, creator)
 )
 select *
-from full_bonding_pools;
+from full_bonding_pools
