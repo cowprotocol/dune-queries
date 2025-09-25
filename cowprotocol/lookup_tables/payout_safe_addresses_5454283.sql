@@ -1,31 +1,11 @@
-select
-    'ethereum' as blockchain,
-    0xa03be496e67ec29bc62f01a428683d7f9c204930 as address
-union all
-select
-    'gnosis' as blockchain,
-    0xa03be496e67ec29bc62f01a428683d7f9c204930 as address
-union all
-select
-    'arbitrum' as blockchain,
-    0x66331f0b9cb30d38779c786bda5a3d57d12fba50 as address
-union all
-select
-    'base' as blockchain,
-    0xa03be496e67ec29bc62f01a428683d7f9c204930 as address
-union all
-select
-    'avalanche_c' as blockchain,
-    0xa03be496e67ec29bc62f01a428683d7f9c204930 as address
-union all
-select
-    'polygon' as blockchain,
-    0x66331f0b9cb30d38779c786bda5a3d57d12fba50 as address
-union all
-select
-    'bnb' as blockchain,
-    0xa03be496e67ec29bc62f01a428683d7f9c204930 as address
-union all
-select
-    'lens' as blockchain,
-    0x798bb2d0ac591e34a4068e447782de05c27ed160 as address
+SELECT *
+FROM (VALUES
+    ('ethereum',   0xa03be496e67ec29bc62f01a428683d7f9c204930),
+    ('gnosis',     0xa03be496e67ec29bc62f01a428683d7f9c204930),
+    ('arbitrum',   0x66331f0b9cb30d38779c786bda5a3d57d12fba50),
+    ('base',       0xa03be496e67ec29bc62f01a428683d7f9c204930),
+    ('avalanche_c',0xa03be496e67ec29bc62f01a428683d7f9c204930),
+    ('polygon',    0x66331f0b9cb30d38779c786bda5a3d57d12fba50),
+    ('bnb',        0xa03be496e67ec29bc62f01a428683d7f9c204930),
+    ('lens',       0x798bb2d0ac591e34a4068e447782de05c27ed160)
+) AS t(blockchain, address);
