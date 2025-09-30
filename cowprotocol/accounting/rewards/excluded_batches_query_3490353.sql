@@ -266,7 +266,12 @@ where
     -- for the week of Sep 16 - Sep 23, 2025 on mainnet
     -- wrong RIO price; see Univ4 USDC/RIO swap within the tx itself
     or tx_hash = 0x4b3613d724978e33fbae601795e0895f47bee9e5382e24926a2bc3a3bf6d5284
-    
+
+    -- for the week of Sep 23 - Sep 30, 2025 on mainnet
+    -- contains some weird transfer from the vault relayer
+    or tx_hash = 0xff17abf0fa1bba3b266f9cc788c4e46e3feefb3e3987ae147d32c36bd2a09c71
+    or tx_hash = 0x75dbe3946f142bc6dd5934cdcb5c17a9eb44cac13ee9a8586cc31dae4fff5dba
+
 
 -- Base
 union all
