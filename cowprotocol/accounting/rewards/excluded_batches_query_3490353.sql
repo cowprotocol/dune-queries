@@ -291,3 +291,13 @@ where
 
     -- for week of March 18 - March 25, 2025 on Base
     or 0x22af33fe49fd1fa80c7149773dde5890d3c76f3b in (buy_token_address) -- exclude BNKR
+
+-- Arbitrum
+union all
+select distinct tx_hash
+from cow_protocol_arbitrum.trades
+where
+    -- for week of Sep 23 - Sep 30, 2025 on Arbitrum
+    tx_hash = 0x77AF4CFEDC518A3DFDAEEE98E3E740C466737A0299933D4034FEF09EA6662D7A
+    or tx_hash = 0xC98C5D2CEF1BB7B98CA0CBBFAEA9E52EC3FF277256B71E953488C2C4E9E1BC10
+    or tx_hash = 0x356BE8891459EEFE877D95EAC44F565B1A0FCB1F695A047AA96B2470334F665D
