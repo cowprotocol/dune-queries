@@ -172,6 +172,7 @@ wrapped_native_token as (
             when 'base' then 0x4200000000000000000000000000000000000006 -- WETH
             when 'avalanche_c' then 0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7 -- WAVAX
             when 'polygon' then 0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270 -- WPOL
+            when 'lens' then 0x6bdc36e20d267ff0dd6097799f82e78907105e2f -- WGHO
         end as native_token_address
 ),
 
