@@ -44,4 +44,3 @@ select
     coalesce(mru.new_overdraft, 0) / pow(10,18) as current_overdraft_native_token
 from cow_protocol_{{blockchain}}.solvers as s left join most_recent_updates as mru on s.address = mru.solver
 order by coalesce(mru.new_overdraft, 0) desc
-        
