@@ -272,6 +272,9 @@ where
     or tx_hash = 0xff17abf0fa1bba3b266f9cc788c4e46e3feefb3e3987ae147d32c36bd2a09c71
     or tx_hash = 0x75dbe3946f142bc6dd5934cdcb5c17a9eb44cac13ee9a8586cc31dae4fff5dba
 
+    -- for the week of October 7 - October 14, 2025
+    or tx_hash = 0x3331d793fd17c79969605bb22696d6bc6cb615c57d0495eaa5a0031da86ca1e1
+
 
 -- Base
 union all
