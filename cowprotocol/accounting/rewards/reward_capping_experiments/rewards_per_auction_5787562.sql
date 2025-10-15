@@ -21,7 +21,6 @@
 -- - new_protocol_fee: protocol fee when charging price improvement, volume and fixed fee
 -- - uncapped_reward: uncapped second price reward for the solver in that auction
 -- - reward: current capped reward using caps per chain
--- - new_reward_proposal: rewards discussed in first post of https://forum.cow.fi/t/cip-draft-align-solver-rewards-with-protocol-revenue/3174
 -- - new_reward_fee_cap: reward based on capping from above by a fraction of new_protocol_fee, the original cap from below applies
 
 
@@ -64,17 +63,15 @@ rewards_per_auction as (
         solver_name,
         protocol_fee,
         volume,
-        {{price_improvement_fee}} * 2 * protocol_fee + volume * {{volume_fee_bps}} / 1e4 + {{fixed_fee}} * 1e18 * number_of_trades as new_protocol_fee,
+        if('{{price_improvement_fee}}'='on', protocol_fee, 0) + volume * {{volume_fee_bps}} / 1e4 + {{fixed_fee}} * 1e18 * number_of_trades as new_protocol_fee,
         uncapped_reward,
         reward
     from batch_data
-    where
-        volume < 1e23 -- this was for filtering out auctions with obvious bogus volume
-        and volume > 2 * uncapped_reward -- this was filtering for auctions with obvious bogus reward
+    where volume < 1e23 -- this was for filtering out auctions with obvious bogus volume
+    and volume > 2 * uncapped_reward -- this was filtering for auctions with obvious bogus reward
 )
 
 select
     *,
-    greatest(reward, 0.5 * protocol_fee) as  new_reward_proposal,
     least({{scaling}} * new_protocol_fee, greatest((select lower_cap from caps), uncapped_reward)) as new_reward_fee_cap
 from rewards_per_auction
