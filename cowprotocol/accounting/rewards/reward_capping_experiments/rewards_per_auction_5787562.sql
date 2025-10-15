@@ -69,6 +69,7 @@ rewards_per_auction as (
         reward
     from batch_data
     where volume < 1e23 -- this was for filtering out auctions with obvious bogus volume
+    and volume > 2 * uncapped_reward -- this was filtering for auctions with obvious bogus reward
 )
 
 select
