@@ -21,7 +21,12 @@
 -- - new_protocol_fee: protocol fee when charging price improvement, volume and fixed fee
 -- - uncapped_reward: uncapped second price reward for the solver in that auction
 -- - reward: current capped reward using caps per chain
--- - new_reward_fee_cap: reward based on capping from above by a fraction of new_protocol_fee, the original cap from below applies
+-- - new_reward: reward based on capping from above by a fraction of new_protocol_fee, the original cap from below applies
+-- - profit: protocol profit as difference of protocol fee and reward
+-- - new_profit: same as profit but for new reward and new protocol fee
+-- - reward_missed: amount a solver could have gotten from taking a cut instead of getting a capped reward;
+--     this is a measure of how much solvers can gain from acting strategically with their bidding
+-- - new_reward_missed: same as reward_missed but for new reward
 
 
 with batch_data as (
@@ -67,12 +72,21 @@ rewards_per_auction as (
         uncapped_reward,
         reward
     from batch_data
-    where
-        volume < 1e23 -- this was for filtering out auctions with obvious bogus volume
-        and volume > 2 * uncapped_reward -- this was filtering for auctions with obvious bogus reward
+    where volume < 1e23 -- this was for filtering out auctions with obvious bogus volume
+    and volume > 2 * uncapped_reward -- this was filtering for auctions with obvious bogus reward
+),
+
+new_rewards_per_auction as (
+    select
+        *,
+        least({{scaling}} * new_protocol_fee, greatest((select lower_cap from caps), uncapped_reward)) as new_reward
+    from rewards_per_auction
 )
 
 select
     *,
-    least({{scaling}} * new_protocol_fee, greatest((select lower_cap from caps), uncapped_reward)) as new_reward_fee_cap
-from rewards_per_auction
+    protocol_fee - reward as profit,
+    new_protocol_fee - new_reward as new_profit,
+    uncapped_reward - reward as reward_missed,
+    uncapped_reward - new_reward as new_reward_missed
+from new_rewards_per_auction
