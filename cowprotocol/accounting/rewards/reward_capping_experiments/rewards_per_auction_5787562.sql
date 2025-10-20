@@ -88,6 +88,6 @@ select
     *,
     protocol_fee - reward as profit,
     new_protocol_fee - new_reward as new_profit,
-    uncapped_reward - reward as reward_missed,
-    uncapped_reward - new_reward as new_reward_missed
+    if(uncapped_reward >=0, uncapped_reward - reward, 0) as reward_missed,
+    if(uncapped_reward >=0, uncapped_reward - new_reward, 0) as new_reward_missed
 from new_rewards_per_auction
