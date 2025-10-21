@@ -53,7 +53,7 @@ batch_data as (
         count(*) as number_of_trades,
         sum((rod.protocol_fee - coalesce(rod.partner_fee, 0)) * rod.protocol_fee_native_price) as protocol_fee, -- this is the actual revenue of the protocol
         sum(case when t.order_type = 'SELL' then atoms_bought * rod.protocol_fee_native_price else atoms_sold * rod.protocol_fee_native_price end) as volume,
-        bool_and(case when t.order_type = 'SELL' then (rod.protocol_fee_native_price * atoms_bought * p.price / 1e18) / coalesce(t.buy_price * units_bought, usd_value) < 2 else (rod.protocol_fee_native_price  * atoms_sold * p.price / 1e18) / coalesce(t.sell_price * units_sold, usd_value) < 2 end) as native_prices_are_accurate
+        bool_and(case when t.order_type = 'SELL' then (rod.protocol_fee_native_price * atoms_bought * p.price / 1e18) / coalesce(t.buy_price * units_bought, usd_value) < 1.2 else (rod.protocol_fee_native_price  * atoms_sold * p.price / 1e18) / coalesce(t.sell_price * units_sold, usd_value) < 1.2 end) as native_prices_are_accurate
     from "query_4351957(blockchain='{{blockchain}}')" as rbd
     join "query_4364122(blockchain='{{blockchain}}')" as rod
         on rbd.auction_id = rod.auction_id and rbd.solver = rod.solver and rbd.tx_hash = rod.tx_hash
