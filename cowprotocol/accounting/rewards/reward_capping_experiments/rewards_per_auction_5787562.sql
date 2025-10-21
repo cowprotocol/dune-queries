@@ -29,7 +29,20 @@
 -- - new_reward_missed: same as reward_missed but for new reward
 
 
-with batch_data as (
+with wrapped_native_token as (
+    select
+        case '{{blockchain}}'
+            when 'ethereum' then 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2 -- WETH
+            when 'gnosis' then 0xe91d153e0b41518a2ce8dd3d7944fa863463a97d -- WXDAI
+            when 'arbitrum' then 0x82af49447d8a07e3bd95bd0d56f35241523fbab1 -- WETH
+            when 'base' then 0x4200000000000000000000000000000000000006 -- WETH
+            when 'avalanche_c' then 0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7 -- WAVAX
+            when 'polygon' then 0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270 -- WPOL
+            when 'lens' then 0x6bdc36e20d267ff0dd6097799f82e78907105e2f -- WGHO
+        end as native_token_address
+),
+
+batch_data as (
     select
         b.time,
         rbd.auction_id,
@@ -39,7 +52,8 @@ with batch_data as (
         rbd.capped_payment as reward,
         count(*) as number_of_trades,
         sum((rod.protocol_fee - coalesce(rod.partner_fee, 0)) * rod.protocol_fee_native_price) as protocol_fee, -- this is the actual revenue of the protocol
-        sum(case when t.order_type = 'SELL' then atoms_bought * rod.protocol_fee_native_price else atoms_sold * rod.protocol_fee_native_price end) as volume
+        sum(case when t.order_type = 'SELL' then atoms_bought * rod.protocol_fee_native_price else atoms_sold * rod.protocol_fee_native_price end) as volume,
+        bool_and(case when t.order_type = 'SELL' then (rod.protocol_fee_native_price * atoms_bought * p.price / 1e18) / coalesce(t.buy_price * units_bought, usd_value) < 2 else (rod.protocol_fee_native_price  * atoms_sold * p.price / 1e18) / coalesce(t.sell_price * units_sold, usd_value) < 2 end) as native_prices_are_accurate
     from "query_4351957(blockchain='{{blockchain}}')" as rbd
     join "query_4364122(blockchain='{{blockchain}}')" as rod
         on rbd.auction_id = rod.auction_id and rbd.solver = rod.solver and rbd.tx_hash = rod.tx_hash
@@ -49,6 +63,10 @@ with batch_data as (
         on rbd.block_deadline = b.number
     join cow_protocol_{{blockchain}}.solvers as s
         on rbd.solver = s.address
+    join prices.day as p
+        on date_trunc('day', b.time) = p.timestamp
+        and p.contract_address = (select * from wrapped_native_token)
+        and p.blockchain = '{{blockchain}}'
     where b.time >= (timestamp '{{start_time}}') and b.time < (timestamp '{{end_time}}')
     group by 1, 2, 3, 4, 5, 6
 ),
@@ -73,8 +91,8 @@ rewards_per_auction as (
         reward
     from batch_data
     where
-        volume < 1e23 -- this was for filtering out auctions with obvious bogus volume
-        and volume > 2 * uncapped_reward -- this was filtering for auctions with obvious bogus reward
+        native_prices_are_accurate -- this filters out cases where native prices are not accurate
+        and uncapped_reward < volume -- this filters out cases where native prices were corrected but rewards are too large
 ),
 
 new_rewards_per_auction as (
