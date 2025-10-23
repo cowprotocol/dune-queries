@@ -53,8 +53,8 @@ batch_data as (
         coalesce(sum(case when t.order_type = 'SELL' then t.atoms_bought * rod.protocol_fee_native_price else t.atoms_sold * rod.protocol_fee_native_price end), 0) as volume,
         bool_and(
             case
-                when t.order_type = 'SELL' then (rod.protocol_fee_native_price * t.atoms_bought * p.price / 1e18) / coalesce(t.buy_value_usd, t.usd_value) < 1.2
-                else (rod.protocol_fee_native_price  * t.atoms_sold * p.price / 1e18) / coalesce(t.sell_value_usd, t.usd_value) < 1.2
+                when t.order_type = 'SELL' then abs((rod.protocol_fee_native_price * t.atoms_bought * p.price / 1e18) / coalesce(t.buy_value_usd, t.usd_value) - 1) < 0.2
+                else abs((rod.protocol_fee_native_price  * t.atoms_sold * p.price / 1e18) / coalesce(t.sell_value_usd, t.usd_value) - 1) < 0.2
             end
         ) as native_prices_are_accurate,
         bool_or(t.tx_hash is not null) as at_least_partial_success -- this implies that there is data on trades which makes checking native prices meaningful
