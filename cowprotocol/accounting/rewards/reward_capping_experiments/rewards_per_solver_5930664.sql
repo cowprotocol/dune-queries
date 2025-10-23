@@ -1,6 +1,6 @@
 with rewards_per_solver as (
     select
-        solver_name,
+        solver,
         sum(protocol_fee / 1e18) as protocol_fee,
         sum(new_protocol_fee / 1e18) as new_protocol_fee,
         sum(reward / 1e18) as reward,

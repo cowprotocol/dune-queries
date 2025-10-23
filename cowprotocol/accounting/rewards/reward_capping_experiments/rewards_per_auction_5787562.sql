@@ -15,7 +15,6 @@
 -- - time: time of the auction (deadline)
 -- - auction_id: id of the auction
 -- - solver: winning solver in that auction
--- - solver_name: dune name of the solver
 -- - protocol_fee: sum of protocol fees charged by a solver, in native token
 -- - volume: sum of volume of trades, in native token
 -- - new_protocol_fee: protocol fee when charging price improvement, volume and fixed fee
@@ -47,7 +46,6 @@ batch_data as (
         b.time,
         rbd.auction_id,
         rbd.solver,
-        s.name as solver_name,
         rbd.uncapped_payment_native_token as uncapped_reward,
         rbd.capped_payment as reward,
         count(t.order_uid) as number_of_trades,
@@ -67,14 +65,12 @@ batch_data as (
         on rod.order_uid = t.order_uid and rod.tx_hash = t.tx_hash
     left join {{blockchain}}.blocks as b
         on rbd.block_deadline = b.number
-    left join cow_protocol_{{blockchain}}.solvers as s
-        on rbd.solver = s.address
     left join prices.day as p
         on date_trunc('day', b.time) = p.timestamp
         and p.contract_address = (select * from wrapped_native_token)
         and p.blockchain = '{{blockchain}}'
     where b.time >= (timestamp '{{start_time}}') and b.time < (timestamp '{{end_time}}')
-    group by 1, 2, 3, 4, 5, 6
+    group by 1, 2, 3, 4, 5
 ),
 
 caps as (
@@ -89,7 +85,6 @@ rewards_per_auction as (
         time,
         auction_id,
         solver,
-        solver_name,
         protocol_fee,
         volume,
         if('{{price_improvement_fee}}'='on', protocol_fee, 0) + volume * {{volume_fee_bps}} / 1e4 + {{fixed_fee}} * 1e18 * number_of_trades as new_protocol_fee,
