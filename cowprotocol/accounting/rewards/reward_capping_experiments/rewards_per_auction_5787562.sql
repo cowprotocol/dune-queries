@@ -50,20 +50,26 @@ batch_data as (
         s.name as solver_name,
         rbd.uncapped_payment_native_token as uncapped_reward,
         rbd.capped_payment as reward,
-        count(*) as number_of_trades,
-        sum((rod.protocol_fee - coalesce(rod.partner_fee, 0)) * rod.protocol_fee_native_price) as protocol_fee, -- this is the actual revenue of the protocol
-        sum(case when t.order_type = 'SELL' then atoms_bought * rod.protocol_fee_native_price else atoms_sold * rod.protocol_fee_native_price end) as volume,
-        bool_and(case when t.order_type = 'SELL' then (rod.protocol_fee_native_price * atoms_bought * p.price / 1e18) / coalesce(t.buy_price * units_bought, usd_value) < 1.2 else (rod.protocol_fee_native_price  * atoms_sold * p.price / 1e18) / coalesce(t.sell_price * units_sold, usd_value) < 1.2 end) as native_prices_are_accurate
+        count(t.order_uid) as number_of_trades,
+        coalesce(sum((rod.protocol_fee - coalesce(rod.partner_fee, 0)) * rod.protocol_fee_native_price), 0) as protocol_fee, -- this is the actual revenue of the protocol
+        coalesce(sum(case when t.order_type = 'SELL' then t.atoms_bought * rod.protocol_fee_native_price else t.atoms_sold * rod.protocol_fee_native_price end), 0) as volume,
+        bool_and(
+            case
+                when t.order_type = 'SELL' then (rod.protocol_fee_native_price * t.atoms_bought * p.price / 1e18) / coalesce(t.buy_value_usd, t.usd_value) < 1.2
+                else (rod.protocol_fee_native_price  * t.atoms_sold * p.price / 1e18) / coalesce(t.sell_value_usd, t.usd_value) < 1.2
+            end
+        ) as native_prices_are_accurate,
+        bool_or(t.tx_hash is not null) as at_least_partial_success -- this implies that there is data on trades which makes checking native prices meaningful
     from "query_4351957(blockchain='{{blockchain}}')" as rbd
-    join "query_4364122(blockchain='{{blockchain}}')" as rod
+    left join "query_4364122(blockchain='{{blockchain}}')" as rod
         on rbd.auction_id = rod.auction_id and rbd.solver = rod.solver and rbd.tx_hash = rod.tx_hash
-    join cow_protocol_{{blockchain}}.trades as t
+    left join cow_protocol_{{blockchain}}.trades as t
         on rod.order_uid = t.order_uid and rod.tx_hash = t.tx_hash
-    join {{blockchain}}.blocks as b
+    left join {{blockchain}}.blocks as b
         on rbd.block_deadline = b.number
-    join cow_protocol_{{blockchain}}.solvers as s
+    left join cow_protocol_{{blockchain}}.solvers as s
         on rbd.solver = s.address
-    join prices.day as p
+    left join prices.day as p
         on date_trunc('day', b.time) = p.timestamp
         and p.contract_address = (select * from wrapped_native_token)
         and p.blockchain = '{{blockchain}}'
@@ -91,8 +97,11 @@ rewards_per_auction as (
         reward
     from batch_data
     where
-        native_prices_are_accurate -- this filters out cases where native prices are not accurate
-        and uncapped_reward < volume -- this filters out cases where native prices were corrected but rewards are too large
+        (
+            native_prices_are_accurate -- this filters out cases where native prices are not accurate
+            and uncapped_reward < volume -- this filters out cases where native prices were corrected but rewards are too large
+        )
+        or not at_least_partial_success -- this makes sure the filtering is only applied if some onchain data exists
 ),
 
 new_rewards_per_auction as (
