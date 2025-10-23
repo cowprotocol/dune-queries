@@ -1,4 +1,4 @@
--- This query is the basis for experiments with different rewards mechanisms
+-- This query is the basis for experiments with capping rewards by a fraction of protocol fees
 --
 -- It is under version control in https://github.com/cowprotocol/dune-queries
 --
@@ -7,7 +7,7 @@
 --  {{end_time}} - the timestamp for which the analysis should end (exclusively)
 --  {{blockchain}} - network to run the analysis on
 --  {{scaling}} - fraction of protocol fees used to cap rewards
---  {{price_improvement_fee}} - fraction of price improvement charged as fee
+--  {{price_improvement_fee}} - switch for including price improvement fee in reward cap
 --  {{volume_fee_bps}} - fraction of volume charged as fee
 --  {{fixed_fee}} - additional fixed fee per trade
 --
@@ -18,6 +18,7 @@
 -- - protocol_fee: sum of protocol fees charged by a solver, in native token
 -- - volume: sum of volume of trades, in native token
 -- - new_protocol_fee: protocol fee when charging price improvement, volume and fixed fee
+-- - new_reward_cap: new fee based cap of rewards
 -- - uncapped_reward: uncapped second price reward for the solver in that auction
 -- - reward: current capped reward using caps per chain
 -- - new_reward: reward based on capping from above by a fraction of new_protocol_fee, the original cap from below applies
@@ -87,7 +88,8 @@ rewards_per_auction as (
         solver,
         protocol_fee,
         volume,
-        if('{{price_improvement_fee}}'='on', protocol_fee, 0) + volume * {{volume_fee_bps}} / 1e4 + {{fixed_fee}} * 1e18 * number_of_trades as new_protocol_fee,
+        protocol_fee + volume * {{volume_fee_bps}} / 1e4 + {{fixed_fee}} * 1e18 * number_of_trades as new_protocol_fee,
+        {{scaling}} * (if('{{price_improvement_fee}}'='on', protocol_fee, 0) + volume * {{volume_fee_bps}} / 1e4 + {{fixed_fee}} * 1e18 * number_of_trades) as new_reward_cap,
         uncapped_reward,
         reward
     from batch_data
@@ -102,7 +104,7 @@ rewards_per_auction as (
 new_rewards_per_auction as (
     select
         *,
-        least({{scaling}} * new_protocol_fee, greatest((select lower_cap from caps), uncapped_reward)) as new_reward
+        least(new_reward_cap, greatest((select lower_cap from caps), uncapped_reward)) as new_reward
     from rewards_per_auction
 )
 
