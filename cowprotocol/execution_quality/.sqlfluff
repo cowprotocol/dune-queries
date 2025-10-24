@@ -1,8 +1,0 @@
-[sqlfluff:templater:jinja:context]
-start='2024-08-20 00:00:00'
-project='cow_protocol'
-project_a='cow_protocol'
-project_b='cow_protocol'
-blockchain='ethereum'
-top_n_pairs=100
-
