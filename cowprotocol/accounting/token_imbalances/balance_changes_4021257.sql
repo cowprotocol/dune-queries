@@ -406,6 +406,43 @@ wgho_deposits_withdrawals_lens as (
 
 special_balance_changes_lens as ( -- noqa: ST03
     select * from wgho_deposits_withdrawals_lens
+),
+
+-- 2.8) bnb
+-- special treatment of
+-- 2.8.1) WBNB
+
+-- 2.8.1) all deposit and withdrawal events for WBNB
+wbnb_deposits_withdrawals_bnb as (
+    -- deposits (contract deposits BNB to get WBNB)
+    select
+        evt_block_time as block_time,
+        evt_tx_hash as tx_hash,
+        contract_address as token_address,
+        0x0000000000000000000000000000000000000000 as sender,
+        0x9008d19f58aabd9ed0d60971565aa8510560ab41 as receiver,
+        wad as amount
+    from bnb_bnb.wbnb_evt_deposit
+    where
+        evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
+        and dst = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
+    union all
+    -- withdrawals (contract withdraws BNB by returning WBNB)
+    select
+        evt_block_time as block_time,
+        evt_tx_hash as tx_hash,
+        contract_address as token_address,
+        0x9008d19f58aabd9ed0d60971565aa8510560ab41 as sender,
+        0x0000000000000000000000000000000000000000 as receiver,
+        wad as amount
+    from bnb_bnb.wbnb_evt_withdrawal
+    where
+        evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
+        and src = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
+),
+
+special_balance_changes_bnb as ( -- noqa: ST03
+    select * from wbnb_deposits_withdrawals_bnb
 )
 
 
