@@ -17,6 +17,7 @@ wrapped_native_token as (
             when 'avalanche_c' then 0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7 -- WAVAX
             when 'polygon' then 0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270 -- WPOL
             when 'lens' then 0x6bdc36e20d267ff0dd6097799f82e78907105e2f -- WGHO
+            when 'bnb' then 0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c -- WBNB
         end as native_token_address
 ),
 
@@ -40,6 +41,7 @@ rewards_safe as (
             when 'avalanche_c' then 0xa03be496e67ec29bc62f01a428683d7f9c204930
             when 'polygon' then 0x66331f0b9cb30d38779c786bda5a3d57d12fba50
             when 'lens' then 0x798bb2d0ac591e34a4068e447782de05c27ed160
+            when 'bnb' then 0xa03be496e67ec29bc62f01a428683d7f9c204930
         end as rewards_safe_address
 ),
 
