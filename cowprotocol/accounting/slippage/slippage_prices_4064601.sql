@@ -150,6 +150,7 @@ prices as (
             when '{{blockchain}}' = 'ethereum' and token_address = 0x23878914efe38d27c4d67ab83ed1b93a74d4086a and hour >= timestamp '2025-08-29 19:00' and hour <= timestamp '2025-08-29 20:00' then 0.9983
             when '{{blockchain}}' = 'base' and token_address = 0x2e285de4c868d225949dbdaf82cd5e28497c52bf and hour >= timestamp '2025-09-23 15:00' and hour <= timestamp '2025-09-23 16:00' then 0.003
             when '{{blockchain}}' = 'base' and token_address = 0x7Ce02e86354EA0Cc3b302AeAdC0Ab56bC7EB44b8 and hour >= timestamp '2025-10-09 19:00' and hour <= timestamp '2025-10-09 20:00' then 0.8263 -- noqa:CP02
+            when '{{blockchain}}' = 'base' and token_address = 0x63706e401c06ac8513145b7687A14804d17f814b and hour >= timestamp '2025-10-22 00:00' and hour <= timestamp '2025-10-22 00:00' then 225.99 -- noqa:CP02
             else price_unit
         end as price_unit,
         case
@@ -160,6 +161,7 @@ prices as (
             when '{{blockchain}}' = 'ethereum' and token_address = 0x23878914efe38d27c4d67ab83ed1b93a74d4086a and hour >= timestamp '2025-08-29 19:00' and hour <= timestamp '2025-08-29 20:00' then 0.9983 / pow(10, 6)
             when '{{blockchain}}' = 'base' and token_address = 0x2e285de4c868d225949dbdaf82cd5e28497c52bf and hour >= timestamp '2025-09-23 15:00' and hour <= timestamp '2025-09-23 16:00' then 0.003 / pow(10, 18)
             when '{{blockchain}}' = 'base' and token_address = 0x7Ce02e86354EA0Cc3b302AeAdC0Ab56bC7EB44b8 and hour >= timestamp '2025-10-09 19:00' and hour <= timestamp '2025-10-09 20:00' then 0.8263 / pow(10, 18) -- noqa:CP02
+            when '{{blockchain}}' = 'base' and token_address = 0x63706e401c06ac8513145b7687A14804d17f814b and hour >= timestamp '2025-10-22 00:00' and hour <= timestamp '2025-10-22 00:00' then 225.99 / pow(10, 18) -- noqa:CP02
             else price_atom
         end as price_atom
     from prices_pre
