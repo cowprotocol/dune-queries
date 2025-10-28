@@ -10,8 +10,8 @@ with polygon_unvouching as (
         block_time as evt_block_time,
         block_number as evt_block_number,
         block_date as evt_block_date,
-        from_hex(substr(cast(topic2 as varchar), 27, 40)) as bondingPool,
-        from_hex(substr(cast(topic3 as varchar), 27, 40)) as sender,
+        from_hex(substr(cast(topic2 as varchar), 27, 40)) as bondingPool, --noqa: CP02
+        from_hex(substr(cast(topic3 as varchar), 27, 40)) as sender, --noqa: CP02
         from_hex(substr(cast(topic1 as varchar), 27, 40)) as solver
     from polygon.logs
     where contract_address = 0xaaa4de096d02ae21729aa31d967e148d4e3ae501 and topic0 = 0xfbe946aa1fb3fabb46cdd9f88982f3d42ef58fad11ed89cb15456b9fe4ea7d7d
@@ -29,7 +29,7 @@ bnb_unvouching as (
         block_time as evt_block_time,
         block_number as evt_block_number,
         block_date as evt_block_date,
-        from_hex(substr(cast(topic2 as varchar), 27, 40)) as bondingPool,
+        from_hex(substr(cast(topic2 as varchar), 27, 40)) as bondingPool, --noqa: CP02
         from_hex(substr(cast(topic3 as varchar), 27, 40)) as sender,
         from_hex(substr(cast(topic1 as varchar), 27, 40)) as solver
     from bnb.logs
@@ -57,7 +57,7 @@ select
     evt_block_time,
     evt_block_number,
     evt_block_date,
-    bondingPool,
+    bondingPool, --noqa: CP02
     sender,
     solver
 from multichain_unvouching
