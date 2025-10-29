@@ -1,33 +1,34 @@
 --noqa: disable=LT09
 with 
 params as (
-    select timestamp'{{start_date}}' as start_date
+    select 
+        timestamp'{{start_date}}' as start_date
         , timestamp'{{end_date}}' as end_date
 ) 
 -- currently uniswap x has different types of reactors depending on the blockchain
 , uniswap_x_fills as (
     select chain as blockchain, evt_block_time, evt_tx_hash, swapper
-    from uniswap_multichain.priorityorderreactor_evt_fill -- base and unichain
-    cross join params
-    where evt_block_time >= params.start_date
+    from uniswap_multichain.priorityorderreactor_evt_fill, params -- base and unichain
+    where 
+        evt_block_time >= params.start_date
         and evt_block_time < params.end_date
     union all
     select chain as blockchain, evt_block_time, evt_tx_hash, swapper
-    from uniswap_multichain.v2dutchorderreactor_evt_fill -- mainnet and arbitrum
-    cross join params
-    where evt_block_time >= params.start_date
+    from uniswap_multichain.v2dutchorderreactor_evt_fill, params -- mainnet and arbitrum
+    where 
+        evt_block_time >= params.start_date
         and evt_block_time < params.end_date 
     union all
     select 'ethereum' as blockchain, evt_block_time, evt_tx_hash, swapper
-    from uniswap_ethereum.exclusivedutchorderreactor_evt_fill 
-    cross join params
-    where evt_block_time >= params.start_date
+    from uniswap_ethereum.exclusivedutchorderreactor_evt_fill, params
+    where 
+        evt_block_time >= params.start_date
         and evt_block_time < params.end_date
     union all
     select 'arbitrum' as blockchain, evt_block_time, evt_tx_hash, swapper
-    from uniswap_arbitrum.v3dutchorderreactor_evt_fill
-    cross join params
-    where evt_block_time >= params.start_date
+    from uniswap_arbitrum.v3dutchorderreactor_evt_fill, params
+    where 
+        evt_block_time >= params.start_date
         and evt_block_time < params.end_date
 )
 --------------------------------------------------------------------------------------------------------------------------------------------
