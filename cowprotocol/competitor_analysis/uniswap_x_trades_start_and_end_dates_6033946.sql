@@ -37,28 +37,32 @@ params as (
     --erc20 tokens 
     select 'ethereum' as blockchain, evt_tx_hash as tx_hash, "from", "to", value, contract_address
     from erc20_ethereum.evt_transfer, params  --erc20 tokens
-    where evt_block_time >= params.start_date
+    where 
+        evt_block_time >= params.start_date
         and evt_block_time < params.end_date
         and value > 0
 
     union all 
     select 'arbitrum' as blockchain, evt_tx_hash as tx_hash, "from", "to", value, contract_address
     from erc20_arbitrum.evt_transfer, params  --erc20 tokens
-    where evt_block_time >= params.start_date
+    where 
+        evt_block_time >= params.start_date
         and evt_block_time < params.end_date
         and value > 0        
 
     union all 
     select 'base' as blockchain, evt_tx_hash as tx_hash, "from", "to", value, contract_address
     from erc20_base.evt_transfer, params  --erc20 tokens
-    where evt_block_time >= params.start_date
+    where 
+        evt_block_time >= params.start_date
         and evt_block_time < params.end_date
         and value > 0 
 
     union all 
     select 'unichain' as blockchain, evt_tx_hash as tx_hash, "from", "to", value, contract_address
     from erc20_unichain.evt_transfer, params  --erc20 tokens
-    where evt_block_time >= params.start_date
+    where 
+        evt_block_time >= params.start_date
         and evt_block_time < params.end_date
         and value > 0
     
