@@ -1,0 +1,8 @@
+[sqlfluff:templater:jinja:context]
+start_date='2024-08-20 00:00:00'
+end_date='2024-09-20 00:00:00'
+project='kyberswap'
+blockchain='ethereum'
+min_usd_amount=10000
+max_usd_amount=1000000
+native_token='0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
