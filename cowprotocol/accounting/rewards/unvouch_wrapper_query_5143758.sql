@@ -39,10 +39,10 @@ bnb_unvouching as (
 multichain_unvouching as (
     select *
     from cow_protocol_multichain.vouchregister_evt_invalidatevouch
-    union all
+    union distinct
     select *
     from polygon_unvouching
-    union all
+    union distinct
     select *
     from bnb_unvouching
 )
