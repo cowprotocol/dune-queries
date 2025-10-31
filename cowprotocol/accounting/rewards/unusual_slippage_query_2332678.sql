@@ -14,6 +14,7 @@ url_helper as (
     select
         case
             when '{{blockchain}}' = 'ethereum' then 'eth'
+            when '{{blockchain}}' = 'bnb' then 'bsc'
             else '{{blockchain}}'
         end
 )
