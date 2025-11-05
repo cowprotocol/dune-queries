@@ -114,7 +114,7 @@ raw_slippage_breakdown_grouped as (
         tx_hash,
         token_address,
         slippage_type,
-        sum(slippage_atoms) as slippage_atoms,
+        cast(sum(slippage_atoms) as double) as slippage_atoms,
         sum(slippage_usd) as slippage_usd,
         sum(slippage_wei) as slippage_wei
     from raw_slippage_breakdown
