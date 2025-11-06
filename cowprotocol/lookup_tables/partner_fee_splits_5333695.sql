@@ -1,4 +1,3 @@
--- sqlfluff: disable
 with partner_fee_splits as (
     select t.*
     from (
