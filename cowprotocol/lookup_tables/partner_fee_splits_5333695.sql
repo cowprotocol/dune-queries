@@ -66,7 +66,18 @@ with partner_fee_splits as (
         ('polygon',     0x8025bacf968aa82bdfe51b513123b55bfb0060d3, '_',               0.45),
         ('polygon',     0xe423c63e8a25811c9cbe71c8585c4505117397c6, '_',               0.75),
         ('polygon',     0x1713b79e3dbb8a76d80e038ca701a4a781ac69eb, '_',               0.75),
-        ('polygon',     0xc542c2f197c4939154017c802b0583c596438380, '_',               0.875)
+        ('polygon',     0xc542c2f197c4939154017c802b0583c596438380, '_',               0.875),
+        
+        ('bnb',     0x63695eee2c3141bde314c5a6f89b98e62808d716, 'CoW Swap-SafeApp', 0.90),
+        ('bnb',     0x352a3666b27bb09aca7b4a71ed624429b7549551, '_',               0.85),
+        ('bnb',     0xaf1c727b605530acdb00906a158e817f41afd778, '_',               0.85),
+        ('bnb',     0x9c9aa90363630d4ab1d9dbf416cc3bbc8d3ed502, '_',               0.85),
+        ('bnb',     0xcd777a10502256db93c2b0a8e8f64a5174c6cbda, '_',               0.85),
+        ('bnb',     0xe344241493d573428076c022835856a221db3e26, '_',               0.85),
+        ('bnb',     0x8025bacf968aa82bdfe51b513123b55bfb0060d3, '_',               0.45),
+        ('bnb',     0xe423c63e8a25811c9cbe71c8585c4505117397c6, '_',               0.75),
+        ('bnb',     0x1713b79e3dbb8a76d80e038ca701a4a781ac69eb, '_',               0.75),
+        ('bnb',     0xc542c2f197c4939154017c802b0583c596438380, '_',               0.875)
     ) as t(blockchain, partner_recipient, app_code_to_excl, partner_share)
 )
 
