@@ -1,5 +1,6 @@
+-- sqlfluff: disable=LT01
 with partner_fee_splits as (
-    select *
+    select t.*
     from (
         values
         ('ethereum',    0x63695eee2c3141bde314c5a6f89b98e62808d716, 'CoW Swap-SafeApp', 0.90),
