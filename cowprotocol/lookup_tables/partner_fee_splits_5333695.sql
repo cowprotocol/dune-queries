@@ -1,3 +1,4 @@
+-- sqlfluff: disable=RF03
 with partner_fee_splits as (
     select t.*
     from (
