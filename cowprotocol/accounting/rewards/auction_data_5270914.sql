@@ -14,7 +14,7 @@
 --    competition_score: decimal(38, 0)
 --    observed_score: decimal(38, 0)
 --    uncapped_payment_native_token: decimal(38, 0)
---    capped_payment_native_token: decimal(38, 0)
+--    capped_payment: decimal(38, 0)
 
 with block_range as (
     select * from "query_3333356(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')"
