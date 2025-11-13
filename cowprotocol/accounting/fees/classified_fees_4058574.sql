@@ -52,7 +52,8 @@ network_fees as (
         tx_hash,
         order_uid,
         sell_token_address as token_address,
-        coalesce(
+        -- PRS disabled: int256 is not standard Trino, only available in Dune
+        coalesce( -- noqa: PRS
             network_fee,
             case
                 when order_type = 'BUY' then surplus_fee - protocol_fee
