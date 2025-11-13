@@ -21,6 +21,7 @@ with raw_fee_data as (
         block_time,
         t.tx_hash,
         t.order_uid,
+        order_type,
         atoms_sold,
         atoms_bought,
         sell_token_address,
@@ -54,7 +55,7 @@ network_fees as (
         coalesce(
             network_fee,
             case
-                when sell_token_address = protocol_fee_token_address then surplus_fee - protocol_fee
+                when order_type = 'BUY' then surplus_fee - protocol_fee
                 else surplus_fee - cast(1.0 * protocol_fee * (atoms_sold - surplus_fee) / atoms_bought as int256)
             end,
             0
