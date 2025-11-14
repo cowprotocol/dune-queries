@@ -24,6 +24,7 @@ with raw_fee_data as (
         atoms_sold,
         atoms_bought,
         sell_token_address,
+        order_type,
         protocol_fee,
         surplus_fee,
         network_fee,
@@ -51,10 +52,11 @@ network_fees as (
         tx_hash,
         order_uid,
         sell_token_address as token_address,
-        coalesce(
+        -- PRS disabled: int256 is not standard Trino, only available in Dune
+        coalesce( -- noqa: PRS
             network_fee,
             case
-                when sell_token_address = protocol_fee_token_address then surplus_fee - protocol_fee
+                when order_type = 'BUY' then surplus_fee - protocol_fee
                 else surplus_fee - cast(1.0 * protocol_fee * (atoms_sold - surplus_fee) / atoms_bought as int256)
             end,
             0
