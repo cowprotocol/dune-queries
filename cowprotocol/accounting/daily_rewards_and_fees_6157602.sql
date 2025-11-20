@@ -134,17 +134,37 @@ end
         from "query_6157807(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')"
         group by
     block_date
+),
+daily_eth_price
+as (
+select date(minute) block_date, avg(price) price_usd
+from prices.usd
+where blockchain='ethereum'
+and contract_address=0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2
+and date(minute)>= date(cast('{{start_time}}' as timestamp))
+and date(minute)<= date(cast('{{end_time}}' as timestamp))
+group by date(minute)
 )
-select
-    coalesce(rewards.block_date, fee.block_date, partner_fee.block_date) block_date
-    , rewards.slippage_native_token
-    , rewards.total_reward_native_token
-    , rewards.network_fee_native_token
-    , fee.protocol_fee_in_native_token
-    , partner_fee.partner_fee_part
-    , partner_fee.cow_dao_partner_fee_part
+
+select 
+    coalesce(rewards.block_date, fee.block_date, partner_fee.block_date) block_date ,
+    rewards.slippage_native_token,
+    rewards.total_reward_native_token,
+    rewards.network_fee_native_token,
+    fee.protocol_fee_in_native_token,
+    partner_fee.partner_fee_part,
+    partner_fee.cow_dao_partner_fee_part,
+    rewards.slippage_native_token * price_usd as slippage_usd,
+    rewards.total_reward_native_token * price_usd as total_reward_usd,
+    rewards.network_fee_native_token * price_usd as network_fee_usd,
+    fee.protocol_fee_in_native_token  * price_usd as protocol_fee_usd,
+    partner_fee.partner_fee_part  * price_usd as partner_fee_part_usd,
+    partner_fee.cow_dao_partner_fee_part  * price_usd as cow_dao_partner_fee_part_usd
 from daily_solver_rewards rewards
-    full outer join daily_protocol_fee_native fee on rewards.block_date = fee.block_date
-    full outer join partner_fee on rewards.block_date = partner_fee.block_date
-order by
-    block_date desc
+full outer join daily_protocol_fee_native fee
+on rewards.block_date = fee.block_date
+full outer join partner_fee 
+on rewards.block_date = partner_fee.block_date
+full outer join daily_eth_price
+on rewards.block_date = daily_eth_price.block_date
+order by block_date desc
