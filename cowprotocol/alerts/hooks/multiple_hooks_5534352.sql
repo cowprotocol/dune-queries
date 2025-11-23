@@ -17,14 +17,28 @@ all_hooks as (
     union all
     select * 
     from "query_5534333(lookback_time_unit='{{time_unit}}', lookback_units='{{units}}', blockchain='polygon')"    
+    union all
+    select * 
+    from "query_5534333(lookback_time_unit='{{time_unit}}', lookback_units='{{units}}', blockchain='lens')"    
+    union all
+    select * 
+    from "query_5534333(lookback_time_unit='{{time_unit}}', lookback_units='{{units}}', blockchain='bnb')"        
+    /* linea and plasma are not fully ready yet but should be soon
+    union all
+    select * 
+    from "query_5534333(lookback_time_unit='{{time_unit}}', lookback_units='{{units}}', blockchain='linea')"        
+    union all
+    select * 
+    from "query_5534333(lookback_time_unit='{{time_unit}}', lookback_units='{{units}}', blockchain='plasma')"    
+    */
 )
 select *
 from (
     select
         *,
-        count(1) over (partition by hook_call_data) as hook_calls
+        count(1) over (partition by hook_call_data, hook_target, hook_gas_limit) as hook_calls
     from all_hooks
-    where hook_app_id not in ('cow-swap://libs/hook-dapp-lib/permit', 'PERMIT_TOKEN', '1db4bacb661a90fb6b475fd5b585acba9745bc373573c65ecc3e8f5bfd5dee1f')
+    where hook_app_id not in ('cow-swap://libs/hook-dapp-lib/permit', 'PERMIT_TOKEN','BUILD_CUSTOM_HOOK', '1db4bacb661a90fb6b475fd5b585acba9745bc373573c65ecc3e8f5bfd5dee1f')
 )
 where
     hook_calls > 1
