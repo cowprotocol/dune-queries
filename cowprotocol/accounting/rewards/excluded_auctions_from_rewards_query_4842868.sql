@@ -116,3 +116,4 @@ select distinct
     bd.auction_id,
     m.multiplier
 from mainnet_nov_18_25_2025_auctions as m inner join "query_4351957(blockchain='{{blockchain}}')" as bd on m.environment = bd.environment and m.auction_id = bd.auction_id
+where m.blockchain = '{{blockchain}}'
