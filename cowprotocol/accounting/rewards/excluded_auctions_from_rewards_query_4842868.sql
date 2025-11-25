@@ -31,11 +31,88 @@ base_march_4_11_auctions_final as (
         *,
         0 as multiplier
     from base_march_4_11_auctions_prelim
+),
+
+mainnet_auction_ids as (
+    select *
+    from unnest (array[
+        11774697,
+        11774702,
+        11774703,
+        11774704,
+        11774705,
+        11774706,
+        11774708,
+        11774709,
+        11774710,
+        11774711,
+        11774714,
+        11774715,
+        11774716,
+        11774718,
+        11774735,
+        11774736,
+        11774739,
+        11774741,
+        11774743,
+        11774745,
+        11774747,
+        11774748,
+        11774750,
+        11774758,
+        11774769,
+        11774774,
+        11774788,
+        11774798,
+        11774801,
+        11775173,
+        11775196,
+        11775197,
+        11775201,
+        11775207,
+        11775221,
+        11775227,
+        11775228,
+        11775232,
+        11775233,
+        11775234,
+        11775235,
+        11775238,
+        11775251,
+        11775263,
+        11775651,
+        11775661,
+        11775666,
+        11775679,
+        11775683,
+        11775731,
+        11775736,
+        11775738,
+        11775746,
+        11775748
+    ]) as t(auction_id)
+),
+
+mainnet_nov_18_25_2025_auctions as (
+    select
+        'ethereum' as blockchain,
+        'prod' as environment,
+        0 as multiplier,
+        auction_id
+    from mainnet_auction_ids
 )
+
+
 ------------------------------
 
-select
+-- select
+--     bd.environment,
+--     bd.auction_id,
+--     ea.multiplier
+-- from base_march_4_11_auctions_final as ea inner join "query_4351957(blockchain='{{blockchain}}')" as bd on ea.environment = bd.environment and ea.auction_id = bd.auction_id
+-- union all
+select distinct
     bd.environment,
     bd.auction_id,
-    ea.multiplier
-from base_march_4_11_auctions_final as ea inner join "query_4351957(blockchain='{{blockchain}}')" as bd on ea.environment = bd.environment and ea.auction_id = bd.auction_id
+    m.multiplier
+from mainnet_nov_18_25_2025_auctions as m inner join "query_4351957(blockchain='{{blockchain}}')" as bd on m.environment = bd.environment and m.auction_id = bd.auction_id

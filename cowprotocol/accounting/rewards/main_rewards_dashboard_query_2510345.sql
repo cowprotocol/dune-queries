@@ -21,7 +21,7 @@ named_results as (
 ),
 
 -- BEGIN SOLVER REWARDS
-auction_data as (
+auction_data_pre as (
     select
         ad.environment,
         ad.auction_id,
@@ -34,16 +34,16 @@ auction_data as (
     where ad.auction_id >= auction_range.min_auction_id and ad.auction_id <= auction_range.max_auction_id
 ),
 
--- auction_data_filtered as (
---     select
---         ad.environment,
---         ad.auction_id,
---         ad.solver,
---         ad.total_network_fee,
---         ad.total_execution_cost,
---         ad.capped_payment * coalesce(ea.multiplier, 1) as capped_payment
---     from auction_data as ad left outer join "query_4842868(blockchain='{{blockchain}}')" as ea on ad.environment = ea.environment and ad.auction_id = ea.auction_id
--- ),
+auction_data as (
+    select
+        ad.environment,
+        ad.auction_id,
+        ad.solver,
+        ad.total_network_fee,
+        ad.total_execution_cost,
+        ad.capped_payment * coalesce(ea.multiplier, 1) as capped_payment
+    from auction_data as ad left outer join "query_4842868(blockchain='{{blockchain}}')" as ea on ad.environment = ea.environment and ad.auction_id = ea.auction_id
+),
 
 -- AKA Performance Rewards
 primary_rewards as (
