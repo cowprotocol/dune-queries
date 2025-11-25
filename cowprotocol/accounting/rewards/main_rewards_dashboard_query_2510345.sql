@@ -42,7 +42,7 @@ auction_data as (
         ad.total_network_fee,
         ad.total_execution_cost,
         ad.capped_payment * coalesce(ea.multiplier, 1) as capped_payment
-    from auction_data as ad left outer join "query_4842868(blockchain='{{blockchain}}')" as ea on ad.environment = ea.environment and ad.auction_id = ea.auction_id
+    from auction_data_pre as ad left outer join "query_4842868(blockchain='{{blockchain}}')" as ea on ad.environment = ea.environment and ad.auction_id = ea.auction_id
 ),
 
 -- AKA Performance Rewards
