@@ -14,7 +14,7 @@ static as (
         , '1inch fusion' as project        
     from oneinch.swaps, static
     where
-        flags['fusion'] 
+        coalesce(element_at(flags, 'fusion'), false) = true
         and block_time >= static.start_date
         and if(array_position(static.blockchains, '-=All=-') > 0, true, array_position(static.blockchains, blockchain) > 0) 
 )
