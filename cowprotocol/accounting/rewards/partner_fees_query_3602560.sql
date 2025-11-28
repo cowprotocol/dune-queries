@@ -151,7 +151,7 @@ per_recipient_partner_fees_prelim as (
             when '{{blockchain}}' = 'bnb' and partner_recipient = 0x1713b79e3dbb8a76d80e038ca701a4a781ac69eb then sum(0.75 * raw_integrator_fee_in_eth)
             when '{{blockchain}}' = 'bnb' and partner_recipient = 0xc542c2f197c4939154017c802b0583c596438380 then sum(0.875 * raw_integrator_fee_in_eth)
             -- default
-            else sum(0.5 * raw_integrator_fee_in_eth)
+            else sum(0.75 * raw_integrator_fee_in_eth)
         end as partner_fee_part
     from
         per_trade_partner_fees
