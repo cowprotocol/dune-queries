@@ -30,7 +30,7 @@ protocol_fees_collected as (
             when partner_fee_recipient is not null then partner_fee * protocol_fee_native_price / pow(10, 18)
         end as partner_fee_native_token,
         protocol_fee * protocol_fee_native_price / pow(10, 18) - coalesce(case when partner_fee_recipient is not null then cast(partner_fee as int256) * protocol_fee_native_price / pow(10, 18) end, 0) as net_protocol_fee_in_native_token, --noqa: AL03, PRS
-        protocol_fee_token as surplus_token
+        protocol_fee_token as surplus_token,
         quote_gas_cost,
         quote_sell_token_price,
         quote_sell_amount,
