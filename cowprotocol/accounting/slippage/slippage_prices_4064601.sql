@@ -178,6 +178,7 @@ wrapped_native_token as (
             when 'polygon' then 0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270 -- WPOL
             when 'lens' then 0x6bdc36e20d267ff0dd6097799f82e78907105e2f -- WGHO
             when 'bnb' then 0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c -- WBNB
+            when 'linea' then 0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f -- WETH
         end as native_token_address
 ),
 
