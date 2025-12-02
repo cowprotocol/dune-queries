@@ -29,8 +29,8 @@ protocol_fees_collected as (
         case
             when partner_fee_recipient is not null then partner_fee * protocol_fee_native_price / pow(10, 18)
         end as partner_fee_native_token,
-        protocol_fee * protocol_fee_native_price / pow(10, 18) - coalesce(case when partner_fee_recipient is not null then cast(partner_fee as int256) * protocol_fee_native_price / pow(10, 18) end, 0) as net_protocol_fee_in_native_token,
-        protocol_fee_token as surplus_token,
+        protocol_fee * protocol_fee_native_price / pow(10, 18) - coalesce(case when partner_fee_recipient is not null then cast(partner_fee as int256) * protocol_fee_native_price / pow(10, 18) end, 0) as net_protocol_fee_in_native_token, --noqa: AL03, PRS
+        protocol_fee_token as surplus_token
         quote_gas_cost,
         quote_sell_token_price,
         quote_sell_amount,
@@ -81,8 +81,13 @@ select
         when '{{blockchain}}' = 'bnb' and partner_recipient = '0x352a3666b27bb09aca7b4a71ed624429b7549551' then partner_fee_native_token * 0.85
         when '{{blockchain}}' = 'bnb' and partner_recipient = '0xAf1c727B605530AcDb00906a158E817f41aFD778' then partner_fee_native_token * 0.85
         when '{{blockchain}}' = 'bnb' and partner_recipient = '0x9c9aA90363630d4ab1D9dbF416cc3BBC8d3Ed502' then partner_fee_native_token * 0.85
+        -- linea
+        when '{{blockchain}}' = 'linea' and partner_recipient = '0x63695Eee2c3141BDE314C5a6f89B98E62808d716' then partner_fee_native_token * 0.90
+        when '{{blockchain}}' = 'linea' and partner_recipient = '0x352a3666b27bb09aca7b4a71ed624429b7549551' then partner_fee_native_token * 0.85
+        when '{{blockchain}}' = 'linea' and partner_recipient = '0xAf1c727B605530AcDb00906a158E817f41aFD778' then partner_fee_native_token * 0.85
+        when '{{blockchain}}' = 'linea' and partner_recipient = '0x9c9aA90363630d4ab1D9dbF416cc3BBC8d3Ed502' then partner_fee_native_token * 0.85
         -- default
-        when partner_recipient is not null then partner_fee_native_token * 0.5
+        when partner_recipient is not null then partner_fee_native_token * 0.75
     end) as partner_fee_part,
     sum(case
         -- mainnet
@@ -120,8 +125,13 @@ select
         when '{{blockchain}}' = 'bnb' and partner_recipient = '0x352a3666b27bb09aca7b4a71ed624429b7549551' then partner_fee_native_token * 0.15
         when '{{blockchain}}' = 'bnb' and partner_recipient = '0xAf1c727B605530AcDb00906a158E817f41aFD778' then partner_fee_native_token * 0.15
         when '{{blockchain}}' = 'bnb' and partner_recipient = '0x9c9aA90363630d4ab1D9dbF416cc3BBC8d3Ed502' then partner_fee_native_token * 0.15
+        -- linea
+        when '{{blockchain}}' = 'linea' and partner_recipient = '0x63695Eee2c3141BDE314C5a6f89B98E62808d716' then partner_fee_native_token * 0.10
+        when '{{blockchain}}' = 'linea' and partner_recipient = '0x352a3666b27bb09aca7b4a71ed624429b7549551' then partner_fee_native_token * 0.15
+        when '{{blockchain}}' = 'linea' and partner_recipient = '0xAf1c727B605530AcDb00906a158E817f41aFD778' then partner_fee_native_token * 0.15
+        when '{{blockchain}}' = 'linea' and partner_recipient = '0x9c9aA90363630d4ab1D9dbF416cc3BBC8d3Ed502' then partner_fee_native_token * 0.15
         -- default
-        when partner_recipient is not null then partner_fee_native_token * 0.5
+        when partner_recipient is not null then partner_fee_native_token * 0.25
     end) as cow_dao_partner_fee_part
 from protocol_fees_collected as f
 inner join cow_protocol_{{blockchain}}.trades as t
