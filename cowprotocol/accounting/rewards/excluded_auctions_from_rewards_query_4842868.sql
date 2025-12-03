@@ -100,6 +100,75 @@ mainnet_nov_18_25_2025_auctions as (
         0 as multiplier,
         auction_id
     from mainnet_auction_ids
+),
+
+base_auction_ids as (
+    select *
+    from unnest (array[
+        26267414,
+        26267417,
+        26267418,
+        26267420,
+        26267421,
+        26267423,
+        26267424,
+        26267426,
+        26267427,
+        26267428,
+        26267429,
+        26267430,
+        26267431,
+        26267432,
+        26267433,
+        26267434,
+        26267435,
+        26267436,
+        26267437,
+        26267438,
+        26267439,
+        26267441,
+        26267442,
+        26267443,
+        26267444,
+        26267445,
+        26267446,
+        26267449,
+        26267450,
+        26267452,
+        26267453,
+        26267454,
+        26267455,
+        26267456,
+        26267459,
+        26267460,
+        26267462,
+        26267463,
+        26267464,
+        26267468,
+        26267469,
+        26267474,
+        26267485,
+        26267487,
+        26267488,
+        26267489,
+        26267492,
+        26267493,
+        26267495,
+        26267497,
+        26267500,
+        26267503,
+        26267504,
+        26267505
+    ]) as t(auction_id)
+),
+
+base_nov25_dec2_2025_auctions as (
+    select
+        'base' as blockchain,
+        'prod' as environment,
+        0 as multiplier,
+        auction_id
+    from base_auction_ids
 )
 
 
@@ -116,4 +185,11 @@ select distinct
     bd.auction_id,
     m.multiplier
 from mainnet_nov_18_25_2025_auctions as m inner join "query_4351957(blockchain='{{blockchain}}')" as bd on m.environment = bd.environment and m.auction_id = bd.auction_id
+where m.blockchain = '{{blockchain}}'
+union all
+select distinct
+    bd.environment,
+    bd.auction_id,
+    m.multiplier
+from base_nov25_dec2_2025_auctions as m inner join "query_4351957(blockchain='{{blockchain}}')" as bd on m.environment = bd.environment and m.auction_id = bd.auction_id
 where m.blockchain = '{{blockchain}}'
