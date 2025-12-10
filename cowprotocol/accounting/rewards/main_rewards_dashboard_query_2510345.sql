@@ -41,7 +41,19 @@ auction_data as (
         ad.solver,
         ad.total_network_fee,
         ad.total_execution_cost,
-        ad.capped_payment * coalesce(ea.multiplier, 1) as capped_payment
+        case
+            when '{{blockchain}}' = 'gnosis'
+                 and (
+                     (ad.environment = 'prod'
+                      and ad.auction_id between 14367217 and 14375601)
+                     or
+                     (ad.environment = 'barn'
+                      and ad.auction_id between 173770641 and 174082289)
+                 )
+                 and ad.capped_payment * coalesce(ea.multiplier, 1) < 0
+            then 0
+            else ad.capped_payment * coalesce(ea.multiplier, 1)
+        end as capped_payment
     from auction_data_pre as ad left outer join "query_4842868(blockchain='{{blockchain}}')" as ea on ad.environment = ea.environment and ad.auction_id = ea.auction_id
 ),
 
