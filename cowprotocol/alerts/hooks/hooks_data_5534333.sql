@@ -82,7 +82,7 @@ inner join hooks_union as hooks
 left join traces
     on hooks.call_data = traces.input
     and t.tx_hash = traces.tx_hash
-    and lower(hooks.target) = cast(traces.to as varchar)
+    and lower(hooks.target) = lower(cast(traces.to as varchar))
 where
     t.block_time >= date_add('{{lookback_time_unit}}', -{{lookback_units}}, now())
     and hooks.call_data is not null -- makes sure the order contains a hook
