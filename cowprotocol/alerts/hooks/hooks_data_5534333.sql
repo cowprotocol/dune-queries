@@ -56,10 +56,10 @@ hooks_union as (
     select * from pre_hooks
 ),
 traces as (
-    select success, block_time, tx_hash, input
+    select success, block_time, tx_hash, input, to
     from {{blockchain}}.traces as t 
     where
-        t.block_time >= date_add('{{lookback_time_unit}}', -{{lookback_units}}, now())
+        t.block_date >= date(date_add('{{lookback_time_unit}}', -{{lookback_units}}, now())) -- using date bc it's the partition field
         and t."from" in (0x01dcb88678aedd0c4cc9552b20f4718550250574, 0x60bf78233f48ec42ee3f101b9a05ec7878728006) --hooks trampoline
 )
 select           
@@ -79,8 +79,10 @@ select
 from cow_protocol_{{blockchain}}.trades as t
 inner join hooks_union as hooks
     on hooks.app_hash = t.app_data
-left outer join traces
+left join traces
     on hooks.call_data = traces.input
-where 
+    and t.tx_hash = traces.tx_hash
+    and lower(hooks.target) = lower(cast(traces.to as varchar))
+where
     t.block_time >= date_add('{{lookback_time_unit}}', -{{lookback_units}}, now())
     and hooks.call_data is not null -- makes sure the order contains a hook
