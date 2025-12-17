@@ -24,7 +24,7 @@ candidate_batches as (
     select
         block_number,
         tx_hash,
-        gas_price * gas_used as execution_cost
+        cast(gas_price as decimal(38, 0)) * cast(gas_used  as decimal(38, 0)) as execution_cost
     from cow_protocol_{{blockchain}}.batches
     where
         block_date >= cast('{{start_time}}' as timestamp) - interval '1' day
