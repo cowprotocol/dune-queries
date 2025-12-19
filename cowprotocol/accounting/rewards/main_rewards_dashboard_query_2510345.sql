@@ -79,7 +79,7 @@ order_quotes as (
     select
         od.order_uid,
         case
-            when coalesce(is_eligible_for_quote_reward, true) is true then od.quote_solver
+            when coalesce(is_eligible_for_quote_reward, true) then od.quote_solver
             else null
         end as quote_solver
     from "query_4364122(blockchain='{{blockchain}}')" as od
