@@ -78,7 +78,10 @@ conversion_prices as (
 order_quotes as (
     select
         od.order_uid,
-        od.quote_solver
+        case
+            when coalesce(is_eligible_for_quote_reward, true) is true then od.quote_solver
+            else null
+        end as quote_solver
     from "query_4364122(blockchain='{{blockchain}}')" as od
     inner join auction_range on od.environment = auction_range.environment
     where od.auction_id >= auction_range.min_auction_id and od.auction_id <= auction_range.max_auction_id
