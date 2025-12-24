@@ -45,7 +45,7 @@ native_prices as (
 , prep_rewards as (
 -- solver rewards are done on a per auction-solver basis (an auction may have multiple batches from the same solver)
     select 
-          t.block_time
+        t.block_time
         , t.tx_hash
         , t.order_uid
         , rod.auction_id
@@ -84,23 +84,22 @@ native_prices as (
 , quote_cap_mapping as (
     select *
     from (
-            values
-            -- Pre CIP 72
-            (timestamp '2010-01-01 00:00', timestamp '2025-08-12 00:00', 0.0006, 6, 'ethereum'),
-            (timestamp '2010-01-01 00:00', timestamp '2025-08-12 00:00', 0.15,   6, 'gnosis'),
-            (timestamp '2010-01-01 00:00', timestamp '2025-08-12 00:00', 0.0002, 6, 'base'),
-            (timestamp '2010-01-01 00:00', timestamp '2025-08-12 00:00', 0.0002, 6, 'arbitrum'),
-            (timestamp '2010-01-01 00:00', timestamp '2025-08-12 00:00', 0.0005, 6, 'avalanche_c'),
-            (timestamp '2010-01-01 00:00', timestamp '2025-08-12 00:00', 0.5,    6, 'polygon'),
-            -- Post CIP 72
-            (timestamp '2025-08-12 00:00', timestamp '2099-01-01 00:00', 0.0007,  6, 'ethereum'),
-            (timestamp '2025-08-12 00:00', timestamp '2099-01-01 00:00', 0.15,    6, 'gnosis'),
-            (timestamp '2025-08-12 00:00', timestamp '2099-01-01 00:00', 0.00024, 6, 'base'),
-            (timestamp '2025-08-12 00:00', timestamp '2099-01-01 00:00', 0.00024, 6, 'arbitrum'),
-            (timestamp '2025-08-12 00:00', timestamp '2099-01-01 00:00', 0.0006,  6, 'avalanche_c'),
-            (timestamp '2025-08-12 00:00', timestamp '2099-01-01 00:00', 0.6,     6, 'polygon')
-    
-        ) as t(from_ts, until_ts, quote_cap_native, quote_cap_cow, blockchain)
+        values
+        -- Pre CIP 72
+        (timestamp '2010-01-01 00:00', timestamp '2025-08-12 00:00', 0.0006, 6, 'ethereum'),
+        (timestamp '2010-01-01 00:00', timestamp '2025-08-12 00:00', 0.15,   6, 'gnosis'),
+        (timestamp '2010-01-01 00:00', timestamp '2025-08-12 00:00', 0.0002, 6, 'base'),
+        (timestamp '2010-01-01 00:00', timestamp '2025-08-12 00:00', 0.0002, 6, 'arbitrum'),
+        (timestamp '2010-01-01 00:00', timestamp '2025-08-12 00:00', 0.0005, 6, 'avalanche_c'),
+        (timestamp '2010-01-01 00:00', timestamp '2025-08-12 00:00', 0.5,    6, 'polygon'),
+        -- Post CIP 72
+        (timestamp '2025-08-12 00:00', timestamp '2099-01-01 00:00', 0.0007,  6, 'ethereum'),
+        (timestamp '2025-08-12 00:00', timestamp '2099-01-01 00:00', 0.15,    6, 'gnosis'),
+        (timestamp '2025-08-12 00:00', timestamp '2099-01-01 00:00', 0.00024, 6, 'base'),
+        (timestamp '2025-08-12 00:00', timestamp '2099-01-01 00:00', 0.00024, 6, 'arbitrum'),
+        (timestamp '2025-08-12 00:00', timestamp '2099-01-01 00:00', 0.0006,  6, 'avalanche_c'),
+        (timestamp '2025-08-12 00:00', timestamp '2099-01-01 00:00', 0.6,     6, 'polygon')
+    ) as t(from_ts, until_ts, quote_cap_native, quote_cap_cow, blockchain)
 )
 , conv_native_to_cow as (
     select
@@ -125,7 +124,7 @@ native_prices as (
         on date_trunc('week', prep.block_time - interval '1' day) + interval '8' day = p.date    
 )
 select 
-      fees.blockchain
+    fees.blockchain
     , fees.block_time 
     , fees.app_code
     , fees.token_pair    
