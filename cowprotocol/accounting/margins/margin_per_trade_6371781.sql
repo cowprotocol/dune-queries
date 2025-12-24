@@ -6,12 +6,15 @@ Per-trade Solver rewards are an estimation and will not perfectly match the over
 */
 with
 native_prices as (
-    select timestamp, price 
+    select 
+        timestamp,
+        price 
     from prices.hour
-    where timestamp >= timestamp '{{start_time}}'
+    where 
+        timestamp >= timestamp '{{start_time}}'
         and timestamp < timestamp '{{end_time}}'
         and blockchain = '{{blockchain}}'
-        and contract_address IN (select token_address from dune.blockchains where name = '{{blockchain}}')
+        and contract_address in (select token_address from dune.blockchains where name = '{{blockchain}}')
 )
 , fees_per_trade as (
     select 
@@ -52,7 +55,8 @@ native_prices as (
         , rbd.capped_payment/1e18 as reward_auction_solver
         , sum(t.usd_value) over (partition by rod.auction_id, rod.solver) as volume_auction_solver
         -- if usd value of trade is missing then attribute the whole auction reward to that trade - may overestimate rewards
-        , if(t.usd_value != 0 
+        , if(
+            t.usd_value != 0 
             , rbd.capped_payment/1e18 * t.usd_value / sum(t.usd_value) over (partition by rod.auction_id, rod.solver)
             , rbd.capped_payment/1e18
         ) as trade_solver_reward
@@ -79,8 +83,8 @@ native_prices as (
 --select * from solving_rewards order by volume desc
 , quote_cap_mapping as (
     select *
-    from 
-        (values
+    from (
+            values
             -- Pre CIP 72
             (timestamp '2010-01-01 00:00', timestamp '2025-08-12 00:00', 0.0006, 6, 'ethereum'),
             (timestamp '2010-01-01 00:00', timestamp '2025-08-12 00:00', 0.15,   6, 'gnosis'),
