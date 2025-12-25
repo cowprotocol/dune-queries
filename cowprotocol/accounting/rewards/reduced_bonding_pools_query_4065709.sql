@@ -113,6 +113,22 @@ reduced_bonding_pools as (
         from_hex('0x8c77268262cd0de611e543dfd7e9b496793acb86') as pool_address,
         from_hex('0x154FB360A14c99a4bfDa310c4A32bB69B259E476') as solver_address,
         timestamp '2025-08-22 09:54:23' as creation_date 
+    union distinct
+    select
+        'prod-BRRRolver' as solver_name,
+        'Reduced-CoW-DAO' as pool_name,
+        'ethereum' as blockchain,
+        from_hex('0x0a9bd5a29e49502cdc100aa364c5de3b436e52c9') as pool_address,
+        from_hex('0xb222da0f9c22ad2addcb0b0d6b150f398e44157a') as solver_address,  
+        timestamp '2025-06-25 16:30:47' as creation_date
+    union distinct
+    select
+        'barn-BRRRolver' as solver_name,
+        'Reduced-CoW-DAO' as pool_name,
+        'ethereum' as blockchain,
+        from_hex('0x0a9bd5a29e49502cdc100aa364c5de3b436e52c9') as pool_address,
+        from_hex('0xb222da076c21b7784a975dd54fd09c0f7c21262f') as solver_address,  
+        timestamp '2025-06-25 16:30:47' as creation_date    
 )
 
 select *
