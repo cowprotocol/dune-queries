@@ -1,17 +1,18 @@
---- Markout calculation for non-intent DEX aggregator trades. Compares the price of dex.prices table at the time of the trade to the executed amounts and factors in gas costs.
---- Returns a per transaction hash buy and sell USD value, gas cost in USD and the resulting markout.
+-- Markout calculation for non-intent DEX aggregator trades. 
+-- Compares the price of prices.usd table at the time of the trade to the executed amounts and factors in gas costs.
+-- Returns buy and sell USD value, gas cost in USD and the resulting markout, all per tx hash.
 
 -- Parameters:
---  {{project}} - The aggregator to look at
---  {{start_date}} - Start date for when trades should be counted
---  {{end_date}} - End date for when trades should be counted
+--  {{project}} - The aggregator to consider
+--  {{start_date}} - Start date for when trades should be counted, inclusive
+--  {{end_date}} - End date for when trades should be counted, exclusive
 --  {{blockchain}} - The chain on which trades should be counted
---  {{native_token}} - The native token of the blockchain (e.g. ETH for Ethereum)
 --  {{min_usd_amount}} - Minimum USD amount of the trade to be considered
 --  {{max_usd_amount}} - Maximum USD amount of the trade to be considered
 
-with markout_per_trade as (
-    select 
+with
+markout_per_trade as (
+    select
         tx_hash,
         token_bought_amount,
         token_sold_amount,
@@ -35,38 +36,54 @@ with markout_per_trade as (
         and buy.blockchain = t.blockchain
     where
         t.blockchain = '{{blockchain}}'
-        and project = '{{project}}'
+        and if(project='0x API', '0x', project) = '{{project}}' -- this fixes a weird parameter bug 
         and t.block_time >= timestamp '{{start_date}}'
         and t.block_time < timestamp '{{end_date}}'
-        and amount_usd >= {{min_usd_amount}} 
-        and amount_usd <= {{max_usd_amount}}
+        and amount_usd between {{min_usd_amount}} and {{max_usd_amount}}
 ),
-
-markout_by_tx as (
-    select 
-        tx_hash, 
+-- remove 1inch intent based txs
+oneinch_intent_based as (
+    select distinct tx_hash
+    from oneinch.swaps
+    where 
+        mode in ('fusion', 'cross-chain')
+        and block_time >= timestamp '{{start_date}}'
+        and block_time < timestamp '{{end_date}}'
+),
+agg_by_tx as (
+    select
+        a.tx_hash, 
         sum(buy_usd_value) as buy_usd_value,
         sum(sell_usd_value) as sell_usd_value
-    from markout_per_trade
+    from markout_per_trade as a
+    left join oneinch_intent_based as b
+        on a.tx_hash = b.tx_hash
+    where b.tx_hash is null
     group by 1
 )
-
+, native_prices as (
+    select
+        minute,
+        price
+    from prices.usd
+    where 
+        contract_address = (select price_address from tokens.native where chain = '{{blockchain}}')
+        and blockchain = '{{blockchain}}'
+        and minute >= timestamp '{{start_date}}'
+        and minute < timestamp '{{end_date}}'
+)
 select 
-    tx_hash,
-    buy_usd_value,
-    sell_usd_value,
-    (gas_used * gas_price * eth.price) / 1e18 as gas_usd,
-    (buy_usd_value/(sell_usd_value + (gas_used * gas_price * eth.price) / 1e18 )) - 1.0000 as markout
-from markout_by_tx
-join {{blockchain}}.transactions
-    on tx_hash = hash
-join prices.usd as eth
-    on eth.contract_address = {{native_token}}
-    and eth.minute = date_trunc('minute', block_time)
-    and eth.blockchain = '{{blockchain}}'
-    -- filter out extreme native prices
-    and buy_usd_value >= {{min_usd_amount}}
-    and buy_usd_value <= {{max_usd_amount}}
-    and sell_usd_value >= {{min_usd_amount}}
-    and sell_usd_value <= {{max_usd_amount}}
-order by markout asc
+    aggtx.tx_hash,
+    aggtx.buy_usd_value,
+    aggtx.sell_usd_value,
+    (tx.gas_used * tx.gas_price * np.price) / 1e18 as gas_usd,
+    (aggtx.buy_usd_value/(aggtx.sell_usd_value + (tx.gas_used * tx.gas_price * np.price) / 1e18 )) - 1.0000 as markout
+from agg_by_tx as aggtx
+join {{blockchain}}.transactions as tx
+    on aggtx.tx_hash = tx.hash
+join native_prices as np
+    on np.minute = date_trunc('minute', tx.block_time)
+where
+    aggtx.buy_usd_value between {{min_usd_amount}} and {{max_usd_amount}}
+    and aggtx.sell_usd_value between {{min_usd_amount}} and {{max_usd_amount}}
+order by markout
