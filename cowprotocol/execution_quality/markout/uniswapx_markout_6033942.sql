@@ -8,11 +8,14 @@
 --  {{max_usd_amount}} - Maximum USD amount of the trade to be considered
 
 select 
+    block_time,
     tx_hash,
     token_bought_amount,
     token_sold_amount,
     token_bought_address,
     token_sold_address,
+    sell_token,
+    buy_token,
     sell_price as sellprice,
     buy_price as buyprice,
     amount_usd,
@@ -22,7 +25,5 @@ where
     blockchain = '{{blockchain}}'
     and block_time >= timestamp '{{start_date}}'
     and block_time < timestamp '{{end_date}}'
-    and token_bought_amount * buy_price >= {{min_usd_amount}}
-    and token_bought_amount * buy_price <= {{max_usd_amount}}
-    and token_sold_amount * sell_price >= {{min_usd_amount}}
-    and token_sold_amount * sell_price <= {{max_usd_amount}}
+    and token_bought_amount * buy_price between {{min_usd_amount}} and {{max_usd_amount}}
+    and token_sold_amount * sell_price between {{min_usd_amount}} and {{max_usd_amount}}
