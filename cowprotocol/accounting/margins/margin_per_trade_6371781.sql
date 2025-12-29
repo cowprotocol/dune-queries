@@ -1,8 +1,7 @@
 /*
-Margin = Protocol Fees + CoW's cut of Partner Fee - Quote Rewards - Solver Rewards*
-*As per our auction mechanism, solving rewards are not attributed on a trade basis but rather on a solver-auction basis. 
-Our approach then is to weigh the rewards by the volume from each trade within that set
-Per-trade Solver rewards are an estimation and will not perfectly match the overall rewards provided by CoW
+Margin = Protocol Fees + CoW's cut of Partner Fee - Quote Rewards - Solver Rewards - Network Fees
+As per our auction mechanism, Solver Rewards are not attributed on a trade basis but rather on a solver-auction basis. Our approach then is to weigh the rewards by the volume from each trade within that set.
+Per-trade Solver rewards are an estimation and will not perfectly match the overall rewards provided by CoW. Slippage for example is not considered in this analysis for simplicity.
 */
 with
 native_prices as (
@@ -22,6 +21,7 @@ native_prices as (
         '{{blockchain}}' as blockchain,
         t.tx_hash,
         t.order_uid,
+        t.trader,
         t.usd_value,        
         ad.app_code,
         t.token_pair,
@@ -51,16 +51,19 @@ native_prices as (
         , rod.auction_id
         , rod.solver
         , rod.quote_solver
-        
         , rbd.capped_payment/1e18 as reward_auction_solver
-        , sum(t.usd_value) over (partition by rod.auction_id, rod.solver) as volume_auction_solver
         -- if usd value of trade is missing then attribute the whole auction reward to that trade - may overestimate rewards
         , if(
             t.usd_value != 0 
             , rbd.capped_payment/1e18 * t.usd_value / sum(t.usd_value) over (partition by rod.auction_id, rod.solver)
             , rbd.capped_payment/1e18
-        ) as trade_solver_reward
-        
+        ) as trade_solver_reward        
+        -- if usd value of trade is missing then attribute the whole batch network fee to that trade - may overestimate network fees
+        , if(
+            t.usd_value != 0 
+            , rbd.network_fee/1e18 * t.usd_value / sum(t.usd_value) over (partition by t.tx_hash)
+            , rbd.network_fee/1e18
+        ) as trade_network_fee
     from (select distinct * from "query_4364122(blockchain='{{blockchain}}')") as rod
     join cow_protocol_{{blockchain}}.trades as t
         on rod.order_uid = t.order_uid
@@ -136,9 +139,11 @@ select
     , fees.partner_fee_cow_share
     , qr.quote_reward as quote_reward
     , sr.solver_reward as solver_reward    
-    , revenue - quote_reward - solver_reward as margin
-    , (revenue - quote_reward - solver_reward) / revenue as margin_pct
-    , 1e4*(revenue - quote_reward - solver_reward) / (fees.usd_value / np.price) as margin_per_vol_bps
+    , sr.trade_network_fee as network_fee
+    , revenue - quote_reward - solver_reward - sr.trade_network_fee as margin
+    , (revenue - quote_reward - solver_reward - sr.trade_network_fee) / revenue as margin_pct
+    , 1e4*(revenue - quote_reward - solver_reward - sr.trade_network_fee) / (fees.usd_value / np.price) as margin_per_vol_bps
+    , fees.trader
     , fees.tx_hash
     , fees.order_uid   
 from fees_per_trade as fees 
@@ -153,5 +158,3 @@ left join native_prices as np
 where
     fees.block_time < current_date -- remove misleading data, as some tables refresh daily
 order by usd_value desc
-
-
