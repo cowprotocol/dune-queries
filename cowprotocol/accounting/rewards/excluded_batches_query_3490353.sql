@@ -332,7 +332,7 @@ union all
 select distinct tx_hash
 from cow_protocol_gnosis.trades
 where
-    -- for week of Dec 23 - Dec 30, 2025 on Gnosis due issuing a refund the user
+    -- for week of Dec 23 - Dec 30, 2025 on Gnosis due to issuing a refund to the user
     -- for suboptimal execution
     tx_hash = 0xfd93f963adb4d79eafb624dbce4befcc08bf56db292615ddaea50e008659df2c
     or tx_hash = 0xD492B39F07FD85A791249A2A40A9E59B5BC1859CF3517D72C613E5190E388376
@@ -340,3 +340,6 @@ where
     or tx_hash = 0x37960545C4D791D3D0A15ADE958C7C206512726F5BED324F0C531ED9E79B508F
     or tx_hash = 0x3C98FAC0B4E3948319E178E9C6BD8B8102B6103668C23D81B30F13CE730775C9
     or tx_hash = 0x586CDAB4451C48CE894AD416A4F54BACC8DA53F6D080B1F19F528385EAF65A58
+    -- for week of Dec 30-Jan 6, 2025, on Gnosis due to issuing a refund to the user
+    -- for suboptimal execution
+    or tx_hash = 0xe5b165bda18b06ca41e9edc8b2530b2b30b16c2a3b478854013387b65914611d
