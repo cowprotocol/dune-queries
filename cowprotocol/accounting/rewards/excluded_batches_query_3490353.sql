@@ -285,6 +285,9 @@ where
     -- for the week of December 16 - December 23, 2025
     or tx_hash = 0x0170A71C3F1240C9770723A4E7790F4FAB9BA35FE8B08E1509506F3BECB9D3D2
 
+    -- for the week of December 23 - December 30, 2025
+    or tx_hash = 0x2586185b564b4638d55e0f05a3caa950eb1cbe092a5a321c3c1eeab7ab50749b
+
 
 -- Base
 union all
