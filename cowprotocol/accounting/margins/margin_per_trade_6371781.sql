@@ -50,7 +50,7 @@ native_prices as (
         , t.order_uid
         , rod.auction_id
         , rod.solver
-        , rod.quote_solver
+        , if(coalesce(is_eligible_for_quote_reward, true), rod.quote_solver) as quote_solver
         , rbd.capped_payment/1e18 as reward_auction_solver
         -- if usd value of trade is missing then attribute the whole auction reward to that trade - may overestimate rewards
         , if(
