@@ -323,3 +323,12 @@ from cow_protocol_bnb.trades
 where
     -- for week of Nov 11 - Nov 18, 2025 on BNB
     tx_hash = 0x193E147809099DE19B08EE6B7AAD699507C176AFACE8B47233473909BA948D1F
+
+-- GNOSIS
+union all
+select distinct tx_hash
+from cow_protocol_gnosis.trades
+where
+    -- for week of Dec 23 - Dec 30, 2025 on Gnosis due issuing a refund the user
+    -- for suboptimal execution
+    tx_hash = 0xfd93f963adb4d79eafb624dbce4befcc08bf56db292615ddaea50e008659df2c
