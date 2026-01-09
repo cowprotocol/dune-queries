@@ -36,7 +36,7 @@ select *
 from (
     select
         *,
-        count(1) over (partition by order_uid, hook_call_data, hook_target, hook_gas_limit) as hook_calls
+        count(1) over (partition by tx_hash, order_uid, hook_call_data, hook_target, hook_gas_limit) as hook_calls
     from all_hooks
     where hook_app_id not in ('cow-swap://libs/hook-dapp-lib/permit', 'PERMIT_TOKEN','BUILD_CUSTOM_HOOK', '1db4bacb661a90fb6b475fd5b585acba9745bc373573c65ecc3e8f5bfd5dee1f')
 )
