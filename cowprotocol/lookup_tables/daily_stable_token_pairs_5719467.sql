@@ -9,11 +9,13 @@ relevant_tokens as (
         block_date as ref_date
         , '{{blockchain}}' as blockchain
         -- the following logic makes fetching the native token price possible
-        , if(sell_token_address!=0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+        , if(
+            sell_token_address!=0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
             , sell_token_address
             , (select token_address from dune.blockchains where name = '{{blockchain}}')
         ) as sell_token_address 
-        , if(buy_token_address!=0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+        , if(
+            buy_token_address!=0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
             , buy_token_address
             , (select token_address from dune.blockchains where name = '{{blockchain}}')
         ) as buy_token_address
@@ -27,13 +29,16 @@ relevant_tokens as (
     having sum(usd_value) > 100 -- performance improvement w/ minimal impact
 )
 , daily_relevant_prices as (
-    select timestamp as day, contract_address, price
+    select 
+        timestamp as day
+        , contract_address
+        , price
     from prices.day as p 
     join (
-            select distinct buy_token_address  as token from relevant_tokens
-            union 
-            select distinct sell_token_address as token from relevant_tokens
-        ) as t
+        select distinct buy_token_address  as token from relevant_tokens
+        union distinct
+        select distinct sell_token_address as token from relevant_tokens
+    ) as t
         on p.contract_address = t.token
     where 
         timestamp between date_add('day', -6, timestamp '{{start_date}}') and timestamp '{{end_date}}'
@@ -59,11 +64,13 @@ relevant_tokens as (
         ref_date
         , blockchain
         -- following logis is to undo what was done before and keep it joinable with the cp trades tables
-        , if(sell_token_address!=(select token_address from dune.blockchains where name = '{{blockchain}}')
+        , if(
+            sell_token_address!=(select token_address from dune.blockchains where name = '{{blockchain}}')
             ,sell_token_address
             ,0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
         ) as sell_token_address        
-        , if(buy_token_address!=(select token_address from dune.blockchains where name = '{{blockchain}}')
+        , if(
+            buy_token_address!=(select token_address from dune.blockchains where name = '{{blockchain}}')
             ,buy_token_address
             ,0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
         ) as buy_token_address
@@ -85,6 +92,6 @@ select*
 from final_stats
 where
     (relative_volatility < 0.007   -- relative volatility < 0.7%
-        and xrate_range < 0.025    -- xrate range within 2.5%
-        and days_of_data > 4) -- at least 5 days of xrate data
+    and xrate_range < 0.025    -- xrate range within 2.5%
+    and days_of_data > 4) -- at least 5 days of xrate data
     or token_pair like '%ETH%ETH'
