@@ -94,5 +94,5 @@ where (
     relative_volatility < 0.007   -- relative volatility < 0.7%
     and xrate_range < 0.025    -- xrate range within 2.5%
     and days_of_data > 4    -- at least 5 days of xrate data
-    ) 
-    or token_pair like '%ETH%ETH'
+) 
+or token_pair like '%ETH%ETH'
