@@ -15,7 +15,21 @@ with all_hooks as (
     from "query_5534333(lookback_time_unit='{{time_unit}}', lookback_units='{{units}}', blockchain='avalanche_c')"
     union all
     select * 
-    from "query_5534333(lookback_time_unit='{{time_unit}}', lookback_units='{{units}}', blockchain='polygon')"
+    from "query_5534333(lookback_time_unit='{{time_unit}}', lookback_units='{{units}}', blockchain='polygon')"    
+    union all
+    select * 
+    from "query_5534333(lookback_time_unit='{{time_unit}}', lookback_units='{{units}}', blockchain='lens')"    
+    union all
+    select * 
+    from "query_5534333(lookback_time_unit='{{time_unit}}', lookback_units='{{units}}', blockchain='bnb')"        
+    /* linea and plasma are only partially available at the moment but should be done soon enough
+    union all
+    select * 
+    from "query_5534333(lookback_time_unit='{{time_unit}}', lookback_units='{{units}}', blockchain='linea')"        
+    union all
+    select * 
+    from "query_5534333(lookback_time_unit='{{time_unit}}', lookback_units='{{units}}', blockchain='plasma')"    
+    */
 )
 select * 
 from all_hooks
