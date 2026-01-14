@@ -1,5 +1,5 @@
 /*
-Margin = Protocol Fees + CoW's cut of Partner Fee - Quote Rewards - Solver Rewards* - Gas Reimbursements
+Margin = Protocol Fees + CoW's cut of Partner Fee - Quote Rewards - Solver Rewards
 *As per our auction mechanism, solving rewards are not attributed on a trade basis but rather on a solver-auction basis. 
 Our approach then is to weigh the rewards by the volume from each trade within that set
 Per-trade Solver rewards are an estimation and will not perfectly match the overall rewards provided by CoW
