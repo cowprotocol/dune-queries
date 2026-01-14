@@ -134,6 +134,7 @@ select
     , qr.quote_reward as quote_reward
     , sr.solver_reward as solver_reward    
     , revenue - quote_reward - solver_reward as margin
+    , (revenue - quote_reward - solver_reward) * np.price as margin_usd
     , (revenue - quote_reward - solver_reward) / revenue as margin_pct
     , 1e4*(revenue - quote_reward - solver_reward) / (fees.usd_value / np.price) as margin_per_vol_bps
     , fees.trader
