@@ -78,7 +78,6 @@ native_prices as (
     left join "query_4298142(blockchain='{{blockchain}}', start_time='{{start_time}}', end_time='{{end_time}}')" as sf 
         on prep.solver = sf.solver
 )
---select * from solving_rewards order by volume desc
 , quote_cap_mapping as (
     select *
     from (
