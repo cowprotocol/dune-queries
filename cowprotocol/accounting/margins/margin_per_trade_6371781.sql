@@ -52,12 +52,12 @@ native_prices as (
         , rod.auction_id
         , rod.solver
         , if(coalesce(is_eligible_for_quote_reward, true), rod.quote_solver) as quote_solver
-        , rbd.capped_payment/1e18 as reward_auction_solver
+        , rbd.capped_payment*coalesce(excl.multiplier, 1)/1e18 as reward_auction_solver
         -- if usd value of trade is missing then attribute the whole auction reward to that trade - may overestimate rewards
         , if(
             t.usd_value != 0 
-            , rbd.capped_payment/1e18 * t.usd_value / sum(t.usd_value) over (partition by rod.auction_id, rod.solver)
-            , rbd.capped_payment/1e18
+            , rbd.capped_payment*coalesce(excl.multiplier, 1)/1e18 * t.usd_value / sum(t.usd_value) over (partition by rod.auction_id, rod.solver)
+            , rbd.capped_payment*coalesce(excl.multiplier, 1)/1e18
         ) as trade_solver_reward        
     from (select distinct * from "query_4364122(blockchain='{{blockchain}}')") as rod
     join cow_protocol_{{blockchain}}.trades as t
@@ -65,6 +65,9 @@ native_prices as (
         and rod.tx_hash = t.tx_hash
     left join (select distinct * from "query_4351957(blockchain='{{blockchain}}')") as rbd
         on rbd.tx_hash = t.tx_hash
+    left join "query_4842868(blockchain='{{blockchain}}')" as excl 
+        on rbd.environment = excl.environment 
+        and rbd.auction_id = excl.auction_id    
     where
         t.block_time >= timestamp '{{start_time}}'
         and t.block_time < timestamp '{{end_time}}'
