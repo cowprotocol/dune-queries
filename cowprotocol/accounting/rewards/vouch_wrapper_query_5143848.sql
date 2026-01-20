@@ -56,6 +56,25 @@ linea_vouching as (
     from linea.logs
     where contract_address = 0xaaa4de096d02ae21729aa31d967e148d4e3ae501 and topic0 = 0xd30c692ff1e6e1e96d8aca701b7f8118d58f64ce4c680feda75c0fc76524f7fa
 ),
+plasma_vouching as (
+    select
+        'plasma' as chain, --noqa: RF04
+        contract_address,
+        tx_hash as evt_tx_hash,
+        tx_from as evt_tx_from,
+        tx_to as evt_tx_to,
+        null as evt_tx_index,
+        index as evt_index,
+        block_time as evt_block_time,
+        block_number as evt_block_number,
+        block_date as evt_block_date,
+        from_hex(substr(cast(topic2 as varchar), 27, 40)) as bondingPool, --noqa: CP02
+        from_hex(substr(cast(data as varchar), 27, 40)) as cowRewardTarget, --noqa: CP02
+        from_hex(substr(cast(topic3 as varchar), 27, 40)) as sender,
+        from_hex(substr(cast(topic1 as varchar), 27, 40)) as solver
+    from plasma.logs
+    where contract_address = 0xaaa4de096d02ae21729aa31d967e148d4e3ae501 and topic0 = 0xd30c692ff1e6e1e96d8aca701b7f8118d58f64ce4c680feda75c0fc76524f7fa
+),
 multichain_vouching as (
     select *
     from cow_protocol_multichain.vouchregister_evt_vouch
@@ -68,6 +87,9 @@ multichain_vouching as (
     union distinct
     select *
     from linea_vouching
+    union distinct
+    select *
+    from plasma_vouching
 )
 
 select
