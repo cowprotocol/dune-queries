@@ -40,7 +40,10 @@ protocol_fees as (
         block_time,
         tx_hash,
         order_uid,
-        protocol_fee_token_address as token_address,
+        case
+            when '{{blockchain}}' = 'gnosis' and protocol_fee_token_address = 0xcb444e90d8198415266c6a2724b7900fb12fc56e then 0x420ca0f9b9b604ce0fd9c18ef134c705e5fa3430
+            else protocol_fee_token_address
+        end as token_address,
         protocol_fee as amount,
         'protocol_fee' as fee_type
     from raw_fee_data
