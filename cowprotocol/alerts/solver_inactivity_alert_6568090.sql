@@ -9,7 +9,10 @@
 
 with per_chain_stats as (
     -- Ethereum (mainnet)
-    select 'ethereum' as network, count(b.tx_hash) as settlements, max(b.block_time) as last_settlement
+    select
+        'ethereum' as network,
+        count(b.tx_hash) as settlements,
+        max(b.block_time) as last_settlement
     from cow_protocol_ethereum.solvers as s
     left join cow_protocol_ethereum.batches as b
         on b.solver_address = s.address and b.block_time > now() - interval '{{days_without_settlement}}' day
@@ -18,7 +21,10 @@ with per_chain_stats as (
     union all
 
     -- Gnosis (xdai)
-    select 'gnosis', count(b.tx_hash), max(b.block_time)
+    select
+        'gnosis' as network,
+        count(b.tx_hash) as settlements,
+        max(b.block_time) as last_settlement
     from cow_protocol_gnosis.solvers as s
     left join cow_protocol_gnosis.batches as b
         on b.solver_address = s.address and b.block_time > now() - interval '{{days_without_settlement}}' day
@@ -27,7 +33,10 @@ with per_chain_stats as (
     union all
 
     -- Arbitrum
-    select 'arbitrum', count(b.tx_hash), max(b.block_time)
+    select
+        'arbitrum' as network,
+        count(b.tx_hash) as settlements,
+        max(b.block_time) as last_settlement
     from cow_protocol_arbitrum.solvers as s
     left join cow_protocol_arbitrum.batches as b
         on b.solver_address = s.address and b.block_time > now() - interval '{{days_without_settlement}}' day
@@ -36,7 +45,10 @@ with per_chain_stats as (
     union all
 
     -- Base
-    select 'base', count(b.tx_hash), max(b.block_time)
+    select
+        'base' as network,
+        count(b.tx_hash) as settlements,
+        max(b.block_time) as last_settlement
     from cow_protocol_base.solvers as s
     left join cow_protocol_base.batches as b
         on b.solver_address = s.address and b.block_time > now() - interval '{{days_without_settlement}}' day
@@ -45,7 +57,10 @@ with per_chain_stats as (
     union all
 
     -- Avalanche
-    select 'avalanche', count(b.tx_hash), max(b.block_time)
+    select
+        'avalanche' as network,
+        count(b.tx_hash) as settlements,
+        max(b.block_time) as last_settlement
     from cow_protocol_avalanche_c.solvers as s
     left join cow_protocol_avalanche_c.batches as b
         on b.solver_address = s.address and b.block_time > now() - interval '{{days_without_settlement}}' day
@@ -54,7 +69,10 @@ with per_chain_stats as (
     union all
 
     -- Polygon
-    select 'polygon', count(b.tx_hash), max(b.block_time)
+    select
+        'polygon' as network,
+        count(b.tx_hash) as settlements,
+        max(b.block_time) as last_settlement
     from cow_protocol_polygon.solvers as s
     left join cow_protocol_polygon.batches as b
         on b.solver_address = s.address and b.block_time > now() - interval '{{days_without_settlement}}' day
@@ -63,7 +81,10 @@ with per_chain_stats as (
     union all
 
     -- BNB Chain
-    select 'bnb', count(b.tx_hash), max(b.block_time)
+    select
+        'bnb' as network,
+        count(b.tx_hash) as settlements,
+        max(b.block_time) as last_settlement
     from cow_protocol_bnb.solvers as s
     left join cow_protocol_bnb.batches as b
         on b.solver_address = s.address and b.block_time > now() - interval '{{days_without_settlement}}' day
@@ -72,7 +93,10 @@ with per_chain_stats as (
     union all
 
     -- Linea
-    select 'linea', count(b.tx_hash), max(b.block_time)
+    select
+        'linea' as network,
+        count(b.tx_hash) as settlements,
+        max(b.block_time) as last_settlement
     from cow_protocol_linea.solvers as s
     left join cow_protocol_linea.batches as b
         on b.solver_address = s.address and b.block_time > now() - interval '{{days_without_settlement}}' day
@@ -81,7 +105,10 @@ with per_chain_stats as (
     union all
 
     -- Plasma
-    select 'plasma', count(b.tx_hash), max(b.block_time)
+    select
+        'plasma' as network,
+        count(b.tx_hash) as settlements,
+        max(b.block_time) as last_settlement
     from cow_protocol_plasma.solvers as s
     left join cow_protocol_plasma.batches as b
         on b.solver_address = s.address and b.block_time > now() - interval '{{days_without_settlement}}' day
@@ -110,4 +137,3 @@ select
     'No settlements found on any chain in the last ' || cast({{days_without_settlement}} as varchar) || ' days' as alert_reason
 from aggregated
 where total_settlements = 0
-
