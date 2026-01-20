@@ -185,6 +185,7 @@ wrapped_native_token as (
             when 'lens' then 0x6bdc36e20d267ff0dd6097799f82e78907105e2f -- WGHO
             when 'bnb' then 0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c -- WBNB
             when 'linea' then 0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f -- WETH
+            when 'plasma' then 0x6100e367285b01f48d07953803a2d8dca5d19873 -- WXPL
         end as native_token_address
 ),
 

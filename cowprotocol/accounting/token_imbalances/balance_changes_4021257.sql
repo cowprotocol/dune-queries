@@ -480,6 +480,43 @@ weth_deposits_withdrawals_linea as (
 
 special_balance_changes_linea as ( -- noqa: ST03
     select * from weth_deposits_withdrawals_linea
+),
+
+-- 2.10) plasma
+-- special treatment of
+-- 2.10.1) WXPL
+
+-- 2.10.1) all deposit and withdrawal events for WXPL
+wxpl_deposits_withdrawals_plasma as (
+    -- deposits (contract deposits ETH to get WETH)
+    select
+        evt_block_time as block_time,
+        evt_tx_hash as tx_hash,
+        contract_address as token_address,
+        0x0000000000000000000000000000000000000000 as sender,
+        0x9008d19f58aabd9ed0d60971565aa8510560ab41 as receiver,
+        wad as amount
+    from XXXXX
+    where
+        evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
+        and dst = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
+    union all
+    -- withdrawals (contract withdraws ETH by returning WETH)
+    select
+        evt_block_time as block_time,
+        evt_tx_hash as tx_hash,
+        contract_address as token_address,
+        0x9008d19f58aabd9ed0d60971565aa8510560ab41 as sender,
+        0x0000000000000000000000000000000000000000 as receiver,
+        wad as amount
+    from XXXXX
+    where
+        evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
+        and src = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
+),
+
+special_balance_changes_plasma as ( -- noqa: ST03
+    select * from wxpl_deposits_withdrawals_plasma
 )
 
 
