@@ -19,6 +19,7 @@ wrapped_native_token as (
             when 'lens' then 0x6bdc36e20d267ff0dd6097799f82e78907105e2f -- WGHO
             when 'bnb' then 0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c -- WBNB
             when 'linea' then 0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f -- WETH
+            when 'plasma' then 0x6100e367285b01f48d07953803a2d8dca5d19873 -- WXPL
         end as native_token_address
 ),
 
@@ -44,6 +45,7 @@ rewards_safe as (
             when 'lens' then 0x798bb2d0ac591e34a4068e447782de05c27ed160
             when 'bnb' then 0xa03be496e67ec29bc62f01a428683d7f9c204930
             when 'linea' then 0xa03be496e67ec29bc62f01a428683d7f9c204930
+            when 'plasma' then 0xa03be496e67ec29bc62f01a428683d7f9c204930
         end as rewards_safe_address
 ),
 

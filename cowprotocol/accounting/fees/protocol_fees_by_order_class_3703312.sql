@@ -86,6 +86,11 @@ select
         when '{{blockchain}}' = 'linea' and partner_recipient = '0x352a3666b27bb09aca7b4a71ed624429b7549551' then partner_fee_native_token * 0.85
         when '{{blockchain}}' = 'linea' and partner_recipient = '0xAf1c727B605530AcDb00906a158E817f41aFD778' then partner_fee_native_token * 0.85
         when '{{blockchain}}' = 'linea' and partner_recipient = '0x9c9aA90363630d4ab1D9dbF416cc3BBC8d3Ed502' then partner_fee_native_token * 0.85
+        -- plasma
+        when '{{blockchain}}' = 'plasma' and partner_recipient = '0x63695Eee2c3141BDE314C5a6f89B98E62808d716' then partner_fee_native_token * 0.90
+        when '{{blockchain}}' = 'plasma' and partner_recipient = '0x352a3666b27bb09aca7b4a71ed624429b7549551' then partner_fee_native_token * 0.85
+        when '{{blockchain}}' = 'plasma' and partner_recipient = '0xAf1c727B605530AcDb00906a158E817f41aFD778' then partner_fee_native_token * 0.85
+        when '{{blockchain}}' = 'plasma' and partner_recipient = '0x9c9aA90363630d4ab1D9dbF416cc3BBC8d3Ed502' then partner_fee_native_token * 0.85
         -- default
         when partner_recipient is not null then partner_fee_native_token * 0.75
     end) as partner_fee_part,
@@ -130,6 +135,11 @@ select
         when '{{blockchain}}' = 'linea' and partner_recipient = '0x352a3666b27bb09aca7b4a71ed624429b7549551' then partner_fee_native_token * 0.15
         when '{{blockchain}}' = 'linea' and partner_recipient = '0xAf1c727B605530AcDb00906a158E817f41aFD778' then partner_fee_native_token * 0.15
         when '{{blockchain}}' = 'linea' and partner_recipient = '0x9c9aA90363630d4ab1D9dbF416cc3BBC8d3Ed502' then partner_fee_native_token * 0.15
+        -- plasma
+        when '{{blockchain}}' = 'plasma' and partner_recipient = '0x63695Eee2c3141BDE314C5a6f89B98E62808d716' then partner_fee_native_token * 0.10
+        when '{{blockchain}}' = 'plasma' and partner_recipient = '0x352a3666b27bb09aca7b4a71ed624429b7549551' then partner_fee_native_token * 0.15
+        when '{{blockchain}}' = 'plasma' and partner_recipient = '0xAf1c727B605530AcDb00906a158E817f41aFD778' then partner_fee_native_token * 0.15
+        when '{{blockchain}}' = 'plasma' and partner_recipient = '0x9c9aA90363630d4ab1D9dbF416cc3BBC8d3Ed502' then partner_fee_native_token * 0.15
         -- default
         when partner_recipient is not null then partner_fee_native_token * 0.25
     end) as cow_dao_partner_fee_part

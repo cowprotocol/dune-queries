@@ -30,6 +30,7 @@ native_token_prices as (
         or blockchain = 'lens' and contract_address = 0x6bdc36e20d267ff0dd6097799f82e78907105e2f
         or blockchain = 'bnb' and contract_address = 0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c
         or blockchain = 'linea' and contract_address = 0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f
+        or blockchain = 'plasma' and contract_address = 0x6100e367285b01f48d07953803a2d8dca5d19873
     )
     group by 1, 2, 3
 )

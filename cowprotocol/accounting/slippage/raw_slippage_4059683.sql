@@ -68,7 +68,7 @@ settlement_contract_sells as (
         block_time >= timestamp '{{start_time}}' and block_time < timestamp '{{end_time}}'
         and trader = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
         and receiver = case
-            when '{{blockchain}}' in ('ethereum', 'gnosis', 'base', 'avalanche_c', 'bnb', 'linea') then 0xa03be496e67ec29bc62f01a428683d7f9c204930
+            when '{{blockchain}}' in ('ethereum', 'gnosis', 'base', 'avalanche_c', 'bnb', 'linea', 'plasma') then 0xa03be496e67ec29bc62f01a428683d7f9c204930
             when '{{blockchain}}' in ('arbitrum', 'polygon') then 0x66331f0b9cb30d38779c786bda5a3d57d12fba50
             when '{{blockchain}}' = 'lens' then 0x798bb2d0ac591e34a4068e447782de05c27ed160
         end
