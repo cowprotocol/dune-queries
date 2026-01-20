@@ -70,7 +70,6 @@ native_transfers as (
 -- 2.1.1) WETH
 -- 2.1.2) sDAI
 -- 2.1.3) MKR
--- 2.1.4) EURe
 
 -- 2.1.1) all deposit and withdrawal events for WETH
 weth_deposits_withdrawals_ethereum as (
@@ -159,36 +158,12 @@ mkr_mint_burn_ethereum as (
         and guy = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
 ),
 
--- 2.1.4) Starting Dec 16, 2025, whenever there is a EURe v1 (0x3231cb76718cdef2155fc47b5286d82e6eda273f
--- we "issue" one more transfer event on the opposite direction so that it cancels out the original event
--- as tracking is now done on the v2 token (0x39b8b6385416f4ca36a20319f70d28621895279d)
--- see docs here: https://monerium.dev/docs/contracts-v2
-eure_v1_cancel_transfers_ethereum as (
-    select
-        evt_block_time as block_time,
-        evt_tx_hash as tx_hash,
-        contract_address as token_address,
-        to as sender,
-        "from" as receiver,
-        value as amount
-    from erc20_{{blockchain}}.evt_transfer
-    where
-        evt_block_time >= cast('2025-12-16 00:00:00' as timestamp)
-        and evt_block_time >= cast('{{start_time}}' as timestamp)
-        and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
-        and 0x9008d19f58aabd9ed0d60971565aa8510560ab41 in ("from", to)
-        and contract_address = 0x3231cb76718cdef2155fc47b5286d82e6eda273f
-        and '{{blockchain}}' = 'ethereum'
-),
-
 special_balance_changes_ethereum as (
     select * from weth_deposits_withdrawals_ethereum
     union all
     select * from sdai_deposits_withdraws_ethereum
     union all
     select * from mkr_mint_burn_ethereum
-    union all
-    select * from eure_v1_cancel_transfers_ethereum
 ),
 
 -- 2.2) gnosis
