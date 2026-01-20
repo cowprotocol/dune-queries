@@ -487,32 +487,52 @@ special_balance_changes_linea as ( -- noqa: ST03
 -- 2.10.1) WXPL
 
 -- 2.10.1) all deposit and withdrawal events for WXPL
-wxpl_deposits_withdrawals_plasma as (
-    -- deposits (contract deposits ETH to get WETH)
+wxpl_all_deposits_withdrawals_plasma as (
+-- WXPL deposits & withdrawals on Plasma
     select
-        evt_block_time as block_time,
-        evt_tx_hash as tx_hash,
+        block_time,
+        block_number,
+        tx_hash,
+        contract_address,
+        topic0,
+        from_hex(substr(cast(topic1 as varchar), 27)) as src_dst_address, -- indexed address (dst for Deposit, src for Withdrawal)
+        varbinary_to_uint256(data) as wad
+    from plasma.logs
+    where contract_address = 0x6100e367285b01f48d07953803a2d8dca5d19873 and (
+        topic0 = 0xe1fffcc4923d04b559f4d29a8bfc6cda04eb5b0d3c460751c2402c5c5cc9109c -- Deposit(address,uint256)
+        or
+        topic0 = 0x7fcf532c15f0a6db0bd6d0e038bea71d30d808c7d98cb3bf7268a95bf5081b65  -- Withdrawal(address,uint256)
+    )
+),
+
+wxpl_deposits_withdrawals_plasma as (
+    -- deposits (contract deposits XPL to get WXPL)
+    select
+        block_time,
+        tx_hash,
         contract_address as token_address,
         0x0000000000000000000000000000000000000000 as sender,
         0x9008d19f58aabd9ed0d60971565aa8510560ab41 as receiver,
         wad as amount
-    from XXXXX
+    from wxpl_all_deposits_withdrawals_plasma
     where
-        evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
-        and dst = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
+        block_time >= cast('{{start_time}}' as timestamp) and block_time < cast('{{end_time}}' as timestamp) -- partition column
+        and topic0 = 0xe1fffcc4923d04b559f4d29a8bfc6cda04eb5b0d3c460751c2402c5c5cc9109c
+        and src_dst_address = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
     union all
-    -- withdrawals (contract withdraws ETH by returning WETH)
+    -- withdrawals (contract withdraws XPL by returning WXPL)
     select
-        evt_block_time as block_time,
-        evt_tx_hash as tx_hash,
+        block_time,
+        tx_hash,
         contract_address as token_address,
         0x9008d19f58aabd9ed0d60971565aa8510560ab41 as sender,
         0x0000000000000000000000000000000000000000 as receiver,
         wad as amount
-    from XXXXX
+    from wxpl_all_deposits_withdrawals_plasma
     where
-        evt_block_time >= cast('{{start_time}}' as timestamp) and evt_block_time < cast('{{end_time}}' as timestamp) -- partition column
-        and src = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
+        block_time >= cast('{{start_time}}' as timestamp) and block_time < cast('{{end_time}}' as timestamp) -- partition column
+        and topic0 = 0x7fcf532c15f0a6db0bd6d0e038bea71d30d808c7d98cb3bf7268a95bf5081b65 
+        and src_dst_address = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
 ),
 
 special_balance_changes_plasma as ( -- noqa: ST03
