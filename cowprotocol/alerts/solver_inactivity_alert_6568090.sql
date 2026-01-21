@@ -1,6 +1,6 @@
--- Alert query for monitoring solver inactivity across all chains
--- Returns a row ONLY if the solver has ZERO settlements on ANY chain in the lookback period
--- Returns nothing if there are settlements (no alert)
+-- Alert query for monitoring solver inactivity per chain
+-- Returns one row per chain where the solver has ZERO settlements in the lookback period
+-- Returns nothing for chains with settlements (no alert for those chains)
 -- Includes all chains: ethereum, gnosis, arbitrum, base, avalanche, polygon, bnb, linea, plasma
 --
 -- Parameters:
@@ -113,27 +113,17 @@ with per_chain_stats as (
     left join cow_protocol_plasma.batches as b
         on b.solver_address = s.address and b.block_time > now() - interval '{{days_without_settlement}}' day
     where s.name = '{{solver_name}}' and s.active = true
-),
-
-aggregated as (
-    select
-        sum(settlements) as total_settlements,
-        max(last_settlement) as most_recent_settlement,
-        count(distinct case when settlements > 0 then network end) as active_chains,
-        count(distinct network) as total_chains
-    from per_chain_stats
 )
 
--- Returns ONLY if there are ZERO settlements across ALL chains (triggers alert)
--- Returns NOTHING if there are settlements (no alert)
+-- Returns one row per chain with ZERO settlements (triggers alert per chain)
+-- Returns NOTHING for chains with settlements (no alert for active chains)
 select
     '{{solver_name}}' as solver_name,
+    network,
     {{days_without_settlement}} as lookback_days,
-    total_settlements,
-    most_recent_settlement,
-    total_chains,
-    active_chains,
+    settlements,
+    last_settlement,
     now() as check_time,
-    'No settlements found on any chain in the last ' || cast({{days_without_settlement}} as varchar) || ' days' as alert_reason
-from aggregated
-where total_settlements = 0
+    'No settlements on ' || network || ' in the last ' || cast({{days_without_settlement}} as varchar) || ' days' as alert_reason
+from per_chain_stats
+where settlements = 0
