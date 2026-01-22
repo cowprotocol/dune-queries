@@ -45,7 +45,7 @@ with wrapped_native_token as (
 
 reward_caps as (
     select
-        case '{{blockchain}}'
+        case '{{blockchain}}' --noqa: PRS, LT02
             when 'ethereum' then cast(0.012 * 1e18 as int256) -- 0.012 ETH
             when 'arbitrum' then cast(0.012 * 1e18 as int256) -- 0.012 ETH
             when 'base' then cast(0.012 * 1e18 as int256) -- 0.012 ETH
