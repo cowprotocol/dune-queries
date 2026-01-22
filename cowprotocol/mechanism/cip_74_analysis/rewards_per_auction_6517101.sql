@@ -71,6 +71,7 @@ aggregated_batch_data as (
         rbd.auction_id,
         rbd.solver,
         rbd.uncapped_payment_native_token as uncapped_reward,
+        sum(rbd.winning_score) as score,
         coalesce(sum((rod.protocol_fee - coalesce(rod.partner_fee, 0)) * rod.protocol_fee_native_price), 0) as protocol_fee, -- this is the actual revenue of the protocol
         coalesce(sum(case when t.order_type = 'SELL' then t.atoms_bought * rod.protocol_fee_native_price else t.atoms_sold * rod.protocol_fee_native_price end), 0) as volume,
         bool_and(
@@ -109,6 +110,7 @@ rewards_per_auction as (
         protocol_fee,
         volume,
         protocol_fee + volume * (if(xrate_type = 'stable', {{volume_fee_bps_stable}}, {{volume_fee_bps_variable}}) - 2.0) / 1e4 as new_protocol_fee,
+        score,
         uncapped_reward
     from aggregated_batch_data
     where
