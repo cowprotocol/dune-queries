@@ -13,9 +13,9 @@
 -- - time: time of the auction (deadline)
 -- - auction_id: id of the auction
 -- - solver: winning solver in that auction
--- - xrate_type: either 'stable' for a trades between highly correlated tokens, 'variable' for trades between uncorrelated tokens,
+-- - xrate_type: either 'stable' for trades between highly correlated tokens, 'variable' for trades between uncorrelated tokens,
 --     None if a classification was not possible
--- - protocol_fee: sum of protocol fees charged by a solver, in native token
+-- - protocol_fee: sum of protocol fees (excluding fees charged by partners) charged by a solver, in native token
 -- - volume: sum of volume of trades, in native token
 -- - new_protocol_fee: new protocol fee when changing the volume fee for some class of orders
 -- - uncapped_reward: uncapped second price reward for the solver in that auction
