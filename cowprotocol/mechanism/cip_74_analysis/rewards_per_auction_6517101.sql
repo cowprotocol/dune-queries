@@ -46,26 +46,26 @@ with wrapped_native_token as (
 reward_caps as (
     select
         case '{{blockchain}}'
-            when 'ethereum' then 12000000000000000 -- 0.012 ETH
-            when 'arbitrum' then 12000000000000000 -- 0.012 ETH
-            when 'base' then 12000000000000000 -- 0.012 ETH
-            when 'gnosis' then 10 * 1e18
-            when 'avalanche_c' then 0.4 * 1e18
-            when 'polygon' then 40 * 1e18
-            when 'bnb' then 0.048 * 1e18 
+            when 'ethereum' then cast(0.012 * 1e18 as int256) -- 0.012 ETH
+            when 'arbitrum' then cast(0.012 * 1e18 as int256) -- 0.012 ETH
+            when 'base' then cast(0.012 * 1e18 as int256) -- 0.012 ETH
+            when 'gnosis' then cast(10 * 1e18 as int256) -- 10 xDAI
+            when 'avalanche_c' then cast(0.4 * 1e18 as int256) -- 0.4 AVAX
+            when 'polygon' then cast(40 * 1e18 as int256) -- 40 POL
+            when 'bnb' then cast(0.048 * 1e18 as int256)  -- 0.048 BNB
         end as upper_cap,
         case '{{blockchain}}'
-            when 'ethereum' then 10000000000000000 -- 0.01 ETH
-            when 'arbitrum' then 10000000000000000 -- 0.01 ETH
-            when 'base' then 10000000000000000 -- 0.01 ETH
-            when 'gnosis' then 10 * 1e18
-            when 'avalanche_c' then 0.3 * 1e18
-            when 'polygon' then 30 * 1e18
-            when 'bnb' then 0.04 * 1e18
+            when 'ethereum' then cast(0.01 * 1e18 as int256) -- 0.01 ETH
+            when 'arbitrum' then cast(0.01 * 1e18 as int256) -- 0.01 ETH
+            when 'base' then cast(0.01 * 1e18 as int256) -- 0.01 ETH
+            when 'gnosis' then cast(10 * 1e18 as int256) -- 10 xDAI
+            when 'avalanche_c' then cast(0.3 * 1e18 as int256) -- 0.3 AVAX
+            when 'polygon' then cast(30 * 1e18 as int256) -- 30 POL
+            when 'bnb' then cast(0.04 * 1e18 as int256)  -- 0.04 BNB
         end as lower_cap
 ),
 
-aggregated_batch_data as (
+per_solver_auction_data as (
     select
         b.time,
         rbd.auction_id,
@@ -112,7 +112,7 @@ rewards_per_auction as (
         protocol_fee + volume * (if(xrate_type = 'stable', {{volume_fee_bps_stable}}, {{volume_fee_bps_variable}}) - 2.0) / 1e4 as new_protocol_fee,
         score,
         uncapped_reward
-    from aggregated_batch_data
+    from per_solver_auction_data
     where
         (
             native_prices_are_accurate -- this filters out cases where native prices are not accurate
