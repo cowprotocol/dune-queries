@@ -34,12 +34,12 @@ with wrapped_native_token as (
     select
         case '{{blockchain}}'
             when 'ethereum' then 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2 -- WETH
-            -- when 'gnosis' then 0xe91d153e0b41518a2ce8dd3d7944fa863463a97d -- WXDAI
+            when 'gnosis' then 0xe91d153e0b41518a2ce8dd3d7944fa863463a97d -- WXDAI
             when 'arbitrum' then 0x82af49447d8a07e3bd95bd0d56f35241523fbab1 -- WETH
             when 'base' then 0x4200000000000000000000000000000000000006 -- WETH
-            -- when 'avalanche_c' then 0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7 -- WAVAX
-            -- when 'polygon' then 0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270 -- WPOL
-            -- when 'lens' then 0x6bdc36e20d267ff0dd6097799f82e78907105e2f -- WGHO
+            when 'avalanche_c' then 0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7 -- WAVAX
+            when 'polygon' then 0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270 -- WPOL
+            when 'bnb' then 0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c -- WBNB
         end as native_token_address
 ),
 
@@ -49,11 +49,19 @@ reward_caps as (
             when 'ethereum' then 12000000000000000 -- 0.012 ETH
             when 'arbitrum' then 12000000000000000 -- 0.012 ETH
             when 'base' then 12000000000000000 -- 0.012 ETH
+            when 'gnosis' then 10 * 1e18
+            when 'avalanche_c' then 0.4 * 1e18
+            when 'polygon' then 40 * 1e18
+            when 'bnb' then 0.048 * 1e18 
         end as upper_cap,
         case '{{blockchain}}'
             when 'ethereum' then 10000000000000000 -- 0.01 ETH
             when 'arbitrum' then 10000000000000000 -- 0.01 ETH
             when 'base' then 10000000000000000 -- 0.01 ETH
+            when 'gnosis' then 10 * 1e18
+            when 'avalanche_c' then 0.3 * 1e18
+            when 'polygon' then 30 * 1e18
+            when 'bnb' then 0.04 * 1e18
         end as lower_cap
 ),
 
