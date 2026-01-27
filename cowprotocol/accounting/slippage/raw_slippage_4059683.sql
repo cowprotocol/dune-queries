@@ -59,7 +59,11 @@ settlement_contract_sells as (
     select
         block_time,
         tx_hash,
-        sell_token_address as token_address,
+        case
+            when '{{blockchain}}' = 'ethereum' and sell_token_address = 0x3231cb76718cdef2155fc47b5286d82e6eda273f then 0x39b8b6385416f4ca36a20319f70d28621895279d
+            when '{{blockchain}}' = 'gnosis' and sell_token_address = 0xcb444e90d8198415266c6a2724b7900fb12fc56e then 0x420ca0f9b9b604ce0fd9c18ef134c705e5fa3430
+            else sell_token_address
+        end as token_address,
         atoms_sold as amount,
         'settlement_contract_sell' as slippage_type,
         date_trunc('hour', block_time) as hour --noqa: RF04
