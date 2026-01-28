@@ -141,16 +141,15 @@ select * from (
         on
             p.contract_address = rf1.contract_address
             and p.token1 = rf1.token
-    left join (select distinct * from prices.day) as price0
+    left join prices.day as price0
         on
             d.day = price0.timestamp
             and p.token0 = price0.contract_address
-    left join (select distinct * from prices.day) as price1
+            and price0.blockchain = '{{blockchain}}'
+    left join prices.day as price1
         on
             d.day = price1.timestamp
             and p.token1 = price1.contract_address
-    where
-        coalesce(price0.blockchain, '{{blockchain}}') = '{{blockchain}}'
-        and coalesce(price1.blockchain, '{{blockchain}}') = '{{blockchain}}'
+            and price1.blockchain = '{{blockchain}}'
 )
 where day >= created_at
