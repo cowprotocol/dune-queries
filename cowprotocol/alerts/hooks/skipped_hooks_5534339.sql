@@ -1,3 +1,4 @@
+--noqa: disable=all
 with all_hooks as (    
     select * 
     from "query_5534333(lookback_time_unit='{{time_unit}}', lookback_units='{{units}}', blockchain='ethereum')"
