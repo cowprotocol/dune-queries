@@ -1,3 +1,4 @@
+--noqa: disable=all
 with 
 all_hooks as (
     select * 
