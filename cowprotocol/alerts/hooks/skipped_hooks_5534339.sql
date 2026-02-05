@@ -22,17 +22,21 @@ with all_hooks as (
     union all
     select * 
     from "query_5534333(lookback_time_unit='{{time_unit}}', lookback_units='{{units}}', blockchain='bnb')"        
-    /* linea and plasma are only partially available at the moment but should be done soon enough
     union all
     select * 
     from "query_5534333(lookback_time_unit='{{time_unit}}', lookback_units='{{units}}', blockchain='linea')"        
     union all
     select * 
     from "query_5534333(lookback_time_unit='{{time_unit}}', lookback_units='{{units}}', blockchain='plasma')"    
-    */
 )
 select * 
 from all_hooks
 where 
-    hook_success is null 
-    and hook_app_id not in ('cow-swap://libs/hook-dapp-lib/permit', 'PERMIT_TOKEN', '1db4bacb661a90fb6b475fd5b585acba9745bc373573c65ecc3e8f5bfd5dee1f')
+    coalesce(hook_success,false) = false
+    and not( hook_app_id in (
+        'cow-swap://libs/hook-dapp-lib/permit',
+        'PERMIT_TOKEN',
+        '1db4bacb661a90fb6b475fd5b585acba9745bc373573c65ecc3e8f5bfd5dee1f',
+        'cow.fi')
+    )
+    and not(hook_app_id like 'cow-sdk://flashloans/aave%')
