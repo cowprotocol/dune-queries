@@ -49,12 +49,13 @@ prep as (
 )
 , markouts_per_trade as (
     select
-      *
-      , (units_bought / units_sold) * (buy_price / sell_price) - 1 AS markout
-      , (units_bought_eff / units_sold_eff) * (buy_price / sell_price)  - 1 AS solver_efficiency
+        *
+        ,(units_bought / units_sold) * (buy_price / sell_price) - 1 as markout
+        ,(units_bought_eff / units_sold_eff) * (buy_price / sell_price)  - 1 as solver_efficiency
     from prep
-    where sell_price>0 
-        and buy_price>0
+    where 
+        sell_price > 0 
+        and buy_price > 0
 )
 select
     date_trunc('{{date_granularity}}', block_time) as date
