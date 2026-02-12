@@ -7,7 +7,7 @@
 --  {{date_granularity}} - How granular the time periods should be
 --  {{min_usd_amount}} - Minimum USD amount of the trade
 --  {{max_usd_amount}} - Maximum USD amount of the trade
---  {{source}} - Whether the trade originated directly through the UI or via integration
+--  {{order_source}} - Whether the trade originated directly through the UI or via integration
 --  {{token_pair}} - Direction agnostic, alphabetical order (eg: USDC-WETH)
 --  {{xrate_type}} - Whether the token pair has a stable or variable exchange rate
 with 
@@ -27,7 +27,7 @@ prep as (
         buy_price,
         sell_price,
         t.token_pair,
-        if(replace(lower(ad.app_code),' ','') = 'cowswap', 'UI', 'Integrations') as source,
+        if(replace(lower(ad.app_code),' ','') = 'cowswap', 'UI', 'Integrations') as order_source,
         if(st.ref_date is not null, 'stable', 'variable') as xrate_type
     from cow_protocol_{{blockchain}}.trades as t 
     inner join "query_4364122(blockchain='{{blockchain}}')" as rod
@@ -43,7 +43,7 @@ prep as (
         t.block_time >= timestamp '{{start_date}}'
         and t.block_time < timestamp '{{end_date}}'
         and t.usd_value between {{min_usd_amount}} and {{max_usd_amount}} 
-        and if(upper('{{source}}')='ALL', true, if(replace(lower(ad.app_code),' ','') = 'cowswap', 'UI', 'Integrations') = '{{source}}')
+        and if(upper('{{order_source}}')='ALL', true, if(replace(lower(ad.app_code),' ','') = 'cowswap', 'UI', 'Integrations') = '{{order_source}}')
         and if(upper('{{token_pair}}')='ALL', true, upper(t.token_pair) = upper('{{token_pair}}'))
         and if(upper('{{xrate_type}}')='ALL', true, if(st.ref_date is not null, 'stable', 'variable') = '{{xrate_type}}')
 )
