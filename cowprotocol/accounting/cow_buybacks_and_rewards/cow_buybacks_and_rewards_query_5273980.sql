@@ -4,7 +4,8 @@
 with
 txs_to_exclude as (
     select 0x7684ba7c81b539f5a54d1e9a55dadd2fac1e355356b7b7fe99fc597345c59402 as tx_hash, 'ethereum' as blockchain -- transfer between CoW and Gnosis DAO safes
-    union select 0xa4dae5aefc62d9096ba561bc1c169a0a2819fed4aa6c44cd6d88d15ff24877b1 as tx_hash, 'arbitrum' as blockchain -- bridge to mainnet
+    union all
+    select 0xa4dae5aefc62d9096ba561bc1c169a0a2819fed4aa6c44cd6d88d15ff24877b1 as tx_hash, 'arbitrum' as blockchain -- bridge to mainnet
 )
 , cow_token_address as (
     select * from query_5454278
