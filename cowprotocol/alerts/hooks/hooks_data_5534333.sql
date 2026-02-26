@@ -9,16 +9,29 @@ app_data_raw as (
     union all
     select *, 'barn' as environment from dune.cowprotocol.dataset_app_data_{{blockchain}}_barn
 )
-,hooks_data as (
+, cleaned_app_data as (
     select
-        environment
+        contract_app_data,
+        try(json_parse(
+            regexp_replace(
+                cast(encode as varchar),
+                '"quoteBody":"([^"\\\\]|\\\\.)*"',
+                '"quoteBody":"<REMOVED>"'
+            )
+        )) as encode
+    from app_data_raw
+)
+, hooks_data as (
+    select
+        CAST(json_extract(encode, '$.environment') AS VARCHAR) as environment
         ,contract_app_data as app_hash        
         ,json_extract_scalar(encode, '$.appCode') as app_code
         ,cast(json_extract_scalar(encode, '$.metadata.bridging.destinationChainId') as int) as destination_chain_id
         ,from_hex(substring(json_extract_scalar(encode, '$.metadata.bridging.destinationTokenAddress'), 3)) as destination_token_address
         ,json_extract(encode, '$.metadata.hooks.post') AS post_hooks_data    
         ,json_extract(encode, '$.metadata.hooks.pre') AS pre_hooks_data    
-    from app_data_raw
+    from cleaned_app_data
+    where encode is not null  -- Excludes the 2 unparseable rows
 )
 ,pre_hooks as (
     select
