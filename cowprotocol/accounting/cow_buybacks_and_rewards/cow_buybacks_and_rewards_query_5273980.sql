@@ -3,7 +3,13 @@
 
 with
 txs_to_exclude as (
-    select 0x7684ba7c81b539f5a54d1e9a55dadd2fac1e355356b7b7fe99fc597345c59402 as tx_hash --mainnet, exclusion due to CoW transfer between CoW and Gnosis DAO safes
+    select
+        0x7684ba7c81b539f5a54d1e9a55dadd2fac1e355356b7b7fe99fc597345c59402 as tx_hash,
+        'ethereum' as blockchain -- transfer between CoW and Gnosis DAO safes
+    union all
+    select
+        0xa4dae5aefc62d9096ba561bc1c169a0a2819fed4aa6c44cd6d88d15ff24877b1 as tx_hash,
+        'arbitrum' as blockchain -- bridge to mainnet
 )
 , cow_token_address as (
     select * from query_5454278
@@ -31,9 +37,12 @@ txs_to_exclude as (
         join rewards_safe as r
             on t."from" = r.address
             and r.blockchain = 'ethereum'
+        left join txs_to_exclude as excl
+            on t.evt_tx_hash = excl.tx_hash
+            and excl.blockchain = 'ethereum'
         where
             t.evt_block_time >= date('2024-04-17')
-            and t.evt_tx_hash not in (select tx_hash from txs_to_exclude)
+            and excl.tx_hash is null
         group by 1
 
         union all
@@ -83,8 +92,12 @@ txs_to_exclude as (
         join rewards_safe as r
             on t."from" = r.address
             and r.blockchain = 'arbitrum'
+        left join txs_to_exclude as excl
+            on t.evt_tx_hash = excl.tx_hash
+            and excl.blockchain = 'arbitrum'
         where
             t.evt_block_time >= date('2024-04-17')
+            and excl.tx_hash is null
         group by 1
     )
     group by 1
