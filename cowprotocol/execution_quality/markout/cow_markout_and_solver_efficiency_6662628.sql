@@ -1,4 +1,5 @@
--- Markout calculation for CoW Protocol trades. Compares the price of prices.usd table at the time of the trade to the executed amounts.
+-- Markout calculation for CoW Protocol trades. Compares the price of prices.usd table at the minute of the trade to the executed amounts.
+-- Now this query also shows Solver Efficiency, i.e., a metric representing the execution quality before any protocol fees are applied
 
 -- Parameters:
 --  {{blockchain}} - The chain to be analysed
@@ -49,21 +50,21 @@ prep as (
 )
 , markouts_per_trade as (
     select
-        *
-        ,(units_bought / units_sold) * (buy_price / sell_price) - 1 as markout
-        ,(units_bought_eff / units_sold_eff) * (buy_price / sell_price)  - 1 as solver_efficiency
+        *,
+        (units_bought / units_sold) * (buy_price / sell_price) - 1 as markout,
+        (units_bought_eff / units_sold_eff) * (buy_price / sell_price)  - 1 as solver_efficiency
     from prep
     where 
         sell_price > 0 
         and buy_price > 0
 )
 select
-    date_trunc('{{date_granularity}}', block_time) as date
-    ,1e4 * approx_percentile(markout, 0.1) as markout_p10_bps
-    ,1e4 * approx_percentile(markout, 0.5) as markout_p50_bps
-    ,1e4 * approx_percentile(markout, 0.9) as markout_p90_bps
-    ,1e4 * approx_percentile(solver_efficiency, 0.1) as solver_efficiency_p10_bps
-    ,1e4 * approx_percentile(solver_efficiency, 0.5) as solver_efficiency_p50_bps
-    ,1e4 * approx_percentile(solver_efficiency, 0.9) as solver_efficiency_p90_bps
+    date_trunc('{{date_granularity}}', block_time) as date,
+    1e4 * approx_percentile(markout, 0.1) as markout_p10_bps,
+    1e4 * approx_percentile(markout, 0.5) as markout_p50_bps,
+    1e4 * approx_percentile(markout, 0.9) as markout_p90_bps,
+    1e4 * approx_percentile(solver_efficiency, 0.1) as solver_efficiency_p10_bps,
+    1e4 * approx_percentile(solver_efficiency, 0.5) as solver_efficiency_p50_bps,
+    1e4 * approx_percentile(solver_efficiency, 0.9) as solver_efficiency_p90_bps
 from markouts_per_trade
 group by 1
