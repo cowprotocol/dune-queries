@@ -343,3 +343,7 @@ where
     -- for week of Dec 30-Jan 6, 2025, on Gnosis due to issuing a refund to the user
     -- for suboptimal execution
     or tx_hash = 0xe5b165bda18b06ca41e9edc8b2530b2b30b16c2a3b478854013387b65914611d
+    -- for week of Feb 24 - March 3, 2026 on Gnosis, due to issuing a refund to the user
+    -- for suboptimal execution
+    or tx_hash = 0x6a9f393b510d5cc952808888e974297087fda7b7b4f8cf0ee91b30e97343324b
+    or tx_hash = 0x6eaeed0ea5c41d45f955131d7826402c6a232faf8dc63268d23d51fe616ed2b4
