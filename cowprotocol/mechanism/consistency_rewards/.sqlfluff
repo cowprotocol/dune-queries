@@ -1,0 +1,8 @@
+[sqlfluff:templater:jinja:context]
+blockchain=ethereum
+start_time='2024-08-20 00:00:00'
+end_time='2024-08-27 00:00:00'
+fee_cap=0.5
+consistency_metric='metric_nr_orders'
+solver='0x3980daa7eaad0b7e0c53cfc5c2760037270da54d'
+volume_filter=0.0
