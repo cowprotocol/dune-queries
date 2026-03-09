@@ -60,10 +60,10 @@ proposed_trade_executions as (
 ),
 
 proposed_solutions_filtered as (
-    select
-        ps.*
+    select ps.*
     from proposed_solutions as ps
-    where solver != {{solver}}
+    where
+        ps.solver != {{solver}}
         or (
             select sum(td.volume / 1e18) >= {{volume_filter}}
             from proposed_trade_executions as pte
@@ -125,8 +125,7 @@ participation_rates as (
     select
         accounting_week_start,
         solver,
-        cast(count(distinct order_uid) as double)
-            / max(total_orders) as participation_rate
+        cast(count(distinct order_uid) as double) / max(total_orders) as participation_rate
     from (
         select
             accounting_week_start,
@@ -167,12 +166,12 @@ marginal_contributions as (
         order_uid,
         remaining_prob * participation_rate * surplus_native as contribution,
         remaining_prob * participation_rate * surplus_native
-            - participation_rate / (1.0 - participation_rate)
-            * coalesce(sum(remaining_prob * participation_rate * surplus_native) over (
-                partition by order_uid
-                order by rk
-                rows between 1 following and unbounded following
-            ), 0) as marginal_contribution
+        - participation_rate / (1.0 - participation_rate)
+        * coalesce(sum(remaining_prob * participation_rate * surplus_native) over (
+            partition by order_uid
+            order by rk
+            rows between 1 following and unbounded following
+        ), 0) as marginal_contribution
     from robust_surplus_per_bid
 ),
 
