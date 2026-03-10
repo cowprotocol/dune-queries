@@ -1,7 +1,7 @@
 -- Alert query for monitoring solver inactivity per chain
 -- Returns one row per chain where the solver has ZERO settlements in the lookback period
 -- Returns nothing for chains with settlements (no alert for those chains)
--- Includes chains: gnosis, arbitrum, base, avalanche, polygon, bnb, linea, plasma
+-- Includes chains: gnosis, arbitrum, base, avalanche, polygon, bnb, linea, plasma, ink
 -- Note: Ethereum mainnet excluded as ExtQuasimodo does not operate there
 --
 -- Parameters:
@@ -116,6 +116,20 @@ with per_chain_stats as (
         max(b.block_time) as last_settlement
     from cow_protocol_plasma.solvers as s
     left join cow_protocol_plasma.batches as b
+        on b.solver_address = s.address and b.block_time > now() - interval '{{days_without_settlement}}' day
+    where s.name = '{{solver_name}}' and s.environment = '{{environment}}' and s.active = true
+    group by s.address
+
+    union all
+
+    -- Ink
+    select
+        'ink' as network,
+        s.address as solver_address,
+        count(b.tx_hash) as settlements,
+        max(b.block_time) as last_settlement
+    from cow_protocol_ink.solvers as s
+    left join cow_protocol_ink.batches as b
         on b.solver_address = s.address and b.block_time > now() - interval '{{days_without_settlement}}' day
     where s.name = '{{solver_name}}' and s.environment = '{{environment}}' and s.active = true
     group by s.address

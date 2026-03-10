@@ -537,6 +537,63 @@ wxpl_deposits_withdrawals_plasma as (
 
 special_balance_changes_plasma as ( -- noqa: ST03
     select * from wxpl_deposits_withdrawals_plasma
+),
+
+-- 2.11) ink
+-- special treatment of
+-- 2.10.1) WETH
+
+-- 2.11.1) all deposit and withdrawal events for WETH
+weth_all_deposits_withdrawals_ink as (
+-- WETH deposits & withdrawals on Ink
+    select
+        block_time,
+        block_number,
+        tx_hash,
+        contract_address,
+        topic0,
+        from_hex(substr(cast(topic1 as varchar), 27)) as src_dst_address, -- indexed address (dst for Deposit, src for Withdrawal)
+        varbinary_to_uint256(data) as wad
+    from ink.logs
+    where contract_address = 0x4200000000000000000000000000000000000006 and (
+        topic0 = 0xe1fffcc4923d04b559f4d29a8bfc6cda04eb5b0d3c460751c2402c5c5cc9109c -- Deposit(address,uint256)
+        or
+        topic0 = 0x7fcf532c15f0a6db0bd6d0e038bea71d30d808c7d98cb3bf7268a95bf5081b65  -- Withdrawal(address,uint256)
+    )
+),
+
+weth_deposits_withdrawals_ink as (
+    -- deposits (contract deposits ETH to get WETH)
+    select
+        block_time,
+        tx_hash,
+        contract_address as token_address,
+        0x0000000000000000000000000000000000000000 as sender,
+        0x9008d19f58aabd9ed0d60971565aa8510560ab41 as receiver,
+        wad as amount
+    from weth_all_deposits_withdrawals_ink
+    where
+        block_time >= cast('{{start_time}}' as timestamp) and block_time < cast('{{end_time}}' as timestamp) -- partition column
+        and topic0 = 0xe1fffcc4923d04b559f4d29a8bfc6cda04eb5b0d3c460751c2402c5c5cc9109c
+        and src_dst_address = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
+    union all
+    -- withdrawals (contract withdraws ETH by returning WETH)
+    select
+        block_time,
+        tx_hash,
+        contract_address as token_address,
+        0x9008d19f58aabd9ed0d60971565aa8510560ab41 as sender,
+        0x0000000000000000000000000000000000000000 as receiver,
+        wad as amount
+    from weth_all_deposits_withdrawals_ink
+    where
+        block_time >= cast('{{start_time}}' as timestamp) and block_time < cast('{{end_time}}' as timestamp) -- partition column
+        and topic0 = 0x7fcf532c15f0a6db0bd6d0e038bea71d30d808c7d98cb3bf7268a95bf5081b65 
+        and src_dst_address = 0x9008d19f58aabd9ed0d60971565aa8510560ab41
+),
+
+special_balance_changes_ink as ( -- noqa: ST03
+    select * from weth_deposits_withdrawals_ink
 )
 
 
