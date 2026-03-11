@@ -45,7 +45,7 @@ data_per_trade as (
         rod.protocol_fee_native_price,
         case when t.order_type = 'SELL' then t.atoms_bought * rod.protocol_fee_native_price else t.atoms_sold * rod.protocol_fee_native_price end as volume
     from cow_protocol_{{blockchain}}.trades as t
-    inner join "query_4364122(blockchain='{{blockchain}}')" as rod on t.order_uid = rod.order_uid and t.block_number = rod.block_number
+    inner join "query_4364122(blockchain='{{blockchain}}')" as rod on t.order_uid = rod.order_uid and t.tx_hash = rod.tx_hash
     inner join performance_data_per_auction as pd on rod.auction_id = pd.auction_id
 ),
 
