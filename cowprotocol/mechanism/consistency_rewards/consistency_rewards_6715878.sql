@@ -194,7 +194,7 @@ metric_nr_orders as (
         ps.solver,
         count(distinct t.order_uid) as metric
     from data_per_trade as t
-    inner join proposed_trade_executions as pte on t.order_uid = pte.order_uid
+    inner join proposed_trade_executions as pte on t.order_uid = pte.order_uid and pte.auction_id = t.auction_id
     inner join proposed_solutions_filtered as ps on pte.auction_id = ps.auction_id and pte.solution_uid = ps.solution_uid
     where ps.filtered_out = false
     group by 1, 2
@@ -210,11 +210,11 @@ surplus_per_order as (
         max(pte.executed_buy - t.limit_buy_amount * pte.executed_sell / t.limit_sell_amount) as surplus,
         max((pte.executed_buy - t.limit_buy_amount * pte.executed_sell / t.limit_sell_amount) * t.protocol_fee_native_price) as surplus_native,
         rank() over (
-            partition by t.order_uid
+            partition by t.order_uid, ps.auction_id
             order by max(pte.executed_buy - t.limit_buy_amount * pte.executed_sell / t.limit_sell_amount) desc
         ) as rk
     from data_per_trade as t
-    inner join proposed_trade_executions as pte on t.order_uid = pte.order_uid
+    inner join proposed_trade_executions as pte on t.order_uid = pte.order_uid and pte.auction_id = t.auction_id
     inner join proposed_solutions_filtered as ps on pte.auction_id = ps.auction_id and pte.solution_uid = ps.solution_uid
     where ps.filtered_out = false
     group by 1, 2, 3, 4, 5
@@ -230,7 +230,7 @@ metric_top4_orders as (
             accounting_week_start,
             solver,
             order_uid,
-            count(*) over (partition by order_uid) as solvers_on_order
+            count(*) over (partition by order_uid, auction_id) as solvers_on_order
         from surplus_per_order
         where rk <= 4
     )
@@ -257,6 +257,7 @@ participation_rates as (
 robust_surplus_per_bid as (
     select
         spo.accounting_week_start,
+        spo.auction_id,
         spo.solver,
         spo.order_uid,
         spo.surplus_native,
@@ -264,7 +265,7 @@ robust_surplus_per_bid as (
         spo.rk,
         coalesce(
             exp(sum(ln(1.0 - p.participation_rate)) over (
-                partition by spo.order_uid
+                partition by spo.order_uid, spo.auction_id
                 order by spo.rk
                 rows between unbounded preceding and 1 preceding
             )),
@@ -284,7 +285,7 @@ marginal_contributions as (
         remaining_prob * participation_rate * surplus_native
         - participation_rate / (1.0 - participation_rate)
         * coalesce(sum(remaining_prob * participation_rate * surplus_native) over (
-            partition by order_uid
+            partition by order_uid, auction_id
             order by rk
             rows between 1 following and unbounded following
         ), 0) as marginal_contribution
