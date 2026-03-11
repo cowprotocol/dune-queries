@@ -332,10 +332,8 @@ consistency_rewards as (
     from {{consistency_metric}} as cm
     join consistency_reward_per_unit as crpu on cm.accounting_week_start = crpu.accounting_week_start
 )
--- select * from consistency_rewards
 
 select
-    -- pr.accounting_week_start,
     pr.solver,
     sum(current_reward / 1e18) as current_reward,
     sum((performance_reward + consistency_reward) / 1e18) as new_reward,
@@ -346,5 +344,4 @@ select
 from performance_rewards as pr
 join consistency_rewards as cr on pr.accounting_week_start = cr.accounting_week_start and pr.solver = cr.solver
 group by 1
--- order by 1 desc, 3 desc
 order by 2 desc
