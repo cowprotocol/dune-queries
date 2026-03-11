@@ -13,6 +13,7 @@ with partner_fee_splits as (
         ('ethereum',    0xe423c63e8a25811c9cbe71c8585c4505117397c6, '_',               0.75),
         ('ethereum',    0x1713b79e3dbb8a76d80e038ca701a4a781ac69eb, '_',               0.75),
         ('ethereum',    0xc542c2f197c4939154017c802b0583c596438380, '_',               0.875),
+        ('ethereum',    0xdda155b76fd2793d4ee6eccdd35708d55f3b84da, '_',               0.80),
 
         ('gnosis',      0x63695eee2c3141bde314c5a6f89b98e62808d716, 'CoW Swap-SafeApp', 0.90),
         ('gnosis',      0x352a3666b27bb09aca7b4a71ed624429b7549551, '_',               0.85),
@@ -24,6 +25,7 @@ with partner_fee_splits as (
         ('gnosis',      0xe423c63e8a25811c9cbe71c8585c4505117397c6, '_',               0.75),
         ('gnosis',      0x1713b79e3dbb8a76d80e038ca701a4a781ac69eb, '_',               0.75),
         ('gnosis',      0xc542c2f197c4939154017c802b0583c596438380, '_',               0.875),
+        ('gnosis',      0xdda155b76fd2793d4ee6eccdd35708d55f3b84da, '_',               0.80),
 
         ('arbitrum',    0x63695eee2c3141bde314c5a6f89b98e62808d716, 'CoW Swap-SafeApp', 0.90),
         ('arbitrum',    0x352a3666b27bb09aca7b4a71ed624429b7549551, '_',               0.85),
@@ -35,6 +37,7 @@ with partner_fee_splits as (
         ('arbitrum',    0xe423c63e8a25811c9cbe71c8585c4505117397c6, '_',               0.75),
         ('arbitrum',    0x1713b79e3dbb8a76d80e038ca701a4a781ac69eb, '_',               0.75),
         ('arbitrum',    0xc542c2f197c4939154017c802b0583c596438380, '_',               0.875),
+        ('arbitrum',    0xdda155b76fd2793d4ee6eccdd35708d55f3b84da, '_',               0.80),
 
         ('base',        0x63695eee2c3141bde314c5a6f89b98e62808d716, 'CoW Swap-SafeApp', 0.90),
         ('base',        0x352a3666b27bb09aca7b4a71ed624429b7549551, '_',               0.85),
@@ -46,6 +49,7 @@ with partner_fee_splits as (
         ('base',        0xe423c63e8a25811c9cbe71c8585c4505117397c6, '_',               0.75),
         ('base',        0x1713b79e3dbb8a76d80e038ca701a4a781ac69eb, '_',               0.75),
         ('base',        0xc542c2f197c4939154017c802b0583c596438380, '_',               0.875),
+        ('base',        0xdda155b76fd2793d4ee6eccdd35708d55f3b84da, '_',               0.80),
 
         ('avalanche_c', 0x63695eee2c3141bde314c5a6f89b98e62808d716, 'CoW Swap-SafeApp', 0.90),
         ('avalanche_c', 0x352a3666b27bb09aca7b4a71ed624429b7549551, '_',               0.85),
@@ -57,6 +61,7 @@ with partner_fee_splits as (
         ('avalanche_c', 0xe423c63e8a25811c9cbe71c8585c4505117397c6, '_',               0.75),
         ('avalanche_c', 0x1713b79e3dbb8a76d80e038ca701a4a781ac69eb, '_',               0.75),
         ('avalanche_c', 0xc542c2f197c4939154017c802b0583c596438380, '_',               0.875),
+        ('avalanche_c', 0xdda155b76fd2793d4ee6eccdd35708d55f3b84da, '_',               0.80),
 
         ('polygon',     0x63695eee2c3141bde314c5a6f89b98e62808d716, 'CoW Swap-SafeApp', 0.90),
         ('polygon',     0x352a3666b27bb09aca7b4a71ed624429b7549551, '_',               0.85),
@@ -68,6 +73,7 @@ with partner_fee_splits as (
         ('polygon',     0xe423c63e8a25811c9cbe71c8585c4505117397c6, '_',               0.75),
         ('polygon',     0x1713b79e3dbb8a76d80e038ca701a4a781ac69eb, '_',               0.75),
         ('polygon',     0xc542c2f197c4939154017c802b0583c596438380, '_',               0.875),
+        ('polygon',     0xdda155b76fd2793d4ee6eccdd35708d55f3b84da, '_',               0.80),
         
         ('bnb',     0x63695eee2c3141bde314c5a6f89b98e62808d716, 'CoW Swap-SafeApp', 0.90),
         ('bnb',     0x352a3666b27bb09aca7b4a71ed624429b7549551, '_',               0.85),
@@ -78,7 +84,8 @@ with partner_fee_splits as (
         ('bnb',     0x8025bacf968aa82bdfe51b513123b55bfb0060d3, '_',               0.45),
         ('bnb',     0xe423c63e8a25811c9cbe71c8585c4505117397c6, '_',               0.75),
         ('bnb',     0x1713b79e3dbb8a76d80e038ca701a4a781ac69eb, '_',               0.75),
-        ('bnb',     0xc542c2f197c4939154017c802b0583c596438380, '_',               0.875)
+        ('bnb',     0xc542c2f197c4939154017c802b0583c596438380, '_',               0.875),
+        ('bnb',     0xdda155b76fd2793d4ee6eccdd35708d55f3b84da, '_',               0.80)
     ) as t(blockchain, partner_recipient, app_code_to_excl, partner_share)
 )
 
