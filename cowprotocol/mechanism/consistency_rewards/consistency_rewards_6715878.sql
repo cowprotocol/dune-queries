@@ -1,3 +1,117 @@
+-- This query experiments with a consistency rewards mechanism for CoW Protocol solver rewards.
+-- It compares the current reward system with a proposed split into performance rewards
+-- (capped at fee_cap * protocol_fee per auction) and consistency rewards (distributed from
+-- the remaining budget proportionally to a chosen consistency metric).
+--
+-- Parameters:
+--  {{blockchain}}          - network to run the analysis on (e.g. 'ethereum', 'gnosis')
+--  {{start_time}}          - start of the time range (inclusive) for auction data
+--  {{end_time}}            - end of the time range (exclusive) for auction data
+--  {{fee_cap}}             - fraction of protocol fee used as the per-auction reward cap
+--                            (e.g. 0.5 means at most 50% of the protocol fee per auction
+--                            goes to the winning solver as performance reward; remainder
+--                            flows into the weekly consistency budget)
+--  {{consistency_metric}}  - CTE name selecting which metric distributes the consistency
+--                            budget; one of:
+--                              metric_nr_orders    - number of distinct orders proposed
+--                              metric_top4_orders  - weighted count of orders where the
+--                                                    solver appeared in the top 4 by surplus
+--                                                    (weight = 12 / competing_solvers_in_top4)
+--                              metric_robust_surplus - marginal contribution to
+--                                                    surplus under a probabilistic model
+--                                                    (see below for details)
+--  {{solver}}              - a specific solver address to apply volume filtering to
+--  {{volume_filter}}       - minimum total volume (in ETH) required for an auction of
+--                            {{solver}} to be included; auctions below this threshold are
+--                            excluded (see filtering notes below)
+--
+-- Consistency budget:
+--  For each auction and solver, the available budget is fee_cap * protocol_fee. It is split as follows:
+--    Positive rewards (uncapped_reward > 0):
+--      performance_reward = min(uncapped_reward, fee_cap * protocol_fee)
+--      consistency_budget = max(fee_cap * protocol_fee - uncapped_reward, 0)
+--    Negative rewards/Penalties (uncapped_reward <= 0):
+--      performance_reward = reward  (actual negative reward, passed through unchanged)
+--      consistency_budget = fee_cap * protocol_fee  (full budget goes to consistency)
+--  In auctions with penaltis the budget increases by the cap and not additionally due to the
+--  penalty. It is possible that the uncapped reward is negative and that the protocol fee is
+--  positive, e.g., when a solver wins with multiple solutions but not all of them settle on chain.
+--
+-- Consistency metrics explained ({{consistency_metric}} selects among these):
+--  All metrics are anchored to executed orders — orders that actually settled on-chain
+--  in the selected time range — and only consider solutions that were not filtered out
+--  (proposed_solutions_filtered, filtered_out = false).
+--
+--  metric_nr_orders:
+--    Each solver's metric equals the number of distinct executed orders they included in
+--    an accepted, non-filtered-out solution.
+--    Rewards breadth of participation.
+--
+--  metric_top4_orders:
+--    For each executed order, solvers are ranked by the surplus they offered (surplus =
+--    executed_buy minus the limit-rate-adjusted buy amount). The top-4 solvers for each
+--    order split 12 points equally: each earns 12 / (number of solvers in top 4).
+--    Example: solvers A, B, C are all in the top 4 for an order → each earns 12/3 = 4.
+--    If only solver A qualifies → A earns 12.
+--    Rewards quality: solvers that are competitive across many orders.
+--
+--  metric_robust_surplus:
+--    Estimates each solver's marginal contribution to expected settled surplus, assuming
+--    solvers participate independently with their observed participation rate.
+--    Only SELL orders are considered.
+--
+--    Setup: solver j's participation rate p_j = (distinct SELL orders they proposed in
+--    accepted solutions) / (total distinct executed SELL orders in the week). For each
+--    order, solvers are ranked by their offered surplus (rank 1 = highest, s_1 >= s_2 >= ...).
+--
+--    Raw contribution of solver j at rank k:
+--      C_j = remaining_prob_j * p_j * s_j
+--    where remaining_prob_j = prod_{i=1}^{k-1} (1 - p_i) is the probability that none of
+--    the k-1 better solvers participates. C_j is the expected surplus j delivers when they
+--    are the best available solver for this order.
+--
+--    Marginal contribution of j = E[surplus with j] - E[surplus without j].
+--    Removing j from rank k increases every worse solver i's remaining_prob by a factor of
+--    1/(1-p_j), because the (1-p_j) term disappears from their product. The surplus gained
+--    by solver i when j is absent is therefore p_j/(1-p_j) * C_i. Summing over all worse
+--    solvers gives the closed-form formula computed by the `marginal_contributions` CTE:
+--      MC_j = C_j - p_j/(1-p_j) * sum_{i: rank(i) > rank(j)} C_i
+--    This avoids summing over exponentially many participant subsets.
+--
+--    Example (three solvers, one order):
+--      A: rank 1, s=10, p=0.90 → remaining_prob = 1.0,              C_A = 9.0
+--      B: rank 2, s= 9, p=0.80 → remaining_prob = 1-0.9 = 0.1,     C_B = 0.72
+--      C: rank 3, s= 8, p=0.95 → remaining_prob = 0.1*(1-0.8)=0.02, C_C = 0.152
+--      expected surplus = C_A + C_B + C_C = 9.872
+--      MC_A = 9.0  - (0.9/0.1) * (0.72 + 0.152) = 1.152
+--      MC_B = 0.72 - (0.8/0.2) * 0.152           = 0.112
+--      MC_C = 0.152                               = 0.152
+--      Note: C has the highest participation rate but ranks last by surplus, so despite
+--      p_C > p_A, most of C's surplus is already covered by A and B being present.
+--    A solver's metric is the sum of MC across all orders.
+--    Rewards solvers who generate surplus that would not be available without them.
+--
+-- Filtering ({{solver}} / {{volume_filter}}):
+--  Auctions where {{solver}} participated with a total volume below {{volume_filter}} ETH
+--  are excluded from both the performance data and the proposed solutions. This reduces
+--  {{solver}}'s performance rewards and their metric contribution, but does not redistribute
+--  the excluded rewards to other solvers (the consistency budget also shrinks accordingly).
+--  The filter is intended to study the effect of ignoring low-volume auctions for a solver.
+--  Rewards for other solvers are not accurate when filtering is enabled.
+--
+-- Output columns (aggregated per solver over the selected time range):
+--  solver              - solver address
+--  current_reward      - total reward under the current mechanism (ETH)
+--  new_reward          - total reward under the proposed mechanism:
+--                        performance_reward + consistency_reward (ETH)
+--  performance_reward  - capped performance reward: min(uncapped_reward, fee_cap *
+--                        protocol_fee) per auction, summed over all winning auctions;
+--                        negative rewards (losing auctions) are passed through unchanged (ETH)
+--  consistency_reward  - share of the weekly consistency budget allocated proportionally
+--                        to the solver's consistency metric (ETH)
+--  protocol_fee        - total protocol fees generated by the solver's settlements (ETH)
+--  volume              - total settlement volume (ETH)
+
 with performance_data_per_auction as (
     select
         auction_time,
@@ -15,9 +129,10 @@ with performance_data_per_auction as (
         and auction_time >= (timestamp '{{start_time}}') and auction_time < (timestamp '{{end_time}}')
 ),
 
+-- the next cte filters out all performance data for {{solver}} if the total reward was positive and the volume of executed orders was smaller than {{volume_filter}}
 performance_data_per_auction_filtered as (
     select * from performance_data_per_auction
-    where solver != {{solver}} or current_reward < 0 or volume / 1e18 >= {{volume_filter}} -- this descreases performance rewards for {{solver}} but does not make other solvers win more rewards
+    where solver != {{solver}} or current_reward < 0 or volume / 1e18 >= {{volume_filter}}
 ),
 
 performance_rewards as (
@@ -59,6 +174,7 @@ proposed_trade_executions as (
     where blockchain = '{{blockchain}}'
 ),
 
+-- the next cte filters out all proposed solutions for {{solver}} if the volume of executed orders included in the proposed solution was smaller than {{volume_filter}}
 proposed_solutions_filtered as (
     select ps.*
     from proposed_solutions as ps
