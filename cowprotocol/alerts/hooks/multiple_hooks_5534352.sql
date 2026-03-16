@@ -1,3 +1,4 @@
+--noqa: disable=all
 with 
 all_hooks as (
     select * 
@@ -23,14 +24,12 @@ all_hooks as (
     union all
     select * 
     from "query_5534333(lookback_time_unit='{{time_unit}}', lookback_units='{{units}}', blockchain='bnb')"        
-    /* linea and plasma are not fully ready yet but should be soon
     union all
     select * 
     from "query_5534333(lookback_time_unit='{{time_unit}}', lookback_units='{{units}}', blockchain='linea')"        
     union all
     select * 
     from "query_5534333(lookback_time_unit='{{time_unit}}', lookback_units='{{units}}', blockchain='plasma')"    
-    */
 )
 select *
 from (
@@ -38,8 +37,16 @@ from (
         *,
         count(1) over (partition by tx_hash, order_uid, hook_call_data, hook_target, hook_gas_limit) as hook_calls
     from all_hooks
-    where hook_app_id not in ('cow-swap://libs/hook-dapp-lib/permit', 'PERMIT_TOKEN','BUILD_CUSTOM_HOOK', '1db4bacb661a90fb6b475fd5b585acba9745bc373573c65ecc3e8f5bfd5dee1f')
+    where 
+        not(hook_app_id in (
+            'cow-swap://libs/hook-dapp-lib/permit', 
+            'PERMIT_TOKEN',
+            'BUILD_CUSTOM_HOOK',
+            '1db4bacb661a90fb6b475fd5b585acba9745bc373573c65ecc3e8f5bfd5dee1f',
+            'cow.fi')
+        )
+        and not(hook_app_id like 'cow-sdk://flashloans/aave%')
 )
-where
+where 
     hook_calls > 1
 order by block_time desc, order_uid
