@@ -308,6 +308,9 @@ where
     -- for week of March 18 - March 25, 2025 on Base
     or 0x22af33fe49fd1fa80c7149773dde5890d3c76f3b in (buy_token_address) -- exclude BNKR
 
+    -- for week of March 10 - March 17, 2026 on Base
+    or tx_hash = 0x7FBFA52D0B86756A6C748A0BDE34E58B8CEC50C6EF46B260C42A7F8BAD3B98A1
+
 -- Arbitrum
 union all
 select distinct tx_hash
