@@ -27,7 +27,10 @@ with all_hooks as (
     from "query_5534333(lookback_time_unit='{{time_unit}}', lookback_units='{{units}}', blockchain='linea')"        
     union all
     select * 
-    from "query_5534333(lookback_time_unit='{{time_unit}}', lookback_units='{{units}}', blockchain='plasma')"    
+    from "query_5534333(lookback_time_unit='{{time_unit}}', lookback_units='{{units}}', blockchain='plasma')"            
+    union all
+    select * 
+    from "query_5534333(lookback_time_unit='{{time_unit}}', lookback_units='{{units}}', blockchain='ink')"    
 )
 select * 
 from all_hooks

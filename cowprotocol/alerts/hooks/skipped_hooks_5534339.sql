@@ -38,6 +38,7 @@ where
         'cow-swap://libs/hook-dapp-lib/permit',
         'PERMIT_TOKEN',
         '1db4bacb661a90fb6b475fd5b585acba9745bc373573c65ecc3e8f5bfd5dee1f',
-        'cow.fi')
+        'cow.fi',
+        'Fordefi')
     )
     and not(hook_app_id like 'cow-sdk://flashloans/aave%')
