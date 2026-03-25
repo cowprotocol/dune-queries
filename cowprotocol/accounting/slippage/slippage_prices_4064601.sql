@@ -154,6 +154,7 @@ prices as (
             when '{{blockchain}}' = 'ethereum' and token_address = 0x5c6Ee304399DBdB9C8Ef030aB642B10820DB8F56 and hour >= timestamp '2025-12-30 03:00' and hour <= timestamp '2025-12-30 04:00' then 2.8 -- noqa:CP02
             when '{{blockchain}}' = 'gnosis' and token_address = 0xcb444e90d8198415266c6a2724b7900fb12fc56e and hour >= timestamp '2025-12-30 00:00' then 0.0
             when '{{blockchain}}' = 'ethereum' and token_address = 0x3231cb76718cdef2155fc47b5286d82e6eda273f and hour >= timestamp '2026-01-13 00:00' then 0.0
+            when '{{blockchain}}' = 'ethereum' and token_address = 0x4956b52ae2ff65d74ca2d61207523288e4528f96 and hour >= timestamp '2026-03-22 15:00' and hour <= timestamp '2026-03-22 19:00' then 0.23292903653351268
             else price_unit
         end as price_unit,
         case
@@ -168,6 +169,7 @@ prices as (
             when '{{blockchain}}' = 'ethereum' and token_address = 0x5c6Ee304399DBdB9C8Ef030aB642B10820DB8F56 and hour >= timestamp '2025-12-30 03:00' and hour <= timestamp '2025-12-30 04:00' then 2.8 / pow(10, 18) -- noqa:CP02
             when '{{blockchain}}' = 'gnosis' and token_address = 0xcb444e90d8198415266c6a2724b7900fb12fc56e and hour >= timestamp '2025-12-30 00:00' then 0.0
             when '{{blockchain}}' = 'ethereum' and token_address = 0x3231cb76718cdef2155fc47b5286d82e6eda273f and hour >= timestamp '2026-01-13 00:00' then 0.0
+            when '{{blockchain}}' = 'ethereum' and token_address = 0x4956b52ae2ff65d74ca2d61207523288e4528f96 and hour >= timestamp '2026-03-22 15:00' and hour <= timestamp '2026-03-22 19:00' then 0.23292903653351268 / pow(10, 18)
             else price_atom
         end as price_atom
     from prices_pre
