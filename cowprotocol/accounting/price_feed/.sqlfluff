@@ -1,2 +1,0 @@
-[sqlfluff:templater:jinja:context]
-blockchain='ethereum'

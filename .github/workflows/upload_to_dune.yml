@@ -1,0 +1,26 @@
+name: Upload CSVs to Dune on Commit
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'uploads/**'
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Upload CSV tables to Dune
+        env:
+          DUNE_API_KEY: ${{ secrets.DUNE_API_KEY }}
+        run: python -u scripts/upload_to_dune.py

@@ -1,33 +1,127 @@
-# Dune Queries
+# Balancer Dune Queries
 
-Repository containing CoW DAO relevant dune queries.
+Repository for managing Balancer protocol Dune Analytics queries. Changes merged to `main` are automatically synced to Dune.
 
-## Developer Guide
+## Repository Structure
 
-Please employ standard engineering principles such as _divide and conquer_, _DRY (don't repeat yourself)_ by creating intermediate queries that can be used for debugging and depended on in upstream queries using Dune's [Query Views](https://docs.dune.com/query-engine/query-a-query#query-views)
+```
+balancer/                 Balancer protocol queries
+  volume/                 Trading volume metrics
+  tvl/                    Total Value Locked
+  fees/                   Swap fees, protocol fees
+  revenue/                Protocol revenue
+  pools/                  Pool-level analytics
+    overview/               Pool listings, general stats
+    weighted/               Weighted pools
+    stable/                 Stable / composable stable pools
+    boosted/                Boosted pools (ERC-4626)
+    lbp/                    Liquidity Bootstrapping Pools
+  liquidity/              LP analytics, yield, impermanent loss
+  governance/             veBAL, gauges, voting incentives
+  token/                  BAL token supply, distribution, price
+  dashboards/             Dashboard-specific composite queries
+  views/                  Shared intermediate queries (Query Views)
+cowamm/                   CoW AMM queries (Balancer CoW AMM product)
+uploads/                  CSV files uploaded as Dune tables
+scripts/                  Tooling for query management
+```
 
-For information on writing efficient Dune queries cf. [this guide](https://docs.dune.com/query-engine/writing-efficient-queries)
+All query file names follow the pattern `descriptive_name_{queryId}.sql`. The query ID is the numeric ID from the Dune URL (`dune.com/queries/{id}`).
 
-### Repository Structure
+## Quick Start
 
-Queries can be placed in any subfolder (please organize the file structure thoughtfully).
-All query file names must be formatted as `**/*_{queryId}.sql`.
-This will cause continuous integration to automatically update queries in Dune whenever a PR is merged into main.
+### Prerequisites
 
-### Adding queries
+- Python 3.9+
+- A Dune API key from a **Plus plan** or higher (create one at [Dune team settings](https://dune.com/settings/teams))
 
-In order to generate a new `queryId` create and save a new query via [https://dune.com/queries](https://dune.com/queries).
-This will turn the url into something like `https://dune.com/queries/<some id>`, where the last part is your newly generated query id.
-Upon merging your PR into main the content of the Dune query will be overridden by the content of the query file in github.
+### Local Setup
 
-### Updating Queries
+```bash
+cp .env.test .env             # copy template and fill in your DUNE_API_KEY
+pip install -r scripts/requirements.txt
+```
 
-To update an existing query, simply change the SQL, then create, review and merge the PR. Upon merging the changes will be automatically synced to Dune.
+### Scripts
 
-### Removing Queries
+| Script | Description | Command |
+|--------|-------------|---------|
+| `pull_from_dune.py` | Fetch queries from Dune into the repo based on `queries.yml` | `python scripts/pull_from_dune.py` |
+| `push_to_dune.py` | Push all managed queries from repo to Dune (manual full sync) | `python scripts/push_to_dune.py` |
+| `preview_query.py` | Run a query and display the first 20 rows (uses API credits) | `python scripts/preview_query.py <query_id>` |
+| `upload_to_dune.py` | Upload CSV files from `uploads/` to Dune as tables | `python scripts/upload_to_dune.py` |
+| `validate.py` | Check naming conventions, manifest consistency, dependencies | `python scripts/validate.py` |
 
-Removing a content file does not automatically archive the query in Dune. If this is desired, please go ahead and remove it manually.
+## Adding a New Query
+
+1. Create the query on [dune.com](https://dune.com/queries) and save it. Note the query ID from the URL.
+2. Add the ID to `queries.yml` with the target category:
+   ```yaml
+   - id: 1234567
+     category: volume
+   ```
+3. Pull it into the repo:
+   ```bash
+   python scripts/pull_from_dune.py
+   ```
+   Or create the file manually: `balancer/volume/descriptive_name_1234567.sql`
+4. Ensure the file starts with `-- part of a query repo` (the pull script adds this automatically).
+5. If the query uses new Jinja parameters (e.g., `{{pool_type}}`), add them to the relevant `.sqlfluff` context file.
+6. Test locally:
+   ```bash
+   sqlfluff lint balancer/volume/descriptive_name_1234567.sql
+   python scripts/preview_query.py 1234567
+   ```
+7. Open a PR. SQLFluff runs automatically. Follow the PR template to document your changes.
+8. On merge to `main`, CI automatically syncs the query to Dune.
+
+## Updating Queries
+
+Edit the SQL file, open a PR, and merge. CI handles the rest.
+
+## Removing Queries
+
+Deleting a file from the repo does **not** archive the query on Dune. If you want to archive it, do so manually on dune.com. Also remove the ID from `queries.yml`.
+
+## Uploading CSV Tables
+
+Place CSV files in the `uploads/` directory. On merge to `main`, they are uploaded to Dune as tables named `dune.{team_name}.dataset_{filename}` (without the `.csv` extension).
+
+## Query Composition (DRY)
+
+Use Dune [Query Views](https://docs.dune.com/query-engine/query-a-query#query-views) to avoid duplicating logic. Place shared intermediate queries in `balancer/views/` and reference them via `query_{id}` in downstream queries.
+
+For tips on writing efficient queries, see the [Dune guide](https://docs.dune.com/query-engine/writing-efficient-queries).
+
+## CI/CD
+
+- **On PR**: [SQLFluff](https://sqlfluff.com/) lints changed SQL files. The [nitpicker](https://github.com/ethanis/nitpicker) bot flags common issues (e.g., using deprecated `prices.usd`, missing partition filters).
+- **On merge to `main`**: Changed `.sql` files are synced to Dune via the [`bh2smith/dune-update`](https://github.com/bh2smith/dune-update) GitHub Action. Changed CSVs in `uploads/` are uploaded via `upload_to_dune.py`.
+
+### Important Notes
+
+- **Ownership**: Queries must be owned by the team whose API key is configured. You cannot update queries owned by other teams.
+- **Rollback**: If a bad merge pushes broken SQL, use [Dune's query version history](https://dune.com/docs/app/query-editor/version-history) to revert.
+- **File names are not synced**: Renaming a file in the repo does not rename the query on Dune. The `_{queryId}.sql` suffix is what matters -- do not remove it.
 
 ## Linting
 
-[Sqlfluff](https://sqlfluff.com/) is run automatically on every PR to ensure queries follow a consistent formatting. See [this guide](https://docs.sqlfluff.com/en/stable/gettingstarted.html#installing-sqlfluff) for installing it locally.
+[SQLFluff](https://sqlfluff.com/) runs on every PR. Install locally:
+
+```bash
+pip install sqlfluff
+sqlfluff lint balancer/          # lint all Balancer queries
+sqlfluff lint cowamm/            # lint CoW AMM queries
+sqlfluff fix <file>              # auto-fix a specific file
+```
+
+## Contributing
+
+See the [PR template](.github/PULL_REQUEST_TEMPLATE.md) for the required format. Issues can be filed using the [issue templates](.github/ISSUE_TEMPLATE/).
+
+| Issue Type | Use For |
+|------------|---------|
+| Bug | Data quality issues, broken queries, miscalculations |
+| Chart Improvement | Visualization suggestions |
+| Query Improvement | SQL enhancements, new columns, performance |
+| Question | General questions or suggestions |

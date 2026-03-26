@@ -12,7 +12,7 @@ indent_unit = space
 tab_space_size = 4
 indented_on_contents = False
 
-[sqlfluff:templater:jinja:context] # unfortunately every parameter used in queries must be defined here - the value does not matter.
+[sqlfluff:templater:jinja:context] # Every Jinja parameter used in queries must be defined here.
 blockchain = 'ethereum'
 starttime = '2023-01-01'
 endtime = '2024-01-01'
@@ -23,9 +23,9 @@ date_granularity = 'month'
 aggregate_by = 'month'
 time_unit = 'hour'
 units = '6'
-solver_name = 'ExtQuasimodo'
-environment = 'prod'
-days_without_settlement = '5'
-order_source = 'UI'
-token_pair = 'USDC-WETH'
-xrate_type = 'variable'
+pool_id = '0x0000000000000000000000000000000000000000000000000000000000000001'
+pool_address = '0x0000000000000000000000000000000000000001'
+pool_type = 'weighted'
+token_address = '0xba100000625a3754423978a60c9317c58a424e3D'
+version = 'v2'
+chain = 'ethereum'

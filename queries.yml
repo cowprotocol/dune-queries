@@ -1,0 +1,55 @@
+# Master manifest of all query IDs managed by this repository.
+#
+# Each entry maps a Dune query ID to a category (subdirectory under balancer/).
+# The pull_from_dune.py script reads this file to fetch and organize queries.
+# The validate.py script cross-checks this against actual files.
+#
+# Format:
+#   - id: <dune_query_id>
+#     category: <subdirectory>   # e.g. volume, tvl, fees, pools/weighted, views
+#
+# CoW AMM queries (in cowamm/) are listed without a category -- their files
+# already exist and are located by searching the repo tree.
+
+query_ids:
+  # --- CoW AMM (existing) ---
+  - 3959044
+  - 3967954
+  - 3968105
+  - 4031724
+  - 4047078
+  - 4047194
+  - 4055484
+  - 4059180
+  - 4059213
+  - 4059465
+  - 4059700
+  - 4060136
+  - 4062641
+  - 4062833
+  - 4077968
+  - 4086902
+  - 4096107
+  - 4106329
+  - 4106553
+  - 4117043
+  - 4232873
+  - 4232976
+  - 4303563
+  - 4304295
+  - 4335231
+  - 4340356
+  - 4340428
+  - 4346160
+  - 4420646
+  - 4420675
+  - 4420687
+  - 4781568
+  - 4814818
+  - 4849124
+
+  # --- Balancer (to be populated in Phase 2: Discovery) ---
+  # - id: <query_id>
+  #   category: volume
+  # - id: <query_id>
+  #   category: tvl
