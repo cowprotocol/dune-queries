@@ -11,10 +11,3 @@
     - "**/*.sql"
   contentFilter:
     - '(\+.*(?:dex\.trades|erc20_\w+\.evt_transfer|balancer_v\d+_\w+\.\w+)(?!.*block_date))'
-
-- markdown: |
-    Missing `-- part of a query repo` header. Please add it as the first line of the file.
-  pathFilter:
-    - "**/*.sql"
-  contentFilter:
-    - '^(?!\-\-\s*part of a query repo)'
