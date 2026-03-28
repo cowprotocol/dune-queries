@@ -1,0 +1,6 @@
+[sqlfluff:templater:jinja:context]
+blockchain=ethereum
+start_time='2024-08-20 00:00:00'
+end_time='2024-08-27 00:00:00'
+volume_fee_bps_stable=2.0
+volume_fee_bps_variable=2.0
