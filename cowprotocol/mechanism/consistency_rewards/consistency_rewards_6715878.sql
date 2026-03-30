@@ -14,7 +14,7 @@
 --  {{consistency_metric}}  - CTE name selecting which metric distributes the consistency
 --                            budget; one of:
 --                              metric_nr_orders    - number of distinct orders proposed
---                              metric_top4_orders  - weighted count of orders where the
+--                              metric_top4_bids  - weighted count of orders where the
 --                                                    solver appeared in the top 4 by surplus
 --                                                    (weight = 12 / competing_solvers_in_top4)
 --                              metric_robust_surplus - marginal contribution to
@@ -51,7 +51,7 @@
 --    an accepted, non-filtered-out solution.
 --    Rewards breadth of participation.
 --
---  metric_top4_orders:
+--  metric_top4_bids:
 --    For each executed order, solvers are ranked by the surplus they offered (surplus =
 --    executed_buy minus the limit-rate-adjusted buy amount). The top-4 solvers for each
 --    order split 12 points equally: each earns 12 / (number of solvers in top 4).
@@ -231,7 +231,7 @@ surplus_per_order as (
     group by 1, 2, 3, 4, 5
 ),
 
-metric_top4_orders as (
+metric_top4_bids as (
     select
         accounting_week_start,
         solver,
