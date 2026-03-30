@@ -23,7 +23,8 @@
 --  {{solver}}              - a specific solver address to apply volume filtering to
 --  {{volume_filter}}       - minimum total volume (in ETH) required for an auction of
 --                            {{solver}} to be included; auctions below this threshold are
---                            excluded (see filtering notes below)
+--                            excluded (see filtering notes below) The default value of 0
+--                            results in no filtering.
 --  {{include_penalties}}   - boolean controlling whether penalties increase the consistency
 --                            budget; when true, a penalty (negative reward) is added to the
 --                            consistency budget in penalised auctions, so the budget becomes
@@ -96,12 +97,16 @@
 --    Rewards solvers who generate surplus that would not be available without them.
 --
 -- Filtering ({{solver}} / {{volume_filter}}):
+--  To compute the impact of solvers settling orders with small volume, the query has the option
+--  to filter batches below some volume for a given solver. Comparing rewards with that filtering
+--  to rewards without filtering gives an indication of that value.
+--  If the {{volume_filter}} parameter is larger than 0, auctions for {{solver}} are filtered.
 --  Auctions where {{solver}} participated with a total volume below {{volume_filter}} ETH
 --  are excluded from both the performance data and the proposed solutions. This reduces
---  {{solver}}'s performance rewards and their metric contribution, but does not redistribute
---  the excluded rewards to other solvers (the consistency budget also shrinks accordingly).
---  The filter is intended to study the effect of ignoring low-volume auctions for a solver.
---  Rewards for other solvers are not accurate when filtering is enabled.
+--  {{solver}}'s performance rewards and their metric contribution giving an accurate estimate
+--  of rewards had the solver not settled small orders. With the way filtering is implemented,
+--  other solvers rewards are not estimated accurately performance rewards are not redistribute
+--  to other solvers (the consistency budget also shrinks accordingly due to missing protocol fees).
 --
 -- Output columns (one row per solver per accounting week):
 --  accounting_week_start       - Monday starting the accounting week
