@@ -1,3 +1,4 @@
+--noqa: disable=all
 -- This query takes all wrapper calls coming from executed trades and looks at the blockchain traces to check if that call was successful 
 with 
 app_data_raw as (
