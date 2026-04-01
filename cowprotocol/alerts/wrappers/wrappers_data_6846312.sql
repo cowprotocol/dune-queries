@@ -49,7 +49,6 @@ app_data_raw as (
         t.block_date >= date(date_add('{{lookback_time_unit}}', -{{lookback_units}}, now())) -- using date bc it's the partition field
         and type = 'call'
         and "from" in (select address from cow_protocol_{{blockchain}}.solvers)
-        --and "to" = 0x891cf92cf082CD159aCAF6A62Ab010495B5Ab4aE
 )
 select           
     '{{blockchain}}' as blockchain,
