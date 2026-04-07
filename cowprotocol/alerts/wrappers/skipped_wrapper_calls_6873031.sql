@@ -26,5 +26,5 @@ multichain as (
 select *
 from multichain
 where
-    is_omittable = false -- if true then solvers are allowed to skip 
+    coalesce(is_omittable, false) = false -- if true then solvers are allowed to skip 
     and trace_success is null 
