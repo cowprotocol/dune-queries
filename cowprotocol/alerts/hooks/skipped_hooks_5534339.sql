@@ -40,7 +40,6 @@ where
         '1db4bacb661a90fb6b475fd5b585acba9745bc373573c65ecc3e8f5bfd5dee1f',
         'cow.fi',
         'Fordefi',
-        'UNI_V2_DEPOSIT'
-        )
+        'UNI_V2_DEPOSIT')
     )
     and not(hook_app_id like 'cow-sdk://flashloans/aave%')
