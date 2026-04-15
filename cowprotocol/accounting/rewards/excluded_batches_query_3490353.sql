@@ -276,17 +276,20 @@ where
     or tx_hash = 0x3331d793fd17c79969605bb22696d6bc6cb615c57d0495eaa5a0031da86ca1e1
 
     -- for the week of  October 21 - October 27, 2025
-    or tx_hash = 0x262D523FC9D66403A6B9C698E29712CAEB71CF94CDD797081F65904B300B2195
-    or tx_hash = 0xF7C9919FDB483D5975BF54D0D979B4CB61D62C740E188FD5BBBF28685F4D6BAB
+    or tx_hash = 0x262d523fc9d66403a6b9c698e29712caeb71cf94cdd797081f65904b300b2195
+    or tx_hash = 0xf7c9919fdb483d5975bf54d0d979b4cb61d62c740e188fd5bbbf28685f4d6bab
 
     -- for the week of November 4 - November 11, 2025
-    or tx_hash = 0xA847929EB17488BA9DA11D61B9AD0D9FD48DE053F0C17013F428C48DEFF29ECB
+    or tx_hash = 0xa847929eb17488ba9da11d61b9ad0d9fd48de053f0c17013f428c48deff29ecb
 
     -- for the week of December 16 - December 23, 2025
-    or tx_hash = 0x0170A71C3F1240C9770723A4E7790F4FAB9BA35FE8B08E1509506F3BECB9D3D2
+    or tx_hash = 0x0170a71c3f1240c9770723a4e7790f4fab9ba35fe8b08e1509506f3becb9d3d2
 
     -- for the week of December 23 - December 30, 2025
     or tx_hash = 0x2586185b564b4638d55e0f05a3caa950eb1cbe092a5a321c3c1eeab7ab50749b
+    
+    -- for the week of March 31 - April 7, 2026
+    or tx_hash = 0x075e0a0e5f59af709f3c6f6e8608518ac90a87b5b005f5872a30c2a3246c9e3e
 
     -- for the week of April 7 - April 14, 2026
     or tx_hash = 0x253c42dfca59cb8fcd6a198ef606033a516b29861f9cbf667ae351b566a7f8ec
