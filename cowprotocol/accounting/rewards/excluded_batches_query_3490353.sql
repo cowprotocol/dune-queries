@@ -340,6 +340,10 @@ where
 
     -- for week of April 07 - April 14, 2026 on BNB
     or tx_hash = 0xe3ccdb8c162b929fda198c04c2944f185bc02d5ffbc543044111cda3594b9a63
+    or tx_hash = 0xdd8b958c8388c10c6273a9157414736abcb959a038ed3117642d5cfbb44b6624
+    or tx_hash = 0x2abc6960bb7059936b073af233a224ca0b2a2b1cb11ed207d3b341bde5247b8a
+    or tx_hash = 0x315bc0ced047efb18452fb3b1134f0425d14b3be7be5880b611f60c2b1063a47
+    or tx_hash = 0x766fb9035d6f8ee11277aa18b610cc0ea6ea083eb370fdda835f3fcdc5e17ce2
 
 -- GNOSIS
 union all
