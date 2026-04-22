@@ -54,6 +54,22 @@ primary_rewards as (
     group by solver
 ),
 
+consistency_rewards as (
+    select
+        solver,
+        cast(consistency_reward_native as double) as consistency_reward_wei
+    from "query_7352571(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')"
+),
+
+solver_competition_rewards as (
+    select
+        a.solver,
+        coalesce(a.reward_wei, 0) as performance_reward_wei,
+        coalesce(b.consistency_reward_wei, 0) as consistency_reward_wei,
+        coalesce(a.reward_wei, 0) + coalesce(b.consistency_reward_wei, 0) as reward_wei
+    from primary_rewards as a inner join consistency_rewards as b on a.solver = b.solver
+),
+
 fees_and_costs as (
     select
         solver,
@@ -106,10 +122,14 @@ aggregate_results as (
     select
         pr.solver,
         coalesce(reward_wei, 0) / pow(10, 18) as primary_reward_eth,
+        coalesce(performance_reward_wei, 0) / pow(10, 18) as performance_reward_eth,
+        coalesce(consistency_reward_wei, 0) / pow(10, 18) as consistency_reward_eth,
         coalesce(network_fee_wei, 0) / pow(10, 18) as network_fee_eth,
         coalesce(execution_cost_wei, 0) / pow(10, 18) as execution_cost_eth,
-        coalesce(reward_wei, 0) / pow(10, 18) * (select native_token_price / cow_price from conversion_prices) as primary_reward_cow
-    from primary_rewards as pr left outer join fees_and_costs as fc on pr.solver = fc.solver
+        coalesce(reward_wei, 0) / pow(10, 18) * (select native_token_price / cow_price from conversion_prices) as primary_reward_cow,
+        coalesce(performance_reward_wei, 0) / pow(10, 18) * (select native_token_price / cow_price from conversion_prices) as performance_reward_cow,
+        coalesce(consistency_reward_wei, 0) / pow(10, 18) * (select native_token_price / cow_price from conversion_prices) as consistency_reward_cow
+    from solver_competition_rewards as pr left outer join fees_and_costs as fc on pr.solver = fc.solver
 ),
 
 combined_data as (
@@ -119,6 +139,8 @@ combined_data as (
         execution_cost_eth,
         primary_reward_eth,
         primary_reward_cow,
+        performance_reward_cow,
+        consistency_reward_cow,
         coalesce(quote_reward, 0) as quote_reward,
         coalesce(slippage, 0) as slippage_eth,
         concat(
@@ -160,6 +182,8 @@ combined_data_after_service_fee as (
             when cd.primary_reward_cow < 0 then cd.primary_reward_cow
             else coalesce(sff.service_fee_factor, 1) * cd.primary_reward_cow
         end as primary_reward_cow,
+        performance_reward_cow,
+        consistency_reward_cow,
         coalesce(sff.service_fee_factor, 1) * cd.quote_reward as quote_reward,
         cd.slippage_eth,
         cd.slippage_per_tx,
@@ -211,6 +235,8 @@ select  --noqa: ST06
     reimbursement_eth as reimbursement_native_token,
     reimbursement_cow,
     total_cow_reward,
+    performance_reward_cow,
+    consistency_reward_cow,
     network_fee_eth as network_fee_native_token,
     execution_cost_eth as execution_cost_native_token
 from extended_payout_data as epd
