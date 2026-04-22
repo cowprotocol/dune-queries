@@ -1,4 +1,5 @@
 -- This query experiments with a consistency rewards mechanism for CoW Protocol solver rewards.
+-- It was used in the decision making around CIP-85
 -- It compares the current reward system with a proposed split into performance rewards
 -- (capped at fee_cap * protocol_fee per auction) and consistency rewards (distributed from
 -- the remaining budget proportionally to a chosen consistency metric).
