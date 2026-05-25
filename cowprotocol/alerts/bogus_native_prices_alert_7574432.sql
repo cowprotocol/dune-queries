@@ -32,7 +32,8 @@ with sell_orders as (
     inner join "query_4364122(blockchain='{{blockchain}}')" as rod
         on t.order_uid = rod.order_uid
         and t.tx_hash = rod.tx_hash
-    where t.order_type = 'SELL'
+    where
+        t.order_type = 'SELL'
         and t.block_time >= timestamp '{{start_time}}'
         and t.block_time < timestamp '{{end_time}}'
         and rod.quote_sell_token_price is not null
@@ -59,8 +60,9 @@ select
         when buy_value_native > 1000 * sell_value_native then 'buy_side_overpriced'
     end as anomaly_type
 from sell_orders
-where (sell_value_native > 1000 * buy_value_native
+where (
+    sell_value_native > 1000 * buy_value_native
     or buy_value_native > 1000 * sell_value_native
 )
-    and greatest(sell_value_native, buy_value_native) > {{min_native_volume}}
+and greatest(sell_value_native, buy_value_native) > {{min_native_volume}}
 order by block_time desc
