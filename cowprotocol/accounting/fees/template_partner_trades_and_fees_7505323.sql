@@ -4,8 +4,8 @@ with
 partner_params as (
 -- modify as needed
     select 
-        0.123 as partner_cut_vol  --ratio of partner volume fee going to integrator (0-1)
-        ,0.123 as partner_cut_pi  --ratio of partner price improvement fee going to integrator (0-1), leave as 0 if non-existing
+        0.123 as partner_cut_vol  --ratio of partner volume fee going to integrator (0.0-1.0)
+        ,0 as partner_cut_pi  --ratio of partner price improvement fee going to integrator (0.0-1.0), leave as 0 if non-existing
         ,[0x0] as partner_fee_recipient_address  -- if multiple follow syntax: [address_a,addresss_b,etc]
         ,timestamp '2026-01-01' as start_date
 )
@@ -56,7 +56,7 @@ partner_params as (
 -- breakdown of partner fees into volume and price improvement
 , partner_fee_breakdown as (
     select
-        prep.*
+        *
         ,partner_fee_base_amount * partner_vol_fee_bps/1e4 as partner_fee_vol
         ,greatest(0, partner_fee - partner_fee_base_amount * partner_vol_fee_bps/1e4) as partner_fee_pi
     from prep
