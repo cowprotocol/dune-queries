@@ -15,11 +15,13 @@ partner_params as (
         ,t.blockchain
         ,app.app_code
         ,t.usd_value  --uses prices.usd 
-        ,if(t.order_type='SELL'
+        ,if(
+            t.order_type='SELL'
             , t.atoms_bought + coalesce(od.protocol_fee, 0)
             , t.atoms_sold - coalesce(od.protocol_fee, 0)
         ) * coalesce(od.protocol_fee_native_price,0)/1e18 as native_value
-        ,if(t.order_type='SELL'
+        ,if(
+            t.order_type='SELL'
             , t.atoms_bought + coalesce(od.partner_fee, 0)
             , t.atoms_sold - coalesce(od.partner_fee, 0)
         ) as partner_fee_base_amount
