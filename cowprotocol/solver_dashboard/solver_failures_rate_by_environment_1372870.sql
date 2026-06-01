@@ -21,6 +21,12 @@ settlement_transactions as (
     group by "from", date_trunc('{{frequency}}', block_time)
 ),
 
+solvers as (
+    select *
+    from dune.cowprotocol.solvers
+    where blockchain = '{{blockchain}}'
+),
+
 results as (
     select
         time,
@@ -29,8 +35,7 @@ results as (
         successes,
         failures,
         (case when successes = 0 then 0 else 1.00 * failures / (successes + failures) end) as failure_rate
-    from settlement_transactions
-    inner join cow_protocol_{{blockchain}}.solvers on solver = address
+    from settlement_transactions inner join solvers on solver = address
 )
 
 select * from results

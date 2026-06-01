@@ -97,6 +97,12 @@ valid_vouches as (
     where time_rank = 1
 ),
 
+solvers as (
+    select *
+    from dune.cowprotocol.solvers
+    where blockchain = '{{blockchain}}'
+),
+
 named_results as (
     select
         vv.solver,
@@ -105,7 +111,7 @@ named_results as (
         bp.pool_name,
         concat(environment, '-', s.name) as solver_name
     from valid_vouches as vv
-    inner join cow_protocol_{{blockchain}}.solvers as s on vv.solver = s.address
+    inner join solvers as s on vv.solver = s.address
     inner join full_bonding_pools as bp on vv.pool_address = bp.pool_address
 )
 

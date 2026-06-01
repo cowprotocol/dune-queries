@@ -17,11 +17,17 @@ url_helper as (
             when '{{blockchain}}' = 'bnb' then 'bsc'
             else '{{blockchain}}'
         end
+),
+
+solvers as (
+    select *
+    from dune.cowprotocol.solvers
+    where blockchain = '{{blockchain}}'
 )
 
 select  --noqa: ST06
     rpt.block_time,
-    concat(environment, '-', name) as solver_name,
+    concat(s.environment, '-', s.name) as solver_name,
     concat(
         '<a href="https://dune.com/queries/4059683',
         '?blockchain={{blockchain}}',
@@ -47,7 +53,7 @@ select  --noqa: ST06
     network_fee_usd
 from results_per_tx as rpt
 inner join cow_protocol_{{blockchain}}.batches as b on rpt.tx_hash = b.tx_hash
-inner join cow_protocol_{{blockchain}}.solvers on address = rpt.solver_address
+inner join solvers as s on s.address = rpt.solver_address
 where (
     abs(slippage_usd) > {{min_absolute_slippage_tolerance}}
     and

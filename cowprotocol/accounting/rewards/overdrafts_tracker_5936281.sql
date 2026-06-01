@@ -34,6 +34,12 @@ most_recent_updates as (
         from overdraft_update_events
     )
     where rn = 1
+),
+
+solvers as (
+    select *
+    from dune.cowprotocol.solvers
+    where blockchain = '{{blockchain}}'
 )
 
 select
@@ -43,6 +49,6 @@ select
     s.active,
     coalesce(mru.new_overdraft, 0) as current_ovedraft_native_token_atoms,
     coalesce(mru.new_overdraft, 0) / pow(10,18) as current_overdraft_native_token_units
-from cow_protocol_{{blockchain}}.solvers as s left join most_recent_updates as mru on s.address = mru.solver
+from solvers as s left join most_recent_updates as mru on s.address = mru.solver
 where coalesce(mru.new_overdraft, 0) > 0
 order by coalesce(mru.new_overdraft, 0) desc

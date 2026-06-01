@@ -31,6 +31,12 @@ settled_batch_data as (
     inner join settled_batches as sb on b.tx_hash = sb.tx_hash
 ),
 
+solvers as (
+    select *
+    from dune.cowprotocol.solvers
+    where blockchain = '{{blockchain}}'
+),
+
 solver_info as (
     select
         s.name as solver_name,
@@ -45,11 +51,8 @@ solver_info as (
         sum(t.surplus_usd) as total_surplus,
         1.0 * sum(b.gas_used) / nullif(sum(t.num_trades), 0) as average_gas_per_trade,
         1.0 * sum(b.dex_swaps) / nullif(sum(t.num_trades), 0) as average_dex_swaps_per_trade
-    from settled_batch_data as b
-    inner join cow_protocol_{{blockchain}}.solvers as s
-        on b.solver_address = s.address
-    inner join trade_agg as t
-        on b.tx_hash = t.tx_hash
+    from settled_batch_data as b inner join solvers as s on b.solver_address = s.address
+    inner join trade_agg as t on b.tx_hash = t.tx_hash
     where s.environment not in ('test', 'service') and s.active = TRUE
     group by s.name
 )
