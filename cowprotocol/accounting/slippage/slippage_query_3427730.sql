@@ -1,3 +1,13 @@
+with solvers as (
+    select
+        address,
+        environment,
+        name,
+        whitelisted as active
+    from dune.cowprotocol.solvers
+    where blockchain = '{{blockchain}}'
+)
+
 select
     solver_address,
     concat(environment, '-', name) as solver_name,
@@ -12,5 +22,4 @@ select
         '" target="_blank">link</a>'
     ) as slippage_per_transaction
 from "query_4070065(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}',slippage_table_name='slippage_per_solver')"
-inner join cow_protocol_{{blockchain}}.solvers
-    on solver_address = address
+inner join solvers as s on solver_address = s.address

@@ -132,6 +132,16 @@ aggregate_results as (
     from solver_competition_rewards as pr left outer join fees_and_costs as fc on pr.solver = fc.solver
 ),
 
+solvers as (
+    select
+        address,
+        environment,
+        name,
+        whitelisted as active
+    from dune.cowprotocol.solvers
+    where blockchain = '{{blockchain}}'
+),
+
 combined_data as (
     select
         coalesce(ar.solver, ss.solver, qr.solver) as solver,
@@ -154,7 +164,7 @@ combined_data as (
         on ar.solver = ss.solver
     full outer join quote_rewards as qr
         on ar.solver = qr.solver
-    left join cow_protocol_{{blockchain}}.solvers as s
+    left join solvers as s
         on coalesce(ar.solver, ss.solver, qr.solver) = s.address
 ),
 

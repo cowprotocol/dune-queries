@@ -22,12 +22,21 @@ breakdown_per_solver as (
         100 * sum(is_revert) * 1.0000 / count(*) as percent_of_reverts
     from batch_data
     group by solver
+),
+
+solvers as (
+    select
+        address,
+        environment,
+        name,
+        whitelisted as active
+    from dune.cowprotocol.solvers
+    where blockchain = '{{blockchain}}'
 )
 
 select
     s.environment,
     s.name,
     a.*
-from breakdown_per_solver as a inner join cow_protocol_{{blockchain}}.solvers as s
-    on a.solver = s.address
+from breakdown_per_solver as a inner join solvers as s on a.solver = s.address
 where a.total_num_winning_solutions > 20

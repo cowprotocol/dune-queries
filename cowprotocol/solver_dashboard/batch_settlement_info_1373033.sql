@@ -11,14 +11,24 @@ num_tokens_traded as (
         select
             evt_tx_hash as tx_hash,
             "buyToken" as token
-        from gnosis_protocol_v2_{{blockchain}}.GPv2Settlement_evt_Trade
+        from gnosis_protocol_v2_{{blockchain}}.GPv2Settlement_evt_Trade --noqa: CP02
         union all
         select
             evt_tx_hash as tx_hash,
             "sellToken" as token
-        from gnosis_protocol_v2_{{blockchain}}.GPv2Settlement_evt_Trade
+        from gnosis_protocol_v2_{{blockchain}}.GPv2Settlement_evt_Trade --noqa: CP02
     ) as all_tokens
     group by tx_hash
+),
+
+solvers as (
+    select
+        address,
+        environment,
+        name,
+        whitelisted as active
+    from dune.cowprotocol.solvers
+    where blockchain = '{{blockchain}}'
 )
 
 select
@@ -51,7 +61,6 @@ select
     end as coverage
 from cow_protocol_{{blockchain}}.batches as b
 inner join num_tokens_traded as n on b.tx_hash = n.tx_hash
-inner join cow_protocol_{{blockchain}}.solvers
-    on solver_address = address
+inner join solvers on solver_address = address
 where block_time > now() - interval '3' month
 order by block_time desc;

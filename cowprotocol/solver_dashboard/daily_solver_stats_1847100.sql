@@ -4,6 +4,16 @@
 --   {{aggregate_by}}: string the time period to aggregate by for each solver
 --   {{blockchain}}: string the blockchain to query
 
+with solvers as (
+    select
+        address,
+        environment,
+        name,
+        whitelisted as active
+    from dune.cowprotocol.solvers
+    where blockchain = '{{blockchain}}'
+)
+
 select
     date_trunc('{{aggregate_by}}', block_date) as day, --noqa: RF04
     name as solver_name,
@@ -18,7 +28,7 @@ select
     1.0 * sum(gas_used) / sum(num_trades) as average_gas_per_trade,
     1.0 * sum(dex_swaps) / sum(num_trades) as average_dex_swaps_per_trade
 from cow_protocol_{{blockchain}}.batches
-inner join cow_protocol_{{blockchain}}.solvers on solver_address = address
+inner join solvers on solver_address = address
 where environment = 'prod' and block_date > now() - interval '{{last_n_days}}' day and active = True
 group by name, date_trunc('{{aggregate_by}}', block_date)
 order by num_trades desc
