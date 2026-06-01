@@ -37,7 +37,11 @@ most_recent_updates as (
 ),
 
 solvers as (
-    select *
+    select
+        address,
+        environment,
+        name,
+        whitelisted as active
     from dune.cowprotocol.solvers
     where blockchain = '{{blockchain}}'
 )
