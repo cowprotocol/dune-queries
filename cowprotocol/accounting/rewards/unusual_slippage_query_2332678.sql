@@ -15,6 +15,7 @@ url_helper as (
         case
             when '{{blockchain}}' = 'ethereum' then 'eth'
             when '{{blockchain}}' = 'bnb' then 'bsc'
+            when '{{blockchain}}' = 'avalanche_c' then 'avalanche'
             else '{{blockchain}}'
         end
 ),
