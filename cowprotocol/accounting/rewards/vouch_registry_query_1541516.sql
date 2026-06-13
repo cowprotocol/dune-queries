@@ -72,13 +72,13 @@ ranked_vouches as (
 
 -- This will contain all latest active vouches,
 -- but could still contain solvers with multiplicity > 1 for different pools.
--- Rank here again by solver, and time.
+-- Rank here again by solver, and time, in decreasing order.
 current_active_vouches as (
     select
         *,
         rank() over (
             partition by solver
-            order by evt_block_number, evt_index
+            order by evt_block_number desc, evt_index desc
         ) as time_rank
     from ranked_vouches
     where
@@ -87,7 +87,7 @@ current_active_vouches as (
 ),
 
 -- To filter for the case of "same solver, different pool",
--- rank the current_active vouches and choose the earliest
+-- rank the current_active vouches and choose the latest
 valid_vouches as (
     select
         solver,
