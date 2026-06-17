@@ -1,3 +1,4 @@
+-- thresholds for firing an alert
 with alert_thresholds as (
     select * from (
         values
@@ -14,6 +15,8 @@ with alert_thresholds as (
     ) as t(blockchain, threshold)
 ),
 
+-- this table aggregates rewards per production solver per chain
+-- on the relevant time window by using the auction_data table
 relevant_data as (
     select
         'ethereum' as blockchain,
@@ -96,6 +99,7 @@ relevant_data as (
     group by 1,2
 ),
 
+-- picking the relevant enties based on the alerts threshold
 alerts as (
     select
         rd.blockchain,
@@ -105,6 +109,7 @@ alerts as (
     where rd.rewards_in_native_units <= alt.threshold
 )
 
+-- joining with solver names so that alerts are easier to read
 select
     a.blockchain,
     a.solver as solver_address,
