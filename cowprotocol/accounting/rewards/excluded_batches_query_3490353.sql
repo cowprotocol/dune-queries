@@ -294,6 +294,9 @@ where
     -- for the week of April 7 - April 14, 2026
     or tx_hash = 0x253c42dfca59cb8fcd6a198ef606033a516b29861f9cbf667ae351b566a7f8ec
 
+    -- for the week of June 16 - June 23, 2026
+    or tx_hash = 0xd02f40f7d677740e0042f2cf1bdfb4bee796e36b6092183ed13e2341879b9fcb
+
 
 -- Base
 union all
