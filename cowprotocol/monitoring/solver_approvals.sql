@@ -2,7 +2,6 @@ with ranked as (
     select
         evt_tx_hash as tx_hash,
         evt_block_time as block_time,
-        "from" as responsible_address,
         spender,
         contract_address as token,
         a.value,
@@ -23,9 +22,9 @@ solvers as (
 select --noqa: ST06
     r.block_time,
     r.tx_hash,
-    r.responsible_address,
+    b.solver_address as responsible_address,
     case
-        when r.responsible_address = 0x05c5494572e4ab2d48d3ab3aaf6bd4e7b1c98382 or r.responsible_address = 0xd8ca5fe380b68171155c7069b8df166db28befdd then 'PROPOSER-ACCOUNT'
+        when b.solver_address = 0x05c5494572e4ab2d48d3ab3aaf6bd4e7b1c98382 or b.solver_address = 0xd8ca5fe380b68171155c7069b8df166db28befdd then 'PROPOSER-ACCOUNT'
         else coalesce(concat(s.environment, '-', s.name), 'NON-SOLVER')
     end as responsible_solver,
     r.spender,
