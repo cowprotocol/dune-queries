@@ -15,11 +15,14 @@
 
 with sell_orders as (
     select
+        '{{blockchain}}' as blockchain,
         t.block_time,
         t.block_number,
         t.tx_hash,
         t.order_uid,
         rod.solver,
+        rod.auction_id,
+        rod.environment,
         t.sell_token_address,
         t.buy_token_address,
         t.atoms_sold,
@@ -43,7 +46,10 @@ with sell_orders as (
 )
 
 select
+    blockchain,
     block_time,
+    environment,
+    auction_id,
     order_uid,
     tx_hash,
     solver,
@@ -64,5 +70,5 @@ where (
     sell_value_native > 1000 * buy_value_native
     or buy_value_native > 1000 * sell_value_native
 )
-and greatest(sell_value_native, buy_value_native) > {{min_native_volume}}
+and least(sell_value_native, buy_value_native) > {{min_native_volume}}
 order by block_time desc
