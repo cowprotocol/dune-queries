@@ -23,13 +23,10 @@ join_with_trade_events as (
         evt_block_number as fill_block,
         order_uid
     from cow_protocol_{{network}}.eth_flow_orders as e
-    left outer join gnosis_protocol_v2_{{network}}.GPv2Settlement_evt_Trade
-        on
-            order_uid = orderUid
-            and evt_block_time > block_time
+    left outer join gnosis_protocol_v2_{{network}}.GPv2Settlement_evt_Trade --noqa: CP02
+        on order_uid = orderUid and evt_block_time > block_time --noqa: CP02
     left join dune.cowprotocol.dim_app_data as a
-        on
-            e.app_hash = a.app_hash
+        on e.app_hash = a.app_hash
     where
         block_time > now() - interval '1' day
         and app_code not in ({{ignored_app_codes}})
@@ -38,18 +35,16 @@ join_with_trade_events as (
 
 cancellations as (
     select
-        orderUid,
+        orderUid, --noqa: CP02
         evt_tx_hash as cancellation_tx,
         evt_block_time as cancellation_time,
         evt_block_number as cancellation_block,
         sum(cast(value as double) / pow(10, 18)) as refund_amount_eth
-    from cow_protocol_{{network}}.CoWSwapEthFlow_evt_OrderInvalidation
+    from cow_protocol_{{network}}.CoWSwapEthFlow_evt_OrderInvalidation --noqa: CP02
     inner join {{network}}.traces
-        on
-            evt_block_number = block_number
-            and evt_tx_hash = tx_hash
+        on evt_block_number = block_number and evt_tx_hash = tx_hash
     where evt_block_time > now() - interval '1' day
-    group by orderUid, evt_tx_hash, evt_block_time, evt_block_number
+    group by orderUid, evt_tx_hash, evt_block_time, evt_block_number --noqa: CP02
 ),
 
 refunds as (
@@ -58,15 +53,13 @@ refunds as (
         evt_block_time as refund_time,
         evt_block_number as refund_block,
         refunder,
-        orderUid,
+        orderUid, --noqa: CP02
         sum(cast(value as double) / pow(10, 18)) as refund_amount_eth
-    from cow_protocol_{{network}}.CoWSwapEthFlow_evt_OrderRefund
+    from cow_protocol_{{network}}.CoWSwapEthFlow_evt_OrderRefund --noqa: CP02
     inner join {{network}}.traces
-        on
-            evt_block_number = block_number
-            and evt_tx_hash = tx_hash
+        on evt_block_number = block_number and evt_tx_hash = tx_hash
     where evt_block_time > now() - interval '1' day
-    group by orderUid, evt_tx_hash, evt_block_time, refunder, evt_block_number
+    group by orderUid, evt_tx_hash, evt_block_time, refunder, evt_block_number --noqa: CP02
 ),
 
 unfilled_orders as (
@@ -92,13 +85,9 @@ unfilled_orders as (
         cancellation_time is not null as canceled
     from join_with_trade_events
     left outer join cancellations as c
-        on
-            cancellation_block >= placement_block
-            and order_uid = c.orderUid
+        on cancellation_block >= placement_block and order_uid = c.orderUid --noqa: CP02
     left outer join refunds as r
-        on
-            refund_block >= placement_block
-            and order_uid = r.orderUid
+        on refund_block >= placement_block and order_uid = r.orderUid --noqa: CP02
     where fill_block is null
 )
 

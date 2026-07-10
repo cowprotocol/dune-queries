@@ -22,9 +22,7 @@ select
     r.solver
 from "query_4364122(blockchain='{{blockchain}}')" as r
 inner join cow_protocol_{{blockchain}}.trades as t
-    on
-        r.order_uid = t.order_uid
-        and r.tx_hash = t.tx_hash
+    on r.order_uid = t.order_uid and r.tx_hash = t.tx_hash
 left join dune.cowprotocol.dim_app_data as d
     on t.app_data = d.app_hash
 where t.order_uid not in (select order_uid from query_3639473) and d.blockchain = '{{blockchain}}'
