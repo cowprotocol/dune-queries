@@ -27,12 +27,13 @@ join_with_trade_events as (
         on
             order_uid = orderUid
             and evt_block_time > block_time
-    left join dune.cowprotocol.result_cow_protocol_ethereum_app_data as a
+    left join dune.cowprotocol.dim_app_data as a
         on
             e.app_hash = a.app_hash
     where
         block_time > now() - interval '1' day
         and app_code not in ({{ignored_app_codes}})
+        and a.blockchain = '{{network}}'
 ),
 
 cancellations as (

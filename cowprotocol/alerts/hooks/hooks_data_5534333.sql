@@ -5,9 +5,11 @@
 --noqa: disable=all
 with 
 app_data_raw as (
-    select *, 'prod' as environment from dune.cowprotocol.dataset_app_data_{{blockchain}}_prod
+    select *, 'prod' as environment from dune.cowprotocol.dim_app_data
+    where blockchain = '{{blockchain}}' and environment = 'production'
     union all
-    select *, 'barn' as environment from dune.cowprotocol.dataset_app_data_{{blockchain}}_barn
+    select *, 'barn' as environment from dune.cowprotocol.dim_app_data
+    where blockchain = '{{blockchain}}' and environment = 'staging'
 )
 , cleaned_app_data as (
     select

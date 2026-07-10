@@ -34,12 +34,13 @@ prep as (
     inner join "query_4364122(blockchain='{{blockchain}}')" as rod
         on t.tx_hash = rod.tx_hash 
         and t.order_uid = rod.order_uid
-    left join dune.cowprotocol.result_cow_protocol_{{blockchain}}_app_data as ad
+    left join dune.cowprotocol.dim_app_data as ad
         on t.app_data = ad.app_hash
     left join "query_5719467(blockchain='{{blockchain}}', start_date='{{start_date}}', end_date='{{end_date}}')" as st  
         on st.sell_token_address = t.sell_token_address
         and st.buy_token_address = t.buy_token_address
         and date(st.ref_date) = t.block_date 
+        and ad.blockchain = '{{blockchain}}'
     where
         t.block_time >= timestamp '{{start_date}}'
         and t.block_time < timestamp '{{end_date}}'
