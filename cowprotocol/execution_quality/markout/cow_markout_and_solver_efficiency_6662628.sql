@@ -34,7 +34,7 @@ prep as (
     inner join "query_4364122(blockchain='{{blockchain}}')" as rod
         on t.tx_hash = rod.tx_hash 
         and t.order_uid = rod.order_uid
-    left join dune.cowprotocol.result_cow_protocol_{{blockchain}}_app_data as ad
+    left join dune.cowprotocol.dim_app_data as ad
         on t.app_data = ad.app_hash
     left join "query_5719467(blockchain='{{blockchain}}', start_date='{{start_date}}', end_date='{{end_date}}')" as st  
         on st.sell_token_address = t.sell_token_address
@@ -47,6 +47,8 @@ prep as (
         and if(upper('{{order_source}}')='ALL', true, if(replace(lower(ad.app_code),' ','') = 'cowswap', 'UI', 'Integrations') = '{{order_source}}')
         and if(upper('{{token_pair}}')='ALL', true, upper(t.token_pair) = upper('{{token_pair}}'))
         and if(upper('{{xrate_type}}')='ALL', true, if(st.ref_date is not null, 'stable', 'variable') = '{{xrate_type}}')
+        and ad.blockchain = '{{blockchain}}'
+
 )
 , markouts_per_trade as (
     select

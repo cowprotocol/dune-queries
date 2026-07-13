@@ -34,7 +34,7 @@ native_prices as (
     left join (select distinct * from "query_4364122(blockchain='{{blockchain}}')") as rod
         on t.tx_hash = rod.tx_hash
         and t.order_uid = rod.order_uid
-    left join dune.cowprotocol.result_cow_protocol_{{blockchain}}_app_data as ad   
+    left join dune.cowprotocol.dim_app_data as ad   
         on t.app_data = ad.app_hash
     left join dune.cowprotocol.result_fees_revenue_per_order as r 
         on t.tx_hash = r.tx_hash
@@ -42,6 +42,7 @@ native_prices as (
     where 
         t.block_time >= timestamp '{{start_time}}'
         and t.block_time < timestamp '{{end_time}}'
+        and ad.blockchain = '{{blockchain}}'
 )
 , prep_rewards as (
 -- solver rewards are done on a per auction-solver basis (an auction may have multiple batches from the same solver)

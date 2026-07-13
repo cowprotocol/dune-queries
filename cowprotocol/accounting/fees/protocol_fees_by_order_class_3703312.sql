@@ -157,9 +157,10 @@ select
 from protocol_fees_collected as f
 inner join cow_protocol_{{blockchain}}.trades as t
     on f.order_uid = t.order_uid and f.tx_hash = t.tx_hash
-left join dune.cowprotocol.result_cow_protocol_{{blockchain}}_app_data as a on t.app_data = a.app_hash
+left join dune.cowprotocol.dim_app_data as a on t.app_data = a.app_hash
 where
     block_number >= (select start_block from block_range)
     and block_number <= (select end_block from block_range)
+    and a.blockchain = '{{blockchain}}'
 group by 1
 order by 1 desc
