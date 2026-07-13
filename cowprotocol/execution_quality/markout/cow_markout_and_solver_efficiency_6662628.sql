@@ -40,7 +40,6 @@ prep as (
         on st.sell_token_address = t.sell_token_address
         and st.buy_token_address = t.buy_token_address
         and date(st.ref_date) = t.block_date 
-        and ad.blockchain = '{{blockchain}}'
     where
         t.block_time >= timestamp '{{start_date}}'
         and t.block_time < timestamp '{{end_date}}'
@@ -48,6 +47,8 @@ prep as (
         and if(upper('{{order_source}}')='ALL', true, if(replace(lower(ad.app_code),' ','') = 'cowswap', 'UI', 'Integrations') = '{{order_source}}')
         and if(upper('{{token_pair}}')='ALL', true, upper(t.token_pair) = upper('{{token_pair}}'))
         and if(upper('{{xrate_type}}')='ALL', true, if(st.ref_date is not null, 'stable', 'variable') = '{{xrate_type}}')
+        and ad.blockchain = '{{blockchain}}'
+
 )
 , markouts_per_trade as (
     select
