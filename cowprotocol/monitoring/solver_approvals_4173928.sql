@@ -27,6 +27,7 @@ select --noqa: ST06
         when b.solver_address = 0x05c5494572e4ab2d48d3ab3aaf6bd4e7b1c98382 or b.solver_address = 0xd8ca5fe380b68171155c7069b8df166db28befdd then 'PROPOSER-ACCOUNT'
         else coalesce(concat(s.environment, '-', s.name), 'NON-SOLVER')
     end as responsible_solver,
+    coalesce(s.active, false) as solver_whitelisted,
     r.spender,
     r.token,
     r.value
