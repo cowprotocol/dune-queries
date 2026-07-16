@@ -24,9 +24,9 @@ select
         when
             approvals.responsible_address not in (select solver from vouched_solvers)
             and not approvals.solver_whitelisted
-            then 'unvouched_and_deprecated'
+            then 'unvouched_and_blacklisted'
         when approvals.responsible_address not in (select solver from vouched_solvers) then 'unvouched'
-        when not approvals.solver_whitelisted then 'deprecated'
+        when not approvals.solver_whitelisted then 'blacklisted'
     end as flag_reason
 from approvals
 where
