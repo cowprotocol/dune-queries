@@ -175,7 +175,6 @@ prices as (
             when '{{blockchain}}' = 'ethereum' and token_address = 0x4956b52ae2ff65d74ca2d61207523288e4528f96 and hour >= timestamp '2026-03-22 15:00' and hour <= timestamp '2026-03-22 19:00' then 0.23292903653351268 / pow(10, 18)
             when '{{blockchain}}' = 'ethereum' and token_address = 0xfcc5c47be19d06bf83eb04298b026f81069ff65b and hour >= timestamp '2026-05-27 09:00' and hour <= timestamp '2026-05-27 10:00' then 0.133 / pow(10, 18)
             when '{{blockchain}}' = 'ethereum' and token_address = 0x01791f726b4103694969820be083196cc7c045ff and hour >= timestamp '2026-05-27 10:00' and hour <= timestamp '2026-05-27 11:00' then 0.105 / pow(10, 18)
-            when '{{blockchain}}' = 'ethereum' and token_address = 0x01791f726b4103694969820be083196cc7c045ff and hour >= timestamp '2026-05-27 10:00' and hour <= timestamp '2026-05-27 11:00' then 0.105 / pow(10, 18)
             when '{{blockchain}}' = 'ethereum' and token_address = 0x60d48c1A161559255aaf572F3c1cE4185578dCfE and hour >= timestamp '2026-07-14 13:00' and hour <= timestamp '2026-07-14 14:00' then 0.0
             else price_atom
         end as price_atom
