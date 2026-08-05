@@ -158,7 +158,7 @@ prices as (
             when '{{blockchain}}' = 'ethereum' and token_address = 0xfcc5c47be19d06bf83eb04298b026f81069ff65b and hour >= timestamp '2026-05-27 09:00' and hour <= timestamp '2026-05-27 10:00' then 0.133
             when '{{blockchain}}' = 'ethereum' and token_address = 0x01791f726b4103694969820be083196cc7c045ff and hour >= timestamp '2026-05-27 10:00' and hour <= timestamp '2026-05-27 11:00' then 0.105
             when '{{blockchain}}' = 'ethereum' and token_address = 0x60d48c1a161559255aaf572f3c1ce4185578dcfe and hour >= timestamp '2026-07-14 13:00' and hour <= timestamp '2026-07-14 14:00' then 0.0
-            when '{{blockchain}}' = 'ethereum' and token_address = 0x4e15361fd6b4bb609fa63c81a2be19d873717870 and hour >= timestamp '2026-07-30 09:00' and hour <= timestamp '2026-07-30 10:00' then 0.02755299152708287 -- noqa:CP02
+            when '{{blockchain}}' = 'ethereum' and token_address = 0x4e15361fd6b4bb609fa63c81a2be19d873717870 and hour >= timestamp '2026-07-30 09:00' and hour <= timestamp '2026-07-30 10:00' then 0.0284 -- noqa:CP02
             else price_unit
         end as price_unit,
         case
@@ -177,7 +177,7 @@ prices as (
             when '{{blockchain}}' = 'ethereum' and token_address = 0xfcc5c47be19d06bf83eb04298b026f81069ff65b and hour >= timestamp '2026-05-27 09:00' and hour <= timestamp '2026-05-27 10:00' then 0.133 / pow(10, 18)
             when '{{blockchain}}' = 'ethereum' and token_address = 0x01791f726b4103694969820be083196cc7c045ff and hour >= timestamp '2026-05-27 10:00' and hour <= timestamp '2026-05-27 11:00' then 0.105 / pow(10, 18)
             when '{{blockchain}}' = 'ethereum' and token_address = 0x60d48c1a161559255aaf572f3c1ce4185578dcfe and hour >= timestamp '2026-07-14 13:00' and hour <= timestamp '2026-07-14 14:00' then 0.0
-            when '{{blockchain}}' = 'ethereum' and token_address = 0x4e15361fd6b4bb609fa63c81a2be19d873717870 and hour >= timestamp '2026-07-30 09:00' and hour <= timestamp '2026-07-30 10:00' then 0.02755299152708287 / pow(10, 18) -- noqa:CP02
+            when '{{blockchain}}' = 'ethereum' and token_address = 0x4e15361fd6b4bb609fa63c81a2be19d873717870 and hour >= timestamp '2026-07-30 09:00' and hour <= timestamp '2026-07-30 10:00' then 0.0284 / pow(10, 18) -- noqa:CP02
             else price_atom
         end as price_atom
     from prices_pre
