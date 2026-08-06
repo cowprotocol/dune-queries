@@ -33,7 +33,7 @@ with all_hooks as (
 select * 
 from all_hooks
 where 
-    coalesce(hook_success,false) = false
+    hook_success is null
     and not( hook_app_id in (
         'cow-swap://libs/hook-dapp-lib/permit',
         'PERMIT_TOKEN',
