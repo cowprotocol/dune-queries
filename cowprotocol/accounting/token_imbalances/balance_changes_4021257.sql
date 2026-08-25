@@ -44,6 +44,7 @@ with erc20_transfers as (
         -- As we are handling them later on in the same way as we do with all other chains, we decided to
         -- filter them out from this cte
         and (contract_address != 0x000000000000000000000000000000000000800a or '{{blockchain}}' != 'lens')
+        and evt_tx_hash != 0xf06378e10b27ccc35de3c8c2ba53fc6da2a5c837d9be5b10a584ab24dfa8a710
 ),
 
 -- 1.2) all native token transfers
