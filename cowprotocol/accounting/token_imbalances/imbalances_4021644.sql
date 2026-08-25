@@ -11,7 +11,7 @@ select
     block_time,
     tx_hash,
     token_address,
-    sum(
+    sum( -- noqa: PRS
         case
             when sender = 0x9008D19f58AAbD9eD0D60971565AA8510560ab41 and receiver = 0x9008D19f58AAbD9eD0D60971565AA8510560ab41 then cast(0 as int256)
             when receiver = 0x9008D19f58AAbD9eD0D60971565AA8510560ab41 then cast(amount as int256)
