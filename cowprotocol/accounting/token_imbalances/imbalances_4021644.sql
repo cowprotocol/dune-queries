@@ -19,4 +19,5 @@ select
         end
     ) as amount
 from "query_4021257(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')"
+where tx_hash != 0xf06378e10b27ccc35de3c8c2ba53fc6da2a5c837d9be5b10a584ab24dfa8a710
 group by block_time, tx_hash, token_address
