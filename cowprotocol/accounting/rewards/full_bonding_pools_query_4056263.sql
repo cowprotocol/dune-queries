@@ -2,7 +2,7 @@
 
 with full_bonding_pools as (
     select *
-    from (
+    from ( --noqa: PRS
         values
         (from_hex('0x8353713b6d2f728ed763a04b886b16aad2b16ebd'), 'Gnosis',        from_hex('0x6c642cafcbd9d8383250bb25f67ae409147f78b2')), -- deprecated
         (from_hex('0x5d4020b9261f01b6f8a45db929704b0ad6f5e9e6'), 'CoW DAO',       from_hex('0x423cec87f19f0778f549846e0801ee267a917935')),
