@@ -2,7 +2,7 @@
 
 with full_bonding_pools as (
     select *
-    from (
+    from ( --noqa: PRS
         values
         (from_hex('0x8353713b6d2f728ed763a04b886b16aad2b16ebd'), 'Gnosis',        from_hex('0x6c642cafcbd9d8383250bb25f67ae409147f78b2')), -- deprecated
         (from_hex('0x5d4020b9261f01b6f8a45db929704b0ad6f5e9e6'), 'CoW DAO',       from_hex('0x423cec87f19f0778f549846e0801ee267a917935')),
@@ -12,6 +12,7 @@ with full_bonding_pools as (
         (from_hex('0x0deb0ae9c4399c51289adb1f3ed83557a56df657'), 'Rizzolver',     from_hex('0x042c9c6d52881dc7e70bf3e233b540a07377d26b')),
         (from_hex('0x7719c9c0d35d460b00487a1744394e9525e8a42c'), 'Fractal',       from_hex('0xd4676b4de3a982a429a8dbe90d4a7e7cfb4769a5')),
         (from_hex('0x8c77268262cd0de611e543dfd7e9b496793acb86'), 'Tsolver',       from_hex('0x57db889be7fac15601d04714f34e1525186545e2'))
+        (from_hex('0x8d2c1d5c0df456bb12d097facae4aefce2faa0cd'), 'Orbt',          from_hex('0x2d3289b7c0cbf808f075e2b35d8138e828c6a61b'))
     ) as t(pool_address, pool_name, creator)
 )
 select *
