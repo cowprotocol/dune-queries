@@ -297,6 +297,11 @@ where
     -- for the week of June 16 - June 23, 2026
     or tx_hash = 0xd02f40f7d677740e0042f2cf1bdfb4bee796e36b6092183ed13e2341879b9fcb
 
+    -- for the week of Sep 1 - Sep 8, 2026
+    -- remove txs trading the Attack token....0xfba372a6A5D5E8F64cE3d03E71ee993bD09a9d79
+    -- if slippage is on that token
+    or tx_hash = 0x7a7071610cd798944d10520ad448c1bc7e06de2890815bb6d4619f531b598087
+    or tx_hash = 0x0d79640f4e5e0277ff4be18a6399303201322f0990146acab349f25488a977b6
 
 -- Base
 union all
