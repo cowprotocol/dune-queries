@@ -302,6 +302,13 @@ where
     -- if slippage is on that token
     or tx_hash = 0x7a7071610cd798944d10520ad448c1bc7e06de2890815bb6d4619f531b598087
     or tx_hash = 0x0d79640f4e5e0277ff4be18a6399303201322f0990146acab349f25488a977b6
+    -- other tokens
+    or tx_hash = 0xeebd4f53ea81502241509704f6f4908f1c6bb9297b98db683d223fc319ba4e63
+    or tx_hash = 0xc5f61e3ffe8563d7c109c3d8a95cccbe76aba118afcf0dee724716a326b203e5
+    or tx_hash = 0x51e7aec517e2b13d63e5c1ff6b218f3ec1dd50bea4f41c4cd10121897086e4a1
+    or tx_hash = 0xc1574b0261408b5567dfcc80d375a2a7496fb693ce4ef6f69aef1399cb5384d6
+    or tx_hash = 0xbffaecef27bcdabac971f196e799b7309bd555e7101536d100dc69ebe738d202
+    or tx_hash = 0xd35c7a3c62fe827e28a78a0af2d6a168f94dc9e54cb639e89a233aeedc906608
 
 -- Base
 union all
