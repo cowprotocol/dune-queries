@@ -74,7 +74,7 @@ problematic_trades as (
         protocol_fee_collected_native_units * native_token_unit_usd_price as protocol_fee_collected_usd
     from trades_with_dune_prices
     where
-        protocol_fee_collected_native_units * native_token_unit_usd_price / usd_value > 0.05
+        protocol_fee_collected_native_units * native_token_unit_usd_price / usd_value > {{protocol_fee_relative_threshold}}
         and
         protocol_fee_collected_native_units * native_token_unit_usd_price > {{protocol_fee_usd_threshold}}
 
