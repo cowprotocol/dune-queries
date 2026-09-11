@@ -1,9 +1,13 @@
--- This query automatically detects issues with native prices
--- and proposes suggested fixes for them. The output produced
--- is a csv that is ready to be plugged into dbt as a seed
+-- This query automatically detects issues with inaccurate native prices
+-- affecting protocol and partner fee calculations and suggests fixes for them.
+-- The output produced is a csv that is ready to be plugged into dbt as a seed
 -- to correct flagged prices.
 -- Parameters:
 --   blockchain: the chain for which we want to retrieve batch data
+--   start_time: the timestamp of the first block of the interval we are focusing on
+--   end_time: the timestamp of the last block of the interval we are focusing on
+--   protocol_fee_usd_threshold: minimum usd value threshold for protocol fee collected, below which a trade is not flagged
+--   protocol_fee_relative_threshold: minimum relative fraction (protocol_fee_collected_value_usd / trade_value_usd) below which a trade is not flagged
 
 -- The output has the following columns:
 --    blockchain: varchar
@@ -35,9 +39,6 @@ all_trades as (
         t.sell_token_address,
         t.buy_token_address,
         t.usd_value,
-        t.atoms_sold,
-        t.atoms_bought,
-        rd.protocol_fee,
         rd.protocol_fee_native_price,
         rd.protocol_fee * rd.protocol_fee_native_price / pow(10,18) as protocol_fee_collected_native_units
     from cow_protocol_{{blockchain}}.trades as t inner join "query_4364122(blockchain='{{blockchain}}')" as rd
@@ -54,9 +55,7 @@ trades_with_dune_prices as (
     select
         t.*,
         sp.price_atom as sell_token_atom_usd_price,
-        sp.price_unit as sell_token_unit_usd_price,
         bp.price_atom as buy_token_atom_usd_price,
-        bp.price_unit as buy_token_unit_usd_price,
         np.price_atom as native_token_atom_usd_price,
         np.price_unit as native_token_unit_usd_price
     from all_trades as t
@@ -66,7 +65,7 @@ trades_with_dune_prices as (
 ),
 
 -- here we flag trades where two conditions are both satisfied:
---   1. protocol fees are more than 5% of the trade
+--   1. protocol fees are more than a {{protocol_fee_relative_threshold}} fraction of the trade
 --   2. total protocol fees are more than {{protocol_fee_usd_threshold}} in absolute value
 problematic_trades as (
     select
@@ -80,7 +79,7 @@ problematic_trades as (
 
 ),
 
-ready_to_use as (
+price_corrections as (
     select
         case
             when '{{blockchain}}' = 'ethereum' then 'mainnet'
@@ -101,4 +100,4 @@ ready_to_use as (
     from problematic_trades
 )
 
-select * from ready_to_use
+select * from price_corrections
