@@ -310,6 +310,18 @@ where
     or tx_hash = 0xbffaecef27bcdabac971f196e799b7309bd555e7101536d100dc69ebe738d202
     or tx_hash = 0xd35c7a3c62fe827e28a78a0af2d6a168f94dc9e54cb639e89a233aeedc906608
 
+    -- for the week of Sep 8 - Sep 15, 2026
+    -- remove txs trading the syBTC token during this week....0x01a8b61E7b03891a736B5DF865E0EF9C511850ad
+    or tx_hash = 0xa739a5c268cf8ba7ba7584205b49615fccd75fd857a30ae66d5971a6932af7e5
+    or tx_hash = 0x45d712c92da99bda92074b442f395267c5f0497c4eda16b2dfff870795c9f372
+    or tx_hash = 0xc6b3e33bc100d154a3804eb1909ae057f7855cedd7db132c9d15566ca4839614
+    or tx_hash = 0xd386c233e97e86348e3579b9b1bc407af3ba76a12ce6d64c3d7e984aa0fb6ee4
+    or tx_hash = 0xefe0ad2fcb1dddad338c4813ee1f1bc893aba091bfcef691a180cb655ac311d6
+    or tx_hash = 0x4a3dac900b86199939c036cffa9d7a7c73955dd3edf9f53c94f2ea6e3f561b23
+    or tx_hash = 0x59480faebbd4a5ad3a334a9c82df047b120ffb064e2ab6c476749e476e712502
+    or tx_hash = 0xebf8f63efecb7195eb631080bb0034f5caf19b1e645a37bcfc8d0eed63ff0781
+    or tx_hash = 0xe1a4df64a0a6f4073708220bf3e8ae62e60db33c53322ea2d54dc3702b792b18
+
 -- Base
 union all
 select distinct tx_hash
