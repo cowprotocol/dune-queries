@@ -391,3 +391,11 @@ where
     -- for suboptimal execution
     or tx_hash = 0x6a9f393b510d5cc952808888e974297087fda7b7b4f8cf0ee91b30e97343324b
     or tx_hash = 0x6eaeed0ea5c41d45f955131d7826402c6a232faf8dc63268d23d51fe616ed2b4
+
+-- POLYGON
+union all
+select distinct tx_hash
+from cow_protocol_polygon.trades
+where
+    tx_hash = 0x2e284a1fe0084300150f0a532307df7936f51d72156cc2a32128e1b0e062ed89
+    or tx_hash = 0x2311d66a2abfa854c94f1d286bb71515bb95455417eed70c0b787b3b2abbd2d3
