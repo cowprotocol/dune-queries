@@ -94,7 +94,7 @@ intrinsic_prices as (
             block_time >= cast('{{start_time}}' as timestamp)
             and block_time < cast('{{end_time}}' as timestamp)
             and buy_token_address != 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-            and units_bought > 0
+            and units_sold * units_bought > 0
         union distinct
         select
             date_trunc('hour', block_time) as hour, --noqa: RF04
@@ -107,7 +107,7 @@ intrinsic_prices as (
             block_time >= cast('{{start_time}}' as timestamp)
             and block_time < cast('{{end_time}}' as timestamp)
             and sell_token_address != 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-            and units_sold > 0
+            and units_sold * units_bought > 0
     ) as combined
     group by 1, 2, 3
 ),
