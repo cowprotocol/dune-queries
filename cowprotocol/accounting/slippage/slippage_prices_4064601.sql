@@ -91,8 +91,10 @@ intrinsic_prices as (
             usd_value / atoms_bought as price_atom
         from cow_protocol_{{blockchain}}.trades
         where
-            block_time >= cast('{{start_time}}' as timestamp) and block_time < cast('{{end_time}}' as timestamp)
+            block_time >= cast('{{start_time}}' as timestamp)
+            and block_time < cast('{{end_time}}' as timestamp)
             and buy_token_address != 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+            and units_sold * units_bought > 0
         union distinct
         select
             date_trunc('hour', block_time) as hour, --noqa: RF04
@@ -102,8 +104,10 @@ intrinsic_prices as (
             usd_value / atoms_sold as price_atom
         from cow_protocol_{{blockchain}}.trades
         where
-            block_time >= cast('{{start_time}}' as timestamp) and block_time < cast('{{end_time}}' as timestamp)
+            block_time >= cast('{{start_time}}' as timestamp)
+            and block_time < cast('{{end_time}}' as timestamp)
             and sell_token_address != 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+            and units_sold * units_bought > 0
     ) as combined
     group by 1, 2, 3
 ),
