@@ -325,6 +325,10 @@ where
     -- for the week of Sep 15 - 22, 2026
     or tx_hash = 0x22a69fd397957caac256bb2e372082140b768ab17ddd2e9e075e968210e8c4d9
 
+    -- for the week of Sep 22 - 29, 2026
+    or tx_hash = 0xC94056A05BE7526289C930E2275114A824A3B1DDB9B9F463DFA0DC6EEEA41779
+    or tx_hash = 0xA7DBAC386C28758290E857DD5CADD2322B44F55F38BD2C95AC3994BC97248E8D
+
 -- Base
 union all
 select distinct tx_hash
