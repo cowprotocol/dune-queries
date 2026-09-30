@@ -75,7 +75,7 @@ traces as (
     from {{blockchain}}.traces as t 
     where
         t.block_date >= date(date_add('{{lookback_time_unit}}', -{{lookback_units}}, now())) -- using date bc it's the partition field
-        and t."from" in (0x01dcb88678aedd0c4cc9552b20f4718550250574, 0x60bf78233f48ec42ee3f101b9a05ec7878728006) --hooks trampoline
+        and t."from" in (0x01dcb88678aedd0c4cc9552b20f4718550250574, 0x60bf78233f48ec42ee3f101b9a05ec7878728006, 0xd496f9fcfba14d7bd1e45e4840d38ad85ded14dd) --hooks trampoline
 )
 select           
     '{{blockchain}}' as blockchain,
