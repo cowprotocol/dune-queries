@@ -329,6 +329,10 @@ where
     or tx_hash = 0xc94056a05be7526289c930e2275114a824a3b1ddb9b9f463dfa0dc6eeea41779
     or tx_hash = 0xa7dbac386c28758290e857dd5cadd2322b44f55f38bd2c95ac3994bc97248e8d
 
+    -- for the week of Sep 29 - Oct 6, 2026
+    or tx_hash = 0x06e420332d8fff52da4cb0391c7afe2d83d77170ca33be89736e252797437899
+    or tx_hash = 0xd846f7b0b1875f9703c9b3f22c57e54eb1a840c88884efa3d739f37c16d4da3e
+
 -- Base
 union all
 select distinct tx_hash
