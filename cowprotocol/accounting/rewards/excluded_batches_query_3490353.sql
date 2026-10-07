@@ -382,6 +382,9 @@ where
     -- for week of July 30 - June 07, 2026 on BNB
     or tx_hash = 0x8FD229BEF8DD31DEC57293CAC610D23B9946A0613F94EAE4ECBB7B6BF4D673A9
 
+    -- for week of Sep29 - Oct 6, 2026 on BNB
+    or tx_hash = 0xe0840f44d7a05d2051e265826db23614104f347248a25b5fe6c0f3734ad08137
+
 -- GNOSIS
 union all
 select distinct tx_hash
