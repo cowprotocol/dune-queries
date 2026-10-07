@@ -93,13 +93,13 @@ native_prices as (
         (timestamp '2010-01-01 00:00', timestamp '2025-08-12 00:00', 0.0002, 6, 'arbitrum'),
         (timestamp '2010-01-01 00:00', timestamp '2025-08-12 00:00', 0.0005, 6, 'avalanche_c'),
         (timestamp '2010-01-01 00:00', timestamp '2025-08-12 00:00', 0.5,    6, 'polygon'),
-        -- Post CIP 72
-        (timestamp '2025-08-12 00:00', timestamp '2099-01-01 00:00', 0.0007,  6, 'ethereum'),
-        (timestamp '2025-08-12 00:00', timestamp '2099-01-01 00:00', 0.15,    6, 'gnosis'),
-        (timestamp '2025-08-12 00:00', timestamp '2099-01-01 00:00', 0.00024, 6, 'base'),
-        (timestamp '2025-08-12 00:00', timestamp '2099-01-01 00:00', 0.00024, 6, 'arbitrum'),
-        (timestamp '2025-08-12 00:00', timestamp '2099-01-01 00:00', 0.0006,  6, 'avalanche_c'),
-        (timestamp '2025-08-12 00:00', timestamp '2099-01-01 00:00', 0.6,     6, 'polygon')
+        -- Post CIP 72, until CIP 88 replaced flat quote rewards with a weekly budget
+        (timestamp '2025-08-12 00:00', timestamp '2026-10-06 00:00', 0.0007,  6, 'ethereum'),
+        (timestamp '2025-08-12 00:00', timestamp '2026-10-06 00:00', 0.15,    6, 'gnosis'),
+        (timestamp '2025-08-12 00:00', timestamp '2026-10-06 00:00', 0.00024, 6, 'base'),
+        (timestamp '2025-08-12 00:00', timestamp '2026-10-06 00:00', 0.00024, 6, 'arbitrum'),
+        (timestamp '2025-08-12 00:00', timestamp '2026-10-06 00:00', 0.0006,  6, 'avalanche_c'),
+        (timestamp '2025-08-12 00:00', timestamp '2026-10-06 00:00', 0.6,     6, 'polygon')
     ) as t(from_ts, until_ts, quote_cap_native, quote_cap_cow, blockchain)
 )
 , conv_native_to_cow as (
@@ -115,7 +115,12 @@ native_prices as (
 , quote_rewards as (
     select        
         prep.* 
-        , coalesce(if(quote_solver is not null, least(cap.quote_cap_cow, cap.quote_cap_native * p.native_to_cow_rate) / p.native_to_cow_rate, 0), 0) as quote_reward
+        , if(
+            prep.block_time > timestamp '2026-10-06 00:00'
+            -- since CIP 88, quote rewards are paid from a weekly budget: a trade's quote reward is its contribution to that budget
+            , coalesce(fr.quote_budget_contribution_native, 0)
+            , coalesce(if(quote_solver is not null, least(cap.quote_cap_cow, cap.quote_cap_native * p.native_to_cow_rate) / p.native_to_cow_rate, 0), 0)
+        ) as quote_reward
     from prep_rewards as prep 
     left join quote_cap_mapping as cap
         on prep.block_time > cap.from_ts
@@ -123,6 +128,10 @@ native_prices as (
         and cap.blockchain = '{{blockchain}}'
     left join conv_native_to_cow as p 
         on date_trunc('week', prep.block_time - interval '1' day) + interval '8' day = p.date    
+    left join dune.cowprotocol.fct_rewards as fr
+        on fr.blockchain = '{{blockchain}}'
+        and prep.tx_hash = fr.tx_hash
+        and prep.order_uid = fr.order_uid
 )
 select 
     fees.blockchain
