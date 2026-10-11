@@ -45,7 +45,7 @@ all_trades as (
         and t.block_number >= (select start_block from block_range)
         and t.block_number <= (select end_block from block_range)
     inner join prices.usd as p on
-        date_trunc('minute',t.block_time) = p.minute
+        date_trunc('minute', t.block_time) = p.minute
         and p.blockchain = '{{blockchain}}'
         and p.contract_address = (select native_token_address from wrapped_native_token)
 ),
