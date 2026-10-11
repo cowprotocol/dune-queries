@@ -38,6 +38,7 @@ all_trades as (
         rd.auction_id,
         rd.environment,
         rd.protocol_fee,
+        rd.protocol_fee_native_price * pow(10, 18) as current_protocol_fee_token_native_price,
         rd.protocol_fee * rd.protocol_fee_native_price * p.price / pow(10,18) as protocol_fee_collected_usd
     from cow_protocol_{{blockchain}}.trades as t
     inner join "query_4364122(blockchain='{{blockchain}}')" as rd
