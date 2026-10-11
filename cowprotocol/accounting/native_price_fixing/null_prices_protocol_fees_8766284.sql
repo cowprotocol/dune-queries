@@ -40,16 +40,14 @@ all_trades as (
         rd.protocol_fee * rd.protocol_fee_native_price * p.price / pow(10,18) as protocol_fee_collected
     from cow_protocol_{{blockchain}}.trades as t
     inner join "query_4364122(blockchain='{{blockchain}}')" as rd
-        on
-            t.order_uid = rd.order_uid
-            and t.tx_hash = rd.tx_hash
-            and t.block_number >= (select start_block from block_range)
-            and t.block_number <= (select end_block from block_range)
+        on t.order_uid = rd.order_uid
+        and t.tx_hash = rd.tx_hash
+        and t.block_number >= (select start_block from block_range)
+        and t.block_number <= (select end_block from block_range)
     inner join prices.usd as p
-        on
-            date_trunc('minute', t.block_time) = p.minute
-            and p.blockchain = '{{blockchain}}'
-            and p.contract_address = (select native_token_address from wrapped_native_token)
+        on date_trunc('minute', t.block_time) = p.minute
+        and p.blockchain = '{{blockchain}}'
+        and p.contract_address = (select native_token_address from wrapped_native_token)
 ),
 
 filtered_trades as (
