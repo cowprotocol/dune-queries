@@ -25,6 +25,7 @@ wrapped_native_token as (
 all_trades as (
     select
         t.block_time,
+        t.block_number,
         t.order_uid,
         t.tx_hash,
         t.sell_token_address,
