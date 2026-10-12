@@ -1,6 +1,5 @@
 [sqlfluff:templater:jinja:context]
 blockchain=ethereum
-price_of_native_token_in_dollars=3000
 protocol_fee_usd_threshold=5
 protocol_fee_relative_threshold=0.05
 start_time='2025-10-21 00:00:00'
