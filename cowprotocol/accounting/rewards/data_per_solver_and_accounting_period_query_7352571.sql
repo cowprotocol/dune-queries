@@ -8,8 +8,8 @@ with all_data as (
         cast(accounting_period_end_time as timestamp) as accounting_period_end_time,
         cast(consistency_reward_native as decimal(38, 0)) as consistency_reward_native,
         cast(consistency_reward_cow as decimal(38, 0)) as consistency_reward_cow,
+        cast(sum_quote_reward_native as decimal(38, 0)) as sum_quote_reward_native,
         cast(sum_quote_reward_cow as decimal(38, 0)) as sum_quote_reward_cow,
-        cast(sum_quote_reward_cow_including_fee as decimal(38, 0)) as sum_quote_reward_cow_including_fee,
         cast(number_of_quotes as bigint) as number_of_quotes
     from dune.cowprotocol.dataset_prod_data_per_solver_and_accounting_period_ethereum
     union all
@@ -22,8 +22,8 @@ with all_data as (
         cast(accounting_period_end_time as timestamp) as accounting_period_end_time,
         cast(consistency_reward_native as decimal(38, 0)) as consistency_reward_native,
         cast(consistency_reward_cow as decimal(38, 0)) as consistency_reward_cow,
+        cast(sum_quote_reward_native as decimal(38, 0)) as sum_quote_reward_native,
         cast(sum_quote_reward_cow as decimal(38, 0)) as sum_quote_reward_cow,
-        cast(sum_quote_reward_cow_including_fee as decimal(38, 0)) as sum_quote_reward_cow_including_fee,
         cast(number_of_quotes as bigint) as number_of_quotes
     from dune.cowprotocol.dataset_staging_data_per_solver_and_accounting_period_ethereum
     union all
@@ -36,8 +36,8 @@ with all_data as (
         cast(accounting_period_end_time as timestamp) as accounting_period_end_time,
         cast(consistency_reward_native as decimal(38, 0)) as consistency_reward_native,
         cast(consistency_reward_cow as decimal(38, 0)) as consistency_reward_cow,
+        cast(sum_quote_reward_native as decimal(38, 0)) as sum_quote_reward_native,
         cast(sum_quote_reward_cow as decimal(38, 0)) as sum_quote_reward_cow,
-        cast(sum_quote_reward_cow_including_fee as decimal(38, 0)) as sum_quote_reward_cow_including_fee,
         cast(number_of_quotes as bigint) as number_of_quotes
     from dune.cowprotocol.dataset_prod_data_per_solver_and_accounting_period_gnosis
     union all
@@ -50,8 +50,8 @@ with all_data as (
         cast(accounting_period_end_time as timestamp) as accounting_period_end_time,
         cast(consistency_reward_native as decimal(38, 0)) as consistency_reward_native,
         cast(consistency_reward_cow as decimal(38, 0)) as consistency_reward_cow,
+        cast(sum_quote_reward_native as decimal(38, 0)) as sum_quote_reward_native,
         cast(sum_quote_reward_cow as decimal(38, 0)) as sum_quote_reward_cow,
-        cast(sum_quote_reward_cow_including_fee as decimal(38, 0)) as sum_quote_reward_cow_including_fee,
         cast(number_of_quotes as bigint) as number_of_quotes
     from dune.cowprotocol.dataset_staging_data_per_solver_and_accounting_period_gnosis
     union all
@@ -64,8 +64,8 @@ with all_data as (
         cast(accounting_period_end_time as timestamp) as accounting_period_end_time,
         cast(consistency_reward_native as decimal(38, 0)) as consistency_reward_native,
         cast(consistency_reward_cow as decimal(38, 0)) as consistency_reward_cow,
+        cast(sum_quote_reward_native as decimal(38, 0)) as sum_quote_reward_native,
         cast(sum_quote_reward_cow as decimal(38, 0)) as sum_quote_reward_cow,
-        cast(sum_quote_reward_cow_including_fee as decimal(38, 0)) as sum_quote_reward_cow_including_fee,
         cast(number_of_quotes as bigint) as number_of_quotes
     from dune.cowprotocol.dataset_prod_data_per_solver_and_accounting_period_arbitrum
     union all
@@ -78,8 +78,8 @@ with all_data as (
         cast(accounting_period_end_time as timestamp) as accounting_period_end_time,
         cast(consistency_reward_native as decimal(38, 0)) as consistency_reward_native,
         cast(consistency_reward_cow as decimal(38, 0)) as consistency_reward_cow,
+        cast(sum_quote_reward_native as decimal(38, 0)) as sum_quote_reward_native,
         cast(sum_quote_reward_cow as decimal(38, 0)) as sum_quote_reward_cow,
-        cast(sum_quote_reward_cow_including_fee as decimal(38, 0)) as sum_quote_reward_cow_including_fee,
         cast(number_of_quotes as bigint) as number_of_quotes
     from dune.cowprotocol.dataset_staging_data_per_solver_and_accounting_period_arbitrum
     union all
@@ -92,8 +92,8 @@ with all_data as (
         cast(accounting_period_end_time as timestamp) as accounting_period_end_time,
         cast(consistency_reward_native as decimal(38, 0)) as consistency_reward_native,
         cast(consistency_reward_cow as decimal(38, 0)) as consistency_reward_cow,
+        cast(sum_quote_reward_native as decimal(38, 0)) as sum_quote_reward_native,
         cast(sum_quote_reward_cow as decimal(38, 0)) as sum_quote_reward_cow,
-        cast(sum_quote_reward_cow_including_fee as decimal(38, 0)) as sum_quote_reward_cow_including_fee,
         cast(number_of_quotes as bigint) as number_of_quotes
     from dune.cowprotocol.dataset_prod_data_per_solver_and_accounting_period_base
     union all
@@ -106,8 +106,8 @@ with all_data as (
         cast(accounting_period_end_time as timestamp) as accounting_period_end_time,
         cast(consistency_reward_native as decimal(38, 0)) as consistency_reward_native,
         cast(consistency_reward_cow as decimal(38, 0)) as consistency_reward_cow,
+        cast(sum_quote_reward_native as decimal(38, 0)) as sum_quote_reward_native,
         cast(sum_quote_reward_cow as decimal(38, 0)) as sum_quote_reward_cow,
-        cast(sum_quote_reward_cow_including_fee as decimal(38, 0)) as sum_quote_reward_cow_including_fee,
         cast(number_of_quotes as bigint) as number_of_quotes
     from dune.cowprotocol.dataset_staging_data_per_solver_and_accounting_period_base
     union all
@@ -120,8 +120,8 @@ with all_data as (
         cast(accounting_period_end_time as timestamp) as accounting_period_end_time,
         cast(consistency_reward_native as decimal(38, 0)) as consistency_reward_native,
         cast(consistency_reward_cow as decimal(38, 0)) as consistency_reward_cow,
+        cast(sum_quote_reward_native as decimal(38, 0)) as sum_quote_reward_native,
         cast(sum_quote_reward_cow as decimal(38, 0)) as sum_quote_reward_cow,
-        cast(sum_quote_reward_cow_including_fee as decimal(38, 0)) as sum_quote_reward_cow_including_fee,
         cast(number_of_quotes as bigint) as number_of_quotes
     from dune.cowprotocol.dataset_prod_data_per_solver_and_accounting_period_avalanche_c
     union all
@@ -134,8 +134,8 @@ with all_data as (
         cast(accounting_period_end_time as timestamp) as accounting_period_end_time,
         cast(consistency_reward_native as decimal(38, 0)) as consistency_reward_native,
         cast(consistency_reward_cow as decimal(38, 0)) as consistency_reward_cow,
+        cast(sum_quote_reward_native as decimal(38, 0)) as sum_quote_reward_native,
         cast(sum_quote_reward_cow as decimal(38, 0)) as sum_quote_reward_cow,
-        cast(sum_quote_reward_cow_including_fee as decimal(38, 0)) as sum_quote_reward_cow_including_fee,
         cast(number_of_quotes as bigint) as number_of_quotes
     from dune.cowprotocol.dataset_staging_data_per_solver_and_accounting_period_avalanche_c
     union all
@@ -148,8 +148,8 @@ with all_data as (
         cast(accounting_period_end_time as timestamp) as accounting_period_end_time,
         cast(consistency_reward_native as decimal(38, 0)) as consistency_reward_native,
         cast(consistency_reward_cow as decimal(38, 0)) as consistency_reward_cow,
+        cast(sum_quote_reward_native as decimal(38, 0)) as sum_quote_reward_native,
         cast(sum_quote_reward_cow as decimal(38, 0)) as sum_quote_reward_cow,
-        cast(sum_quote_reward_cow_including_fee as decimal(38, 0)) as sum_quote_reward_cow_including_fee,
         cast(number_of_quotes as bigint) as number_of_quotes
     from dune.cowprotocol.dataset_prod_data_per_solver_and_accounting_period_polygon
     union all
@@ -162,8 +162,8 @@ with all_data as (
         cast(accounting_period_end_time as timestamp) as accounting_period_end_time,
         cast(consistency_reward_native as decimal(38, 0)) as consistency_reward_native,
         cast(consistency_reward_cow as decimal(38, 0)) as consistency_reward_cow,
+        cast(sum_quote_reward_native as decimal(38, 0)) as sum_quote_reward_native,
         cast(sum_quote_reward_cow as decimal(38, 0)) as sum_quote_reward_cow,
-        cast(sum_quote_reward_cow_including_fee as decimal(38, 0)) as sum_quote_reward_cow_including_fee,
         cast(number_of_quotes as bigint) as number_of_quotes
     from dune.cowprotocol.dataset_staging_data_per_solver_and_accounting_period_polygon
     union all
@@ -176,8 +176,8 @@ with all_data as (
         cast(accounting_period_end_time as timestamp) as accounting_period_end_time,
         cast(consistency_reward_native as decimal(38, 0)) as consistency_reward_native,
         cast(consistency_reward_cow as decimal(38, 0)) as consistency_reward_cow,
+        cast(sum_quote_reward_native as decimal(38, 0)) as sum_quote_reward_native,
         cast(sum_quote_reward_cow as decimal(38, 0)) as sum_quote_reward_cow,
-        cast(sum_quote_reward_cow_including_fee as decimal(38, 0)) as sum_quote_reward_cow_including_fee,
         cast(number_of_quotes as bigint) as number_of_quotes
     from dune.cowprotocol.dataset_prod_data_per_solver_and_accounting_period_bnb
     union all
@@ -190,8 +190,8 @@ with all_data as (
         cast(accounting_period_end_time as timestamp) as accounting_period_end_time,
         cast(consistency_reward_native as decimal(38, 0)) as consistency_reward_native,
         cast(consistency_reward_cow as decimal(38, 0)) as consistency_reward_cow,
+        cast(sum_quote_reward_native as decimal(38, 0)) as sum_quote_reward_native,
         cast(sum_quote_reward_cow as decimal(38, 0)) as sum_quote_reward_cow,
-        cast(sum_quote_reward_cow_including_fee as decimal(38, 0)) as sum_quote_reward_cow_including_fee,
         cast(number_of_quotes as bigint) as number_of_quotes
     from dune.cowprotocol.dataset_staging_data_per_solver_and_accounting_period_bnb
     union all
@@ -204,8 +204,8 @@ with all_data as (
         cast(accounting_period_end_time as timestamp) as accounting_period_end_time,
         cast(consistency_reward_native as decimal(38, 0)) as consistency_reward_native,
         cast(consistency_reward_cow as decimal(38, 0)) as consistency_reward_cow,
+        cast(sum_quote_reward_native as decimal(38, 0)) as sum_quote_reward_native,
         cast(sum_quote_reward_cow as decimal(38, 0)) as sum_quote_reward_cow,
-        cast(sum_quote_reward_cow_including_fee as decimal(38, 0)) as sum_quote_reward_cow_including_fee,
         cast(number_of_quotes as bigint) as number_of_quotes
     from dune.cowprotocol.dataset_prod_data_per_solver_and_accounting_period_linea
     union all
@@ -218,8 +218,8 @@ with all_data as (
         cast(accounting_period_end_time as timestamp) as accounting_period_end_time,
         cast(consistency_reward_native as decimal(38, 0)) as consistency_reward_native,
         cast(consistency_reward_cow as decimal(38, 0)) as consistency_reward_cow,
+        cast(sum_quote_reward_native as decimal(38, 0)) as sum_quote_reward_native,
         cast(sum_quote_reward_cow as decimal(38, 0)) as sum_quote_reward_cow,
-        cast(sum_quote_reward_cow_including_fee as decimal(38, 0)) as sum_quote_reward_cow_including_fee,
         cast(number_of_quotes as bigint) as number_of_quotes
     from dune.cowprotocol.dataset_staging_data_per_solver_and_accounting_period_linea
     union all
@@ -232,8 +232,8 @@ with all_data as (
         cast(accounting_period_end_time as timestamp) as accounting_period_end_time,
         cast(consistency_reward_native as decimal(38, 0)) as consistency_reward_native,
         cast(consistency_reward_cow as decimal(38, 0)) as consistency_reward_cow,
+        cast(sum_quote_reward_native as decimal(38, 0)) as sum_quote_reward_native,
         cast(sum_quote_reward_cow as decimal(38, 0)) as sum_quote_reward_cow,
-        cast(sum_quote_reward_cow_including_fee as decimal(38, 0)) as sum_quote_reward_cow_including_fee,
         cast(number_of_quotes as bigint) as number_of_quotes
     from dune.cowprotocol.dataset_prod_data_per_solver_and_accounting_period_plasma
     union all
@@ -246,8 +246,8 @@ with all_data as (
         cast(accounting_period_end_time as timestamp) as accounting_period_end_time,
         cast(consistency_reward_native as decimal(38, 0)) as consistency_reward_native,
         cast(consistency_reward_cow as decimal(38, 0)) as consistency_reward_cow,
+        cast(sum_quote_reward_native as decimal(38, 0)) as sum_quote_reward_native,
         cast(sum_quote_reward_cow as decimal(38, 0)) as sum_quote_reward_cow,
-        cast(sum_quote_reward_cow_including_fee as decimal(38, 0)) as sum_quote_reward_cow_including_fee,
         cast(number_of_quotes as bigint) as number_of_quotes
     from dune.cowprotocol.dataset_staging_data_per_solver_and_accounting_period_plasma
     union all
@@ -260,8 +260,8 @@ with all_data as (
         cast(accounting_period_end_time as timestamp) as accounting_period_end_time,
         cast(consistency_reward_native as decimal(38, 0)) as consistency_reward_native,
         cast(consistency_reward_cow as decimal(38, 0)) as consistency_reward_cow,
+        cast(sum_quote_reward_native as decimal(38, 0)) as sum_quote_reward_native,
         cast(sum_quote_reward_cow as decimal(38, 0)) as sum_quote_reward_cow,
-        cast(sum_quote_reward_cow_including_fee as decimal(38, 0)) as sum_quote_reward_cow_including_fee,
         cast(number_of_quotes as bigint) as number_of_quotes
     from dune.cowprotocol.dataset_prod_data_per_solver_and_accounting_period_ink
     union all
@@ -274,8 +274,8 @@ with all_data as (
         cast(accounting_period_end_time as timestamp) as accounting_period_end_time,
         cast(consistency_reward_native as decimal(38, 0)) as consistency_reward_native,
         cast(consistency_reward_cow as decimal(38, 0)) as consistency_reward_cow,
+        cast(sum_quote_reward_native as decimal(38, 0)) as sum_quote_reward_native,
         cast(sum_quote_reward_cow as decimal(38, 0)) as sum_quote_reward_cow,
-        cast(sum_quote_reward_cow_including_fee as decimal(38, 0)) as sum_quote_reward_cow_including_fee,
         cast(number_of_quotes as bigint) as number_of_quotes
     from dune.cowprotocol.dataset_staging_data_per_solver_and_accounting_period_ink
 )
