@@ -91,6 +91,7 @@ conversion_prices as (
 ),
 
 -- BEGIN QUOTE REWARDS
+-- accounting periods before CIP-88: a flat reward per traded order with an eligible winning quote
 order_quotes as (
     select
         od.order_uid,
@@ -111,11 +112,29 @@ winning_quotes as (
     inner join cow_protocol_{{blockchain}}.trades as t on oq.order_uid = t.order_uid and oq.quote_solver != 0x0000000000000000000000000000000000000000
 ),
 
-quote_rewards as (
+flat_quote_rewards as (
     select
         solver,
         least({{quote_reward}}, {{quote_cap_native_token}} * (select native_token_price / cow_price from conversion_prices)) * count(*) as quote_reward
     from winning_quotes group by solver
+),
+
+-- accounting periods from CIP-88 on: the rewards computed for the payout, in COW before service fee;
+-- solvers with only zero rewards are dropped so they do not enter the full outer join below
+cip88_quote_rewards as (
+    select
+        solver,
+        cast(sum_quote_reward_cow as double) / pow(10, 18) as quote_reward
+    from "query_7352571(blockchain='{{blockchain}}',start_time='{{start_time}}',end_time='{{end_time}}')"
+    where sum_quote_reward_cow > 0
+),
+
+quote_rewards as (
+    select * from flat_quote_rewards
+    where cast('{{start_time}}' as timestamp) < timestamp '2026-10-06 00:00'
+    union all
+    select * from cip88_quote_rewards
+    where cast('{{start_time}}' as timestamp) >= timestamp '2026-10-06 00:00'
 ),
 
 aggregate_results as (
