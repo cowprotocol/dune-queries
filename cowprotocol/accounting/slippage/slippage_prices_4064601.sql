@@ -167,6 +167,7 @@ prices as (
             when '{{blockchain}}' = 'ethereum' and token_address = 0x230f1e241c621d5af670dad83ebcdd18971e2995 and hour >= timestamp '2026-08-24 15:00' and hour <= timestamp '2026-08-24 23:59' then 0.005 -- noqa:CP02
             when '{{blockchain}}' = 'gnosis' and token_address = 0x420ca0f9b9b604ce0fd9c18ef134c705e5fa3430 and hour >= timestamp '2026-10-12 21:00' and hour <= timestamp '2026-10-12 22:00' then 1.11853
             when '{{blockchain}}' = 'gnosis' and token_address = 0x420ca0f9b9b604ce0fd9c18ef134c705e5fa3430 and hour >= timestamp '2026-10-08 07:00' and hour <= timestamp '2026-10-08 08:00' then 1.12438
+            when '{{blockchain}}' = 'gnosis' and token_address = 0x420ca0f9b9b604ce0fd9c18ef134c705e5fa3430 and hour >= timestamp '2026-10-19 17:00' and hour <= timestamp '2026-10-19 18:00' then 1.122200
             else price_unit
         end as price_unit,
         case
@@ -190,6 +191,7 @@ prices as (
             when '{{blockchain}}' = 'ethereum' and token_address = 0x230f1e241c621d5af670dad83ebcdd18971e2995 and hour >= timestamp '2026-08-24 15:00' and hour <= timestamp '2026-08-24 23:59' then 0.005  / pow(10, 18) -- noqa:CP02
             when '{{blockchain}}' = 'gnosis' and token_address = 0x420ca0f9b9b604ce0fd9c18ef134c705e5fa3430 and hour >= timestamp '2026-10-12 21:00' and hour <= timestamp '2026-10-12 22:00' then 1.11853 / pow(10, 18)
             when '{{blockchain}}' = 'gnosis' and token_address = 0x420ca0f9b9b604ce0fd9c18ef134c705e5fa3430 and hour >= timestamp '2026-10-08 07:00' and hour <= timestamp '2026-10-08 08:00' then 1.12438 / pow(10, 18)
+            when '{{blockchain}}' = 'gnosis' and token_address = 0x420ca0f9b9b604ce0fd9c18ef134c705e5fa3430 and hour >= timestamp '2026-10-19 17:00' and hour <= timestamp '2026-10-19 18:00' then 1.122200 / pow(10, 18)  -- noqa:CP02
             else price_atom
         end as price_atom
     from prices_pre
