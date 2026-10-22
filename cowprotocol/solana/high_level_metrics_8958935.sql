@@ -1,4 +1,3 @@
-
 -- CoW Protocol on Solana: swaps, orders, traders and volume per {{date_granularity}}
 -- source: cow_protocol_solana decoded tables for the prod settlement program (v0.5.x)
 --   create_order is fully decoded; begin_settle / finalize_settle only decode their fixed args,
@@ -55,7 +54,7 @@ with begin_settle as (
     from (
         select
             *
-            , reduce(slice(transfer_counts, 1, order_index -, x) -> s + x, s -> s) as prior_transfers
+            , reduce(slice(transfer_counts, 1, order_index - 1), cast(0 as bigint), (s, x) -> s + x, s -> s) as prior_transfers
         from begin_orders
     )
 )
@@ -66,11 +65,11 @@ with begin_settle as (
         , call_data as data
         , call_account_arguments as account_arguments
         -- data: [disc u8][begin_ix_index u16][bump u8 x push_count][amount u64 LE x push_count]
-        -- accounts: 4 fixed, then per push [source_buffer,
+        -- accounts: 4 fixed, then per push [source_buffer, destination, mint]
         , (cardinality(call_account_arguments) - 4) / 3 as push_count
-    from cow_protocol_solana.cow_settlement_call_finalize_se
+    from cow_protocol_solana.cow_settlement_call_finalize_settle
     where
-        call_executing_account = 'Moook87DzJ25dELx3LXJ3dnu5a
+        call_executing_account = 'Moook87DzJ25dELx3LXJ3dnu5a4ERVFwKo1PWWF4p7Y'
         and call_block_time >= timestamp '2026-10-07'
 )
 
@@ -86,27 +85,27 @@ with begin_settle as (
 )
 
 , orders as (
-    -- intent is a JSON string; addresses come as "PublicKey
+    -- intent is a JSON string; addresses come as "PublicKey(<base58>)"
     -- order_pda is derived from the intent hash, so all fields are the same for a given order_pda
     select distinct
         account_order_pda as order_pda
         , regexp_extract(json_extract_scalar(intent, '$.OrderIntent.owner'), 'PublicKey\((\w+)\)', 1) as owner
-        , regexp_extract(json_extract_scalar(intent, '$.OrdeicKey\((\w+)\)', 1) as sell_mint
+        , regexp_extract(json_extract_scalar(intent, '$.OrderIntent.sell_mint'), 'PublicKey\((\w+)\)', 1) as sell_mint
         , regexp_extract(json_extract_scalar(intent, '$.OrderIntent.buy_token_account'), 'PublicKey\((\w+)\)', 1) as buy_token_account
-        -- native SOL buys use the system program as buy_mining
+        -- native SOL buys use the system program as buy_mint; map it to wSOL for pricing
         , if(
-            regexp_extract(json_extract_scalar(intent, '$.OrlicKey\((\w+)\)', 1) = '11111111111111111111111111111111'
+            regexp_extract(json_extract_scalar(intent, '$.OrderIntent.buy_mint'), 'PublicKey\((\w+)\)', 1) = '11111111111111111111111111111111'
             , 'So11111111111111111111111111111111111111112'
-            , regexp_extract(json_extract_scalar(intent, '$.ublicKey\((\w+)\)', 1)
+            , regexp_extract(json_extract_scalar(intent, '$.OrderIntent.buy_mint'), 'PublicKey\((\w+)\)', 1)
         ) as buy_mint
-    from cow_protocol_solana.cow_settlement_call_create_orde
+    from cow_protocol_solana.cow_settlement_call_create_order
     where
         call_executing_account = 'Moook87DzJ25dELx3LXJ3dnu5a4ERVFwKo1PWWF4p7Y'
         and call_block_time >= timestamp '2026-10-07'
 )
 
 , fills as (
-    -- one row per filled order, with both amounts and both
+    -- one row per filled order, with both amounts and both mints
     select
         pl.block_time
         , pl.tx_id
@@ -133,8 +132,8 @@ with begin_settle as (
         , l.order_index
         , l.order_pda
         , l.owner
-        , max(if(l.side = 'sell', l.sell_amount_raw / power() as sell_usd
-        , max(if(l.side = 'buy', l.buy_amount_raw / power(10as buy_usd
+        , max(if(l.side = 'sell', l.sell_amount_raw / power(10, p.decimals) * p.price)) as sell_usd
+        , max(if(l.side = 'buy', l.buy_amount_raw / power(10, p.decimals) * p.price)) as buy_usd
     from (
         select
             f.*
@@ -165,10 +164,10 @@ with begin_settle as (
         , tx_id
         , order_pda
         , owner
-        -- sell side first; buy side when the sell token has
+        -- sell side first; buy side when the sell token has no price
         , coalesce(sell_usd, buy_usd) as volume_usd
-        -- a trader is new in the period of their first swap
-        , min(date_trunc('{{date_granularity}}', block_time)) as first_period
+        -- a trader is new in the period of their first swap on the prod program
+        , min(date_trunc('{{date_granularity}}', block_time)) over (partition by owner) as first_period
     from priced_fills
 )
 
@@ -177,10 +176,10 @@ with begin_settle as (
         period
         , sum(volume_usd) as volume_usd
         , count(*) as swaps
-        -- a partially fillable order filled several times ie
+        -- a partially fillable order filled several times in a period counts once here
         , count(distinct order_pda) as orders_filled
         , count(distinct owner) as traders
-        , count(distinct case when first_period = period thes
+        , count(distinct case when first_period = period then owner end) as new_traders
         , count(distinct tx_id) as settlements
         , count_if(volume_usd is null) as unpriced_swaps
     from trades
@@ -193,7 +192,7 @@ with begin_settle as (
         , volume_usd
         , sum(volume_usd) over (order by period) as cumulative_volume_usd
         , swaps
-        , sum(swaps) over (order by period) as cumulative_sw
+        , sum(swaps) over (order by period) as cumulative_swaps
         , orders_filled
         , traders
         , new_traders
@@ -205,5 +204,5 @@ with begin_settle as (
 
 select *
 from with_cumulative
-where period >= date_trunc('{{date_granularity}}', timestamp
+where period >= date_trunc('{{date_granularity}}', timestamp '{{start_time}}')
 order by period desc
