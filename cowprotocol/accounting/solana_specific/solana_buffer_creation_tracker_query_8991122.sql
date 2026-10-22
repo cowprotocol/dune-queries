@@ -50,5 +50,5 @@ select
     b.pre_lamports,
     b.post_lamports,
     b.post_lamports - b.pre_lamports as rent_lamports
-from buffer_lamports as b left join settle_txs s on s.tx_id = b.tx_id
+from buffer_lamports as b left join settle_txs as s on s.tx_id = b.tx_id
 order by b.block_time desc
