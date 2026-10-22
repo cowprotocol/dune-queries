@@ -31,7 +31,7 @@ settlements as (
         t.account_keys,
         t.pre_balances,
         t.post_balances
-    from solana.transactions as t inner join settle_txs s
+    from solana.transactions as t inner join settle_txs as s
         on s.tx_id = t.id and s.block_time = t.block_time
     where
         t.block_time >= cast('{{start_time}}' as timestamp)
