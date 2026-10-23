@@ -21,7 +21,7 @@ vouches as (
         v.evt_index,
         to_base58(v.solver) as solver,
         v.cowrewardtarget as cow_reward_target,
-        to_base58(v.solanaRewardTarget) as solana_reward_target,
+        to_base58(v.solanarewardtarget) as solana_reward_target,
         fp.pool_address,
         fp.pool_name,
         fp.creator,
