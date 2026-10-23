@@ -2,8 +2,7 @@
 
 with solver_names (solver, environment, name) as (
     values
-        ('5GmuFPWYbVYD3jijMhtq5aGbhHi24ANqGcbFAirr284M', 'prod', 'Fractal')
-        -- , ('<address>', '<environment>', '<name>')
+    ('5GmuFPWYbVYD3jijMhtq5aGbhHi24ANqGcbFAirr284M', 'prod', 'Fractal')
 ),
 
 events as (
