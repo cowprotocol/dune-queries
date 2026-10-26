@@ -2,7 +2,8 @@
 
 with solver_names (solver, environment, name) as (
     values
-    ('5GmuFPWYbVYD3jijMhtq5aGbhHi24ANqGcbFAirr284M', 'prod', 'Fractal')
+    ('5GmuFPWYbVYD3jijMhtq5aGbhHi24ANqGcbFAirr284M', 'prod', 'Fractal'),
+    ('6ZUeThQ9FovzaS8HejAfGW2VqCXwRYPKKyUNsozpfrSx', 'prod', 'Rizzolver')
 ),
 
 events as (
