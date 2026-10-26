@@ -88,7 +88,7 @@ price_corrections as (
             else '{{blockchain}}'
         end as blockchain,
         environment,
-        CAST(auction_id AS BIGINT) AS auction_id,
+        cast(auction_id as bigint) as auction_id,
         case
             when order_type = 'SELL' then buy_token_address
             else sell_token_address
