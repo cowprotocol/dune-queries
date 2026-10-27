@@ -12,9 +12,9 @@
 -- The output has the following columns:
 --    blockchain: varchar
 --    environment: varchar
---    auction_id: integer
---    token: varbinary
---    price: decimal(38, 0)
+--    auction_id: integer cast as varchar to be easier to consume in Python apps
+--    token: varbinary cast as varchar to be easier to consume in Python apps
+--    price: decimal(38, 0) cast as varchar to be easier to consume in Python apps
 
 with block_range as (
     select
@@ -100,4 +100,10 @@ price_corrections as (
     from problematic_trades
 )
 
-select * from price_corrections
+select
+    blockchain,
+    environment,
+    cast(auction_id as varchar) as auction_id,
+    cast(token as varchar) as token,
+    cast(price as varchar) as price
+from price_corrections
