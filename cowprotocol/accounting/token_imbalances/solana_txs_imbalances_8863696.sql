@@ -1,26 +1,56 @@
 -- CoW settlement (prod): buffer imbalances per tx, with solver attribution.
--- Txs = every tx with a CoW settlement / create_buffer / reclaim_buffer / withdraw_native_sol call.
--- solana.transactions is read ONCE (Trino re-runs a CTE every time it is referenced).
--- Window filters use block_time; block_date is only a join key / partition filter for speed.
--- Legs:
---   token      : token balance change of a buffer (atoms)
---   native_sol : lamport change of the native SOL buffer (its balance is SOL)
---   lamports   : lamport change of a token buffer = rent on creation / reclaim,
---                net of wSOL token movements on the wSOL buffer (no double count)
+--
+-- Solana analogue of the EVM token-imbalance queries (4021257 / 4021644). Unlike the EVM
+-- version it does NOT look at every transfer touching the buffers: it only scans txs that
+-- contain a CoW instruction (begin_settle / create_buffer / reclaim_buffer / withdraw_native_sol).
+-- Buffer in-flows made in other txs (e.g. a solver pre-funding a buffer) are not visible here.
+--
+-- Parameters:
+--  {{start_time}} - the timestamp for which the analysis should start (inclusively)
+--  {{end_time}}   - the timestamp for which the analysis should end (exclusively)
+--
+-- Output: one row per (tx, buffer, leg, token) with a non-zero (or NULL) balance change, where
+--  amount      : post - pre, in atoms (NULL when the mint is missing from tokens_solana.fungible)
+--  leg         : token      - token balance change of a buffer
+--                native_sol - lamport change of the native SOL buffer (its balance IS the SOL buffer)
+--                lamports   - lamport change of a token buffer, i.e. rent on creation / reclaim,
+--                             net of wSOL token movements on the wSOL buffer (no double count)
+--  attribution : settlement / multi_solver / protocol / solver_non_settlement / unattributed
+--
+-- Notes:
+--  - solana.transactions is read ONCE (Trino re-runs a CTE every time it is referenced).
+--  - Window filters use block_time; block_date is only a join key / partition filter for speed.
+--  - Buffer addresses are discovered from successful create_buffer / initialize calls, so a minor
+--    version bump of the program (which relocates every PDA) is picked up automatically.
 
-with buffers as ( -- all token buffers ever created + the native SOL buffer
+with token_buffers as ( -- all token buffers ever created (successful calls only: the program
+    -- only guarantees canonical buffer PDAs when the instruction succeeded)
     select distinct t.account as buffer_account
     from cow_protocol_solana.cow_settlement_call_create_buffer as cb
     -- args: [payer, system_program, token_program, (buffer, mint)...]
     cross join unnest(cb.call_account_arguments) with ordinality as t(account, pos)
-    where t.pos >= 4 and t.pos % 2 = 0
-    union
-    select 'ESnpC8iNkuUzbLRm2dG6VezaGBi86QPdYh6TzvSXn2Pz' -- native SOL buffer (fixed PDA, created at Initialize)
+    where
+        cb.call_tx_success
+        and t.pos >= 4 and t.pos % 2 = 0
 ),
 
-buf_list as ( -- buffers as one array, for in-row filtering
-    select array_agg(buffer_account) as bufs
-    from buffers
+native_buffers as ( -- native SOL buffer(s): created at Initialize, one per program version
+    select distinct account_native_sol_buffer as buffer_account
+    from cow_protocol_solana.cow_settlement_call_initialize
+    where call_tx_success
+),
+
+buf_list as ( -- buffers as arrays, for in-row filtering
+    select
+        (select array_agg(buffer_account) from native_buffers) as native_bufs,
+        (
+            select array_agg(buffer_account)
+            from (
+                select buffer_account from token_buffers
+                union distinct
+                select buffer_account from native_buffers
+            ) as all_buffers
+        ) as bufs
 ),
 
 -- ---------- CoW txs in window (small decoded tables) ----------
@@ -34,8 +64,9 @@ settles as ( -- settlement txs (a tx may hold several settlements)
         count(*) as n_settlements
     from cow_protocol_solana.cow_settlement_call_begin_settle
     where
-        call_block_time >= cast('{{start_time}}' as timestamp)
-        and call_block_time <= cast('{{end_time}}' as timestamp)
+        call_tx_success
+        and call_block_time >= cast('{{start_time}}' as timestamp)
+        and call_block_time < cast('{{end_time}}' as timestamp)
     group by 1, 2
 ),
 
@@ -46,39 +77,63 @@ creates as ( -- txs with create_buffer (payer funds the rent)
         min(account_payer) as payer
     from cow_protocol_solana.cow_settlement_call_create_buffer
     where
-        call_block_time >= cast('{{start_time}}' as timestamp)
-        and call_block_time <= cast('{{end_time}}' as timestamp)
+        call_tx_success
+        and call_block_time >= cast('{{start_time}}' as timestamp)
+        and call_block_time < cast('{{end_time}}' as timestamp)
     group by 1, 2
 ),
 
 protocol_txs as ( -- protocol-authority actions: reclaims and native SOL withdrawals
-    select distinct call_tx_id as tx_id, call_block_date as block_date
+    select distinct
+        call_tx_id as tx_id,
+        call_block_date as block_date
     from cow_protocol_solana.cow_settlement_call_reclaim_buffer
     where
-        call_block_time >= cast('{{start_time}}' as timestamp)
-        and call_block_time <= cast('{{end_time}}' as timestamp)
-    union
-    select distinct call_tx_id, call_block_date
+        call_tx_success
+        and call_block_time >= cast('{{start_time}}' as timestamp)
+        and call_block_time < cast('{{end_time}}' as timestamp)
+    union distinct
+    select distinct
+        call_tx_id,
+        call_block_date
     from cow_protocol_solana.cow_settlement_call_withdraw_native_sol
     where
-        call_block_time >= cast('{{start_time}}' as timestamp)
-        and call_block_time <= cast('{{end_time}}' as timestamp)
+        call_tx_success
+        and call_block_time >= cast('{{start_time}}' as timestamp)
+        and call_block_time < cast('{{end_time}}' as timestamp)
 ),
 
 cow_txs as (
-    select tx_id, block_date from settles
-    union
-    select tx_id, block_date from creates
-    union
-    select tx_id, block_date from protocol_txs
+    select
+        tx_id,
+        block_date
+    from settles
+    union distinct
+    select
+        tx_id,
+        block_date
+    from creates
+    union distinct
+    select
+        tx_id,
+        block_date
+    from protocol_txs
 ),
 
-solver_events as ( -- solver registry changes (all history)
-    select solver, call_block_time as event_time, 1 as delta
+solver_events as ( -- solver registry changes (all history, successful calls only)
+    select
+        solver,
+        call_block_time as event_time,
+        1 as delta
     from cow_protocol_solana.cow_settlement_call_add_solver
+    where call_tx_success
     union all
-    select solver, call_block_time, -1
+    select
+        solver,
+        call_block_time as event_time,
+        -1 as delta
     from cow_protocol_solana.cow_settlement_call_remove_solver
+    where call_tx_success
 ),
 
 -- ---------- the single scan of solana.transactions ----------
@@ -108,9 +163,9 @@ tx_raw as (
         and c.block_date = t.block_date
     where
         t.block_date between cast(cast('{{start_time}}' as timestamp) as date)
-                         and cast(cast('{{end_time}}' as timestamp) as date) -- partition pruning
+        and cast(cast('{{end_time}}' as timestamp) as date) -- partition pruning
         and t.block_time >= cast('{{start_time}}' as timestamp)
-        and t.block_time <= cast('{{end_time}}' as timestamp)
+        and t.block_time < cast('{{end_time}}' as timestamp)
         and t.success
 ),
 
@@ -131,37 +186,50 @@ tx_entries as ( -- every buffer balance entry of each tx, signed so that sum = p
             -- token balances (units): -pre, +post
             transform(
                 filter(r.pre_token_balances, b -> contains(bl.bufs, b.account)),
-                b -> cast(row('token', b.account, b.mint, -b.amount)
-                          as row(leg varchar, buffer_account varchar, mint varchar, amount decimal(38,18)))
+                b -> cast(
+                    row('token', b.account, b.mint, -b.amount)
+                    as row(leg varchar, buffer_account varchar, mint varchar, amount decimal(38,18))
+                )
             ),
             transform(
                 filter(r.post_token_balances, b -> contains(bl.bufs, b.account)),
-                b -> cast(row('token', b.account, b.mint, b.amount)
-                          as row(leg varchar, buffer_account varchar, mint varchar, amount decimal(38,18)))
+                b -> cast(
+                    row('token', b.account, b.mint, b.amount)
+                    as row(leg varchar, buffer_account varchar, mint varchar, amount decimal(38,18))
+                )
             ),
             -- wSOL buffer: its lamports also move with wSOL tokens, so take those out
             -- of its lamport leg (+pre, -post, scaled to lamports; wSOL has 9 decimals)
             transform(
-                filter(r.pre_token_balances, b -> contains(bl.bufs, b.account)
-                                                  and b.mint = 'So11111111111111111111111111111111111111112'),
-                b -> cast(row('lamports', b.account, '11111111111111111111111111111111', b.amount * 1000000000)
-                          as row(leg varchar, buffer_account varchar, mint varchar, amount decimal(38,18)))
+                filter(
+                    r.pre_token_balances, b -> contains(bl.bufs, b.account)
+                    and b.mint = 'So11111111111111111111111111111111111111112'
+                ),
+                b -> cast(
+                    row('lamports', b.account, '11111111111111111111111111111111', b.amount * 1000000000)
+                    as row(leg varchar, buffer_account varchar, mint varchar, amount decimal(38,18))
+                )
             ),
             transform(
-                filter(r.post_token_balances, b -> contains(bl.bufs, b.account)
-                                                   and b.mint = 'So11111111111111111111111111111111111111112'),
-                b -> cast(row('lamports', b.account, '11111111111111111111111111111111', -(b.amount * 1000000000))
-                          as row(leg varchar, buffer_account varchar, mint varchar, amount decimal(38,18)))
+                filter(
+                    r.post_token_balances, b -> contains(bl.bufs, b.account)
+                    and b.mint = 'So11111111111111111111111111111111111111112'
+                ),
+                b -> cast(
+                    row('lamports', b.account, '11111111111111111111111111111111', -(b.amount * 1000000000))
+                    as row(leg varchar, buffer_account varchar, mint varchar, amount decimal(38,18))
+                )
             ),
             -- lamport change of every buffer present in the tx
             transform(
                 filter(sequence(1, cardinality(r.keys)), i -> contains(bl.bufs, r.keys[i])),
                 i -> cast(row(
-                        if(r.keys[i] = 'ESnpC8iNkuUzbLRm2dG6VezaGBi86QPdYh6TzvSXn2Pz', 'native_sol', 'lamports'),
-                        r.keys[i],
-                        '11111111111111111111111111111111',
-                        r.post_balances[i] - r.pre_balances[i])
-                      as row(leg varchar, buffer_account varchar, mint varchar, amount decimal(38,18)))
+                    if(contains(bl.native_bufs, r.keys[i]), 'native_sol', 'lamports'),
+                    r.keys[i],
+                    '11111111111111111111111111111111',
+                    r.post_balances[i] - r.pre_balances[i]
+                )
+                as row(leg varchar, buffer_account varchar, mint varchar, amount decimal(38,18)))
             )
         )
     ) as e(leg, buffer_account, mint, amount)
@@ -179,6 +247,14 @@ legs as ( -- net change per tx, buffer, leg and token
         sum(amount) as amount_units
     from tx_entries
     group by 1, 2, 3, 4, 5, 6, 7
+),
+
+token_decimals as ( -- one row per mint (tokens_solana.fungible is not guaranteed unique per mint)
+    select
+        token_mint_address,
+        max(decimals) as decimals
+    from tokens_solana.fungible
+    group by 1
 ),
 
 -- ---------- attribution (small joins only) ----------
@@ -204,8 +280,9 @@ with_status as ( -- non-settlement: was the rent payer (else signer) a registere
         coalesce((
             select sum(e.delta)
             from solver_events as e
-            where e.solver = j.candidate
-              and e.event_time <= j.block_time
+            where
+                e.solver = j.candidate
+                and e.event_time <= j.block_time
         ), 0) > 0 as candidate_is_solver
     from joined as j
 )
@@ -233,17 +310,17 @@ select
     w.mint as token_address,
     case
         when w.leg = 'token'
-            then cast(w.amount_units * cast(power(10, f.decimals) as decimal(20,0)) as decimal(38,0))
+            then cast(w.amount_units * cast(power(10, d.decimals) as decimal(20,0)) as decimal(38,0))
         else cast(w.amount_units as decimal(38,0)) -- lamports are already atoms
     end as amount
 from with_status as w
-left join tokens_solana.fungible as f
+left join token_decimals as d
     on w.leg = 'token'
-    and f.token_mint_address = w.mint
+    and d.token_mint_address = w.mint
 where
     case
         when w.leg = 'token'
-            then cast(w.amount_units * cast(power(10, f.decimals) as decimal(20,0)) as decimal(38,0))
+            then cast(w.amount_units * cast(power(10, d.decimals) as decimal(20,0)) as decimal(38,0))
         else cast(w.amount_units as decimal(38,0))
     end is distinct from 0 -- keeps null amounts (missing decimals) visible
 order by w.block_time desc, w.tx_id, w.buffer_account
