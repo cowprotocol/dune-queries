@@ -9,13 +9,27 @@
 --  {{start_time}} - the timestamp for which the analysis should start (inclusively)
 --  {{end_time}}   - the timestamp for which the analysis should end (exclusively)
 --
--- Output: one row per (tx, buffer, leg, token) with a non-zero (or NULL) balance change, where
---  amount      : post - pre, in atoms (NULL when the mint is missing from tokens_solana.fungible)
---  leg         : token      - token balance change of a buffer
---                native_sol - lamport change of the native SOL buffer (its balance IS the SOL buffer)
---                lamports   - lamport change of a token buffer, i.e. rent on creation / reclaim,
---                             net of wSOL token movements on the wSOL buffer (no double count)
---  attribution : settlement / multi_solver / protocol / solver_non_settlement / unattributed
+-- Output: one row per (tx, buffer, leg, token) whose balance changed.
+--
+--   amount       post - pre, in atoms (smallest unit: lamports, token base units).
+--                NULL if the token's decimals are unknown (mint missing from
+--                tokens_solana.fungible); these rows are kept so they can be fixed.
+--
+--   leg          what kind of balance changed:
+--                  token       the buffer's token balance
+--                  native_sol  the native SOL buffer's balance (its SOL is the buffer's funds)
+--                  lamports    the SOL held by a token buffer: rent paid on creation (+)
+--                              or refunded on reclaim (-). On the wSOL buffer, wSOL token
+--                              movements are subtracted so they aren't counted twice.
+--
+--   attribution  who the change belongs to:
+--                  settlement             settlement tx; solver = its account_solver
+--                  multi_solver           settlement tx with more than one solver (unexpected)
+--                  protocol               reclaim_buffer / withdraw_native_sol (protocol authorities)
+--                  solver_non_settlement  non-settlement tx by a whitelisted solver,
+--                                         e.g. creating a buffer outside a settlement
+--                  unattributed           anyone else, e.g. a user creating a buffer
+--                                         when placing an order
 --
 -- Notes:
 --  - solana.transactions is read ONCE (Trino re-runs a CTE every time it is referenced), and is
@@ -213,8 +227,11 @@ tx_entries as ( -- every buffer balance entry of each tx, signed so that sum = p
                     as row(leg varchar, buffer_account varchar, mint varchar, amount decimal(38,18))
                 )
             ),
-            -- wSOL buffer: its lamports also move with wSOL tokens, so take those out
-            -- of its lamport leg (+pre, -post, scaled to lamports; wSOL has 9 decimals)
+            -- wSOL correction. On the wSOL buffer, wSOL tokens are held as lamports, so every
+            -- wSOL movement also shows up in its lamport change (last group below). Adding the
+            -- wSOL token balances here with the opposite sign (+pre, -post, scaled to lamports;
+            -- wSOL has 9 decimals) cancels that out, so the buffer's 'lamports' leg keeps only
+            -- rent and the wSOL movement is counted once, in its 'token' leg.
             transform(
                 filter(
                     r.pre_token_balances, b -> contains(bl.bufs, b.account)
