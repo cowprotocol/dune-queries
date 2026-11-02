@@ -168,7 +168,7 @@ solver_events as ( -- solver registry changes (all history)
 
 tx_raw as (
     select
-        t.id as tx_id,
+        t.tx_id,
         t.block_time,
         t.block_slot,
         t.signer,
@@ -176,7 +176,6 @@ tx_raw as (
         t.post_token_balances,
         t.pre_balances,
         t.post_balances,
-        -- lamport arrays cover static + lookup-table keys; make sure keys do too
         case
             when cardinality(t.account_keys) = cardinality(t.pre_balances) then t.account_keys
             else concat(
@@ -185,17 +184,10 @@ tx_raw as (
                 coalesce(t.loaded_addresses.readonly, cast(array[] as array(varchar)))
             )
         end as keys
-    from solana.transactions as t
-    inner join cow_txs as c
-        on c.tx_id = t.id
-        and c.block_slot = t.block_slot -- lets the scan skip row groups whose slot range has no CoW tx
-        and c.block_date = t.block_date
+    from dune.cowprotocol.result_solana_txs_past_10_days_materialized as t
     where
-        t.block_date between cast(cast('{{start_time}}' as timestamp) as date)
-        and cast(cast('{{end_time}}' as timestamp) as date) -- partition pruning
-        and t.block_time >= cast('{{start_time}}' as timestamp)
+        t.block_time >= cast('{{start_time}}' as timestamp)
         and t.block_time < cast('{{end_time}}' as timestamp)
-        and t.success
 ),
 
 tx_entries as ( -- every buffer balance entry of each tx, signed so that sum = post - pre
