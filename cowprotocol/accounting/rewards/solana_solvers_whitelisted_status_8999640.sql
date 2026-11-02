@@ -3,7 +3,17 @@
 with solver_names (solver, environment, name) as (
     values
     ('5GmuFPWYbVYD3jijMhtq5aGbhHi24ANqGcbFAirr284M', 'prod', 'Fractal'),
-    ('6ZUeThQ9FovzaS8HejAfGW2VqCXwRYPKKyUNsozpfrSx', 'prod', 'Rizzolver')
+    ('6ZUeThQ9FovzaS8HejAfGW2VqCXwRYPKKyUNsozpfrSx', 'prod', 'Rizzolver'),
+    ('28daZbMeESw1BzQBkxbwrnem2ovZ1GVF2nTLsorWjxyN', 'prod', 'Jupiter'),
+    ('3jHwQjfsALASmqvFmBo5hJJSL5ywmWtfC9EfKE1cE9be', 'prod', 'Grafiks'),
+    ('8uHPmjK1cWaoCztAp46LXNqEu4SFWsVKahB9RVkHacis', 'prod', 'Helixbox'),
+    ('3bydtXWUJ7tsWBTac4vfaeZxgFq9xxYQtY4cbRPw2SwU', 'prod', 'Paradox'),
+    ('CRBteFruLoWETEHeV357YMoo2EoQgVCy4SjhTmoxKgWv', 'prod', 'Rosato'),
+    ('YyyWTCRTzTJUEBS8aV5H73J7qBKec8j3aNtJ8ivC3wo',  'prod', 'Horadrim'),
+    ('ETHdCeRZ6wvj98HmC7V8Rjdp61o6XQwYPKHyBTTiu25g', 'prod', 'Zurui'),
+    ('A6GKArhE77pF9NPLCAcDvRtWcjHhRKaXsqhiX2ef18cx', 'prod', 'Solivagus'),
+    ('H7RtuXeC1P42fhpL2bv237XhRjTtTMa6qkAyLMvbkTFG', 'prod', 'Wraxyn'),
+    ('2XTFpFTW5iQRLGAppNmQhsq3Pu8xoyrdaARvFEFKhabv', 'prod', 'Asao')
 ),
 
 events as (
