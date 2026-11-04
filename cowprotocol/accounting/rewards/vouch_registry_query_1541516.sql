@@ -113,10 +113,10 @@ named_results as (
         vv.reward_target,
         vv.pool_address,
         bp.pool_name,
-        concat(environment, '-', s.name) as solver_name
+        coalesce(concat(environment, '-', s.name), 'new-Uncatalogued') as solver_name
     from valid_vouches as vv
-    inner join solvers as s on vv.solver = s.address
     inner join full_bonding_pools as bp on vv.pool_address = bp.pool_address
+    left join solvers as s on vv.solver = s.address
 )
 
 select * from {{vouch_cte_name}}
