@@ -2,8 +2,9 @@
 --
 -- Solana analogue of the EVM token-imbalance queries (4021257 / 4021644). Unlike the EVM
 -- version it does NOT look at every transfer touching the buffers: it only scans txs that
--- contain a CoW instruction initiated by a solver (begin_settle / create_buffer).
--- Buffer in-flows made in other txs (e.g. a solver pre-funding a buffer) are not visible here.
+-- contain begin_settle (settlements) or create_buffer (buffer creations, by solvers or users).
+-- Out of scope: buffer in-flows made in other txs (e.g. a solver pre-funding a buffer), and
+-- protocol actions (reclaim_buffer, withdraw_native_sol), which involve no solver.
 --
 -- Parameters:
 --  {{start_time}} - the timestamp for which the analysis should start (inclusively)
@@ -15,25 +16,37 @@
 --                NULL if the token's decimals are unknown (mint missing from
 --                tokens_solana.fungible); these rows are kept so they can be fixed.
 --
---   leg          what kind of balance changed:
---                  token       the buffer's token balance
---                  native_sol  the native SOL buffer's balance (its SOL is the buffer's funds)
---                  lamports    the SOL held by a token buffer: rent paid on creation (+)
---                              or refunded on reclaim (-). On the wSOL buffer, wSOL token
---                              movements are subtracted so they aren't counted twice.
+--   leg          which balance of the buffer changed:
+--                  token       the buffer's token balance (e.g. USDC held by the USDC buffer).
+--                              amount is in the token's atoms.
+--                  native_sol  the SOL balance of the native SOL buffer. That buffer is a plain
+--                              account rather than a token account: it holds SOL directly, so
+--                              its lamport change is the buffer's SOL imbalance. amount is in
+--                              lamports.
+--                  lamports    the SOL sitting in a token buffer itself. That SOL isn't part of
+--                              the buffer's tokens: it's the rent paid when the buffer is
+--                              created. amount is in lamports.
+--                              The wSOL buffer is a special case: its wSOL tokens are also held
+--                              as lamports, so wSOL movements would show up here as well. They
+--                              are subtracted, so wSOL is counted once (token leg) and this leg
+--                              keeps only the rent.
 --
---   attribution  who the change belongs to:
---                  settlement             settlement tx; solver = its account_solver
---                  multi_solver           settlement tx with more than one solver (unexpected)
---                  solver_non_settlement  non-settlement tx by a whitelisted solver,
---                                         e.g. creating a buffer outside a settlement
---                  unattributed           anyone else, e.g. a user creating a buffer
---                                         when placing an order
+--   solver       who the change is attributed to:
+--                  settlement txs          the account_solver of its begin_settle
+--                  other txs               the rent payer (else the signer), if a whitelisted
+--                                          solver at the time, e.g. a solver creating a buffer
+--                                          outside a settlement
+--                  null                    no solver involved, e.g. a user creating a buffer
+--                                          when placing an order
+--
+-- Assertions (the query fails instead of returning wrong data):
+--  - a buffer mint has more than one row in tokens_solana.fungible
+--  - a settlement tx has more than one solver
+--  - start_time is before the data covered by the materialized view
 --
 -- Notes:
---  - solana.transactions is read ONCE (Trino re-runs a CTE every time it is referenced), and is
---    joined on (id, block_slot, block_date) so the scan can skip row groups by slot and partition.
---  - Window filters use block_time; block_date is only a join key / partition filter for speed.
+--  - Balances come from the materialized view dune.cowprotocol.result_solana_txs_past_10_days_materialized
+--    (raw balances of CoW txs in the last 10 days). Make sure it was refreshed after end_time.
 --  - Buffer addresses are discovered from create_buffer / initialize calls, so a minor version
 --    bump of the program (which relocates every PDA) is picked up automatically.
 
@@ -92,8 +105,6 @@ buf_list as ( -- buffers as arrays, for in-row filtering
 settles as ( -- settlement txs (a tx may hold several settlements)
     select
         call_tx_id as tx_id,
-        call_block_slot as block_slot,
-        call_block_date as block_date,
         array_agg(distinct account_solver) as solvers,
         array_agg(auction_id order by call_outer_instruction_index) as auction_ids,
         count(*) as n_settlements
@@ -101,35 +112,24 @@ settles as ( -- settlement txs (a tx may hold several settlements)
     where
         call_block_time >= cast('{{start_time}}' as timestamp)
         and call_block_time < cast('{{end_time}}' as timestamp)
-    group by 1, 2, 3
+    group by 1
 ),
 
 creates as ( -- txs with create_buffer (payer funds the rent)
     select
         call_tx_id as tx_id,
-        call_block_slot as block_slot,
-        call_block_date as block_date,
         min(account_payer) as payer
     from cow_protocol_solana.cow_settlement_call_create_buffer
     where
         call_block_time >= cast('{{start_time}}' as timestamp)
         and call_block_time < cast('{{end_time}}' as timestamp)
-    group by 1, 2, 3
+    group by 1
 ),
 
-
-cow_txs as (
-    select
-        tx_id,
-        block_slot,
-        block_date
-    from settles
+cow_txs as ( -- the txs in scope: settlements and buffer creations
+    select tx_id from settles
     union distinct
-    select
-        tx_id,
-        block_slot,
-        block_date
-    from creates
+    select tx_id from creates
 ),
 
 solver_events as ( -- solver registry changes (all history)
@@ -146,7 +146,29 @@ solver_events as ( -- solver registry changes (all history)
     from cow_protocol_solana.cow_settlement_call_remove_solver
 ),
 
--- ---------- the single scan of solana.transactions ----------
+-- ---------- assertions ----------
+
+solver_check as ( -- fails if a settlement tx has more than one solver (solver would be ambiguous)
+    select
+        case
+            when count_if(cardinality(solvers) > 1) > 0
+                then cast('ASSERTION FAILED: settlement tx with more than one solver' as integer)
+            else 1
+        end as ok
+    from settles
+),
+
+coverage_check as ( -- fails if the window starts before the materialized view's data
+    select
+        case
+            when cast('{{start_time}}' as timestamp) < min(block_time)
+                then cast('ASSERTION FAILED: start_time is before the materialized view coverage' as integer)
+            else 1
+        end as ok
+    from dune.cowprotocol.result_solana_txs_past_10_days_materialized
+),
+
+-- ---------- raw balances of the CoW txs (materialized view) ----------
 
 tx_raw as (
     select
@@ -158,6 +180,7 @@ tx_raw as (
         t.post_token_balances,
         t.pre_balances,
         t.post_balances,
+        -- lamport arrays cover static + lookup-table keys; make sure keys do too
         case
             when cardinality(t.account_keys) = cardinality(t.pre_balances) then t.account_keys
             else concat(
@@ -170,6 +193,7 @@ tx_raw as (
     where
         t.block_time >= cast('{{start_time}}' as timestamp)
         and t.block_time < cast('{{end_time}}' as timestamp)
+        and t.tx_id in (select tx_id from cow_txs) -- settlements and buffer creations only
 ),
 
 tx_entries as ( -- every buffer balance entry of each tx, signed so that sum = post - pre
@@ -288,15 +312,9 @@ select
     w.block_time,
     w.block_slot,
     case
-        when w.solvers is not null and cardinality(w.solvers) = 1 then 'settlement'
-        when w.solvers is not null then 'multi_solver'
-        when w.candidate_is_solver then 'solver_non_settlement'
-        else 'unattributed'
-    end as attribution,
-    case
-        when w.solvers is not null and cardinality(w.solvers) = 1 then w.solvers[1]
-        when w.solvers is null and w.candidate_is_solver then w.candidate
-    end as solver,
+        when w.solvers is not null then w.solvers[1] -- settlement: its account_solver
+        when w.candidate_is_solver then w.candidate  -- e.g. a solver creating a buffer outside a settlement
+    end as solver,                                   -- null: no solver involved (e.g. a user creating a buffer)
     w.auction_ids,
     w.n_settlements,
     w.creates_buffer,
@@ -312,6 +330,8 @@ from with_status as w
 left join token_decimals as d
     on w.leg = 'token'
     and d.token_mint_address = w.mint
+cross join solver_check
+cross join coverage_check
 where
     case
         when w.leg = 'token'
