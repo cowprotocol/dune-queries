@@ -53,10 +53,16 @@ buffer_mints as ( -- the mints those buffers hold (odd positions after the share
     where t.pos >= 5 and t.pos % 2 = 1
 ),
 
-token_decimals as ( -- decimals for buffer mints only: keeps tokens_solana.fungible off the build side
+token_decimals as ( -- decimals for buffer mints only; fails if fungible has more than one row for a mint
     select
         token_mint_address,
-        max(decimals) as decimals -- one row per mint, in case fungible ever holds duplicates
+        case
+            when count(*) > 1 then cast(
+                'ASSERTION FAILED: multiple tokens_solana.fungible rows for mint ' || token_mint_address
+                as integer
+            )
+            else max(decimals)
+        end as decimals
     from tokens_solana.fungible
     where token_mint_address in (select mint from buffer_mints)
     group by 1
