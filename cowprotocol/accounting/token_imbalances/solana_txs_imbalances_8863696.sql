@@ -10,34 +10,30 @@
 --  {{start_time}} - the timestamp for which the analysis should start (inclusively)
 --  {{end_time}}   - the timestamp for which the analysis should end (exclusively)
 --
--- Output: one row per (tx, buffer, leg, token) whose balance changed.
+-- Output: one row per (tx, buffer, token) whose balance changed.
 --
---   amount       post - pre, in atoms (smallest unit: lamports, token base units).
---                NULL if the token's decimals are unknown (mint missing from
---                tokens_solana.fungible); these rows are kept so they can be fixed.
+--   token_address  the token whose balance changed:
+--                    a mint      the buffer's token balance, e.g. USDC held by the USDC buffer
+--                    111...1     SOL (lamports). On the native SOL buffer, this is its SOL
+--                                imbalance: that buffer is a plain account holding SOL
+--                                directly. On a token buffer, it's the rent paid when the
+--                                buffer is created: SOL sitting in the account itself, not part
+--                                of its tokens.
+--                  The wSOL buffer holds its wSOL tokens as lamports too, so wSOL movements are
+--                  subtracted from its 111...1 row: wSOL is counted once (So111...2 row) and the
+--                  111...1 row keeps only the rent.
 --
---   leg          which balance of the buffer changed:
---                  token       the buffer's token balance (e.g. USDC held by the USDC buffer).
---                              amount is in the token's atoms.
---                  native_sol  the SOL balance of the native SOL buffer. That buffer is a plain
---                              account rather than a token account: it holds SOL directly, so
---                              its lamport change is the buffer's SOL imbalance. amount is in
---                              lamports.
---                  lamports    the SOL sitting in a token buffer itself. That SOL isn't part of
---                              the buffer's tokens: it's the rent paid when the buffer is
---                              created. amount is in lamports.
---                              The wSOL buffer is a special case: its wSOL tokens are also held
---                              as lamports, so wSOL movements would show up here as well. They
---                              are subtracted, so wSOL is counted once (token leg) and this leg
---                              keeps only the rent.
+--   amount         post - pre, in atoms (smallest unit: token base units, or lamports for 111...1).
+--                  NULL if the token's decimals are unknown (mint missing from
+--                  tokens_solana.fungible); these rows are kept so they can be fixed.
 --
---   solver       who the change is attributed to:
---                  settlement txs          the account_solver of its begin_settle
---                  other txs               the rent payer (else the signer), if a whitelisted
---                                          solver at the time, e.g. a solver creating a buffer
---                                          outside a settlement
---                  null                    no solver involved, e.g. a user creating a buffer
---                                          when placing an order
+--   solver         who the change is attributed to:
+--                    settlement txs   the account_solver of its begin_settle
+--                    other txs        the rent payer (else the signer), if a whitelisted solver
+--                                     at the time, e.g. a solver creating a buffer outside a
+--                                     settlement
+--                    null             no solver involved, e.g. a user creating a buffer when
+--                                     placing an order
 --
 -- Assertions (the query fails instead of returning wrong data):
 --  - a buffer mint has more than one row in tokens_solana.fungible
@@ -87,17 +83,13 @@ native_buffers as ( -- native SOL buffer(s): created at Initialize, one per prog
     from cow_protocol_solana.cow_settlement_call_initialize
 ),
 
-buf_list as ( -- buffers as arrays, for in-row filtering
-    select
-        (select array_agg(buffer_account) from native_buffers) as native_bufs,
-        (
-            select array_agg(buffer_account)
-            from (
-                select buffer_account from token_buffers
-                union distinct
-                select buffer_account from native_buffers
-            ) as all_buffers
-        ) as bufs
+buf_list as ( -- all buffers (token + native SOL) as one array, for in-row filtering
+    select array_agg(buffer_account) as bufs
+    from (
+        select buffer_account from token_buffers
+        union distinct
+        select buffer_account from native_buffers
+    ) as all_buffers
 ),
 
 -- ---------- CoW txs in window (small decoded tables) ----------
@@ -202,7 +194,6 @@ tx_entries as ( -- every buffer balance entry of each tx, signed so that sum = p
         r.block_time,
         r.block_slot,
         r.signer,
-        e.leg,
         e.buffer_account,
         e.mint,
         e.amount
@@ -214,30 +205,30 @@ tx_entries as ( -- every buffer balance entry of each tx, signed so that sum = p
             transform(
                 filter(r.pre_token_balances, b -> contains(bl.bufs, b.account)),
                 b -> cast(
-                    row('token', b.account, b.mint, -b.amount)
-                    as row(leg varchar, buffer_account varchar, mint varchar, amount decimal(38,18))
+                    row(b.account, b.mint, -b.amount)
+                    as row(buffer_account varchar, mint varchar, amount decimal(38,18))
                 )
             ),
             transform(
                 filter(r.post_token_balances, b -> contains(bl.bufs, b.account)),
                 b -> cast(
-                    row('token', b.account, b.mint, b.amount)
-                    as row(leg varchar, buffer_account varchar, mint varchar, amount decimal(38,18))
+                    row(b.account, b.mint, b.amount)
+                    as row(buffer_account varchar, mint varchar, amount decimal(38,18))
                 )
             ),
             -- wSOL correction. On the wSOL buffer, wSOL tokens are held as lamports, so every
             -- wSOL movement also shows up in its lamport change (last group below). Adding the
-            -- wSOL token balances here with the opposite sign (+pre, -post, scaled to lamports;
-            -- wSOL has 9 decimals) cancels that out, so the buffer's 'lamports' leg keeps only
-            -- rent and the wSOL movement is counted once, in its 'token' leg.
+            -- wSOL token balances to its 111...1 entries with the opposite sign (+pre, -post,
+            -- scaled to lamports; wSOL has 9 decimals) cancels that out, so the buffer's 111...1
+            -- row keeps only rent and the wSOL movement is counted once, in its So111...2 row.
             transform(
                 filter(
                     r.pre_token_balances, b -> contains(bl.bufs, b.account)
                     and b.mint = 'So11111111111111111111111111111111111111112'
                 ),
                 b -> cast(
-                    row('lamports', b.account, '11111111111111111111111111111111', b.amount * 1000000000)
-                    as row(leg varchar, buffer_account varchar, mint varchar, amount decimal(38,18))
+                    row(b.account, '11111111111111111111111111111111', b.amount * 1000000000)
+                    as row(buffer_account varchar, mint varchar, amount decimal(38,18))
                 )
             ),
             transform(
@@ -246,52 +237,48 @@ tx_entries as ( -- every buffer balance entry of each tx, signed so that sum = p
                     and b.mint = 'So11111111111111111111111111111111111111112'
                 ),
                 b -> cast(
-                    row('lamports', b.account, '11111111111111111111111111111111', -(b.amount * 1000000000))
-                    as row(leg varchar, buffer_account varchar, mint varchar, amount decimal(38,18))
+                    row(b.account, '11111111111111111111111111111111', -(b.amount * 1000000000))
+                    as row(buffer_account varchar, mint varchar, amount decimal(38,18))
                 )
             ),
-            -- lamport change of every buffer present in the tx
+            -- lamport change of every buffer present in the tx (recorded as 111...1, in lamports)
             transform(
                 filter(sequence(1, cardinality(r.keys)), i -> contains(bl.bufs, r.keys[i])),
-                i -> cast(row(
-                    if(contains(bl.native_bufs, r.keys[i]), 'native_sol', 'lamports'),
-                    r.keys[i],
-                    '11111111111111111111111111111111',
-                    r.post_balances[i] - r.pre_balances[i]
+                i -> cast(
+                    row(r.keys[i], '11111111111111111111111111111111', r.post_balances[i] - r.pre_balances[i])
+                    as row(buffer_account varchar, mint varchar, amount decimal(38,18))
                 )
-                as row(leg varchar, buffer_account varchar, mint varchar, amount decimal(38,18)))
             )
         )
-    ) as e(leg, buffer_account, mint, amount)
+    ) as e(buffer_account, mint, amount)
 ),
 
-legs as ( -- net change per tx, buffer, leg and token
+changes as ( -- net change per tx, buffer and token (units for mints, lamports for 111...1)
     select
         tx_id,
         block_time,
         block_slot,
         signer,
         buffer_account,
-        leg,
         mint,
         sum(amount) as amount_units
     from tx_entries
-    group by 1, 2, 3, 4, 5, 6, 7
+    group by 1, 2, 3, 4, 5, 6
 ),
 
 -- ---------- attribution (small joins only) ----------
 
 joined as (
     select
-        l.*,
+        c.*,
         s.solvers,
         s.auction_ids,
         s.n_settlements,
         cr.tx_id is not null as creates_buffer,
-        coalesce(cr.payer, l.signer) as candidate
-    from legs as l
-    left join settles as s on s.tx_id = l.tx_id
-    left join creates as cr on cr.tx_id = l.tx_id
+        coalesce(cr.payer, c.signer) as candidate
+    from changes as c
+    left join settles as s on s.tx_id = c.tx_id
+    left join creates as cr on cr.tx_id = c.tx_id
 ),
 
 with_status as ( -- non-settlement: was the rent payer (else signer) a registered solver then?
@@ -305,37 +292,36 @@ with_status as ( -- non-settlement: was the rent payer (else signer) a registere
                 and e.event_time <= j.block_time
         ), 0) > 0 as candidate_is_solver
     from joined as j
+),
+
+with_amounts as ( -- convert token units to atoms (lamports are already atoms)
+    select
+        w.*,
+        case
+            when w.mint = '11111111111111111111111111111111' then cast(w.amount_units as decimal(38,0))
+            else cast(w.amount_units * cast(power(10, d.decimals) as decimal(20,0)) as decimal(38,0))
+        end as amount
+    from with_status as w
+    left join token_decimals as d
+        on d.token_mint_address = w.mint
 )
 
 select
-    w.tx_id,
-    w.block_time,
-    w.block_slot,
+    a.tx_id,
+    a.block_time,
+    a.block_slot,
     case
-        when w.solvers is not null then w.solvers[1] -- settlement: its account_solver
-        when w.candidate_is_solver then w.candidate  -- e.g. a solver creating a buffer outside a settlement
+        when a.solvers is not null then a.solvers[1] -- settlement: its account_solver
+        when a.candidate_is_solver then a.candidate  -- e.g. a solver creating a buffer outside a settlement
     end as solver,                                   -- null: no solver involved (e.g. a user creating a buffer)
-    w.auction_ids,
-    w.n_settlements,
-    w.creates_buffer,
-    w.buffer_account,
-    w.leg,
-    w.mint as token_address,
-    case
-        when w.leg = 'token'
-            then cast(w.amount_units * cast(power(10, d.decimals) as decimal(20,0)) as decimal(38,0))
-        else cast(w.amount_units as decimal(38,0)) -- lamports are already atoms
-    end as amount
-from with_status as w
-left join token_decimals as d
-    on w.leg = 'token'
-    and d.token_mint_address = w.mint
+    a.auction_ids,
+    a.n_settlements,
+    a.creates_buffer,
+    a.buffer_account,
+    a.mint as token_address,
+    a.amount
+from with_amounts as a
 cross join solver_check
 cross join coverage_check
-where
-    case
-        when w.leg = 'token'
-            then cast(w.amount_units * cast(power(10, d.decimals) as decimal(20,0)) as decimal(38,0))
-        else cast(w.amount_units as decimal(38,0))
-    end is distinct from 0 -- keeps null amounts (missing decimals) visible
-order by w.block_time desc, w.tx_id, w.buffer_account
+where a.amount is distinct from 0 -- keeps null amounts (missing decimals) visible
+order by a.block_time desc, a.tx_id, a.buffer_account
