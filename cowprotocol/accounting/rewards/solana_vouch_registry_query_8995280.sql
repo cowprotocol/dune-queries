@@ -1,5 +1,5 @@
--- Query that fetches the list of solver addresses that are active
--- and are properly vouched for by a full bonding pool on Solana
+-- Query that fetches every Solana solver ever vouched for by a full bonding pool,
+-- with active = true if the solver has a valid vouch at end_time
 -- Parameters:
 --  {{end_time}} - the end date timestamp for the accounting period (exclusively)
 
@@ -96,7 +96,21 @@ valid_vouches as (
         pool_name
     from current_active_vouches
     where time_rank = 1
+),
+
+-- every solver ever vouched for, so an invalidated one returns with active = false
+all_solvers as (
+    select distinct solver
+    from vouches_and_invalidations
 )
 
-select * from valid_vouches
-
+select
+    timestamp '{{end_time}}' as end_time,
+    s.solver,
+    vv.solver is not Null as active,
+    vv.cow_reward_target,
+    vv.solana_reward_target,
+    vv.pool_address,
+    vv.pool_name
+from all_solvers as s
+left join valid_vouches as vv on s.solver = vv.solver
