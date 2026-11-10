@@ -2,7 +2,7 @@
 --
 -- Solana analogue of the EVM token-imbalance queries (4021257 / 4021644). Unlike the EVM
 -- version it does NOT look at every transfer touching the buffers: it only scans txs that
--- contain a CoW instruction (begin_settle / create_buffer / reclaim_buffer / withdraw_native_sol).
+-- contain a CoW instruction initiated by a solver (begin_settle / create_buffer).
 -- Buffer in-flows made in other txs (e.g. a solver pre-funding a buffer) are not visible here.
 --
 -- Parameters:
@@ -25,7 +25,6 @@
 --   attribution  who the change belongs to:
 --                  settlement             settlement tx; solver = its account_solver
 --                  multi_solver           settlement tx with more than one solver (unexpected)
---                  protocol               reclaim_buffer / withdraw_native_sol (protocol authorities)
 --                  solver_non_settlement  non-settlement tx by a whitelisted solver,
 --                                         e.g. creating a buffer outside a settlement
 --                  unattributed           anyone else, e.g. a user creating a buffer
@@ -118,25 +117,6 @@ creates as ( -- txs with create_buffer (payer funds the rent)
     group by 1, 2, 3
 ),
 
-protocol_txs as ( -- protocol-authority actions: reclaims and native SOL withdrawals
-    select distinct
-        call_tx_id as tx_id,
-        call_block_slot as block_slot,
-        call_block_date as block_date
-    from cow_protocol_solana.cow_settlement_call_reclaim_buffer
-    where
-        call_block_time >= cast('{{start_time}}' as timestamp)
-        and call_block_time < cast('{{end_time}}' as timestamp)
-    union distinct
-    select distinct
-        call_tx_id,
-        call_block_slot,
-        call_block_date
-    from cow_protocol_solana.cow_settlement_call_withdraw_native_sol
-    where
-        call_block_time >= cast('{{start_time}}' as timestamp)
-        and call_block_time < cast('{{end_time}}' as timestamp)
-),
 
 cow_txs as (
     select
@@ -150,12 +130,6 @@ cow_txs as (
         block_slot,
         block_date
     from creates
-    union distinct
-    select
-        tx_id,
-        block_slot,
-        block_date
-    from protocol_txs
 ),
 
 solver_events as ( -- solver registry changes (all history)
@@ -290,12 +264,10 @@ joined as (
         s.auction_ids,
         s.n_settlements,
         cr.tx_id is not null as creates_buffer,
-        p.tx_id is not null as is_protocol,
         coalesce(cr.payer, l.signer) as candidate
     from legs as l
     left join settles as s on s.tx_id = l.tx_id
     left join creates as cr on cr.tx_id = l.tx_id
-    left join (select distinct tx_id from protocol_txs) as p on p.tx_id = l.tx_id
 ),
 
 with_status as ( -- non-settlement: was the rent payer (else signer) a registered solver then?
@@ -318,13 +290,12 @@ select
     case
         when w.solvers is not null and cardinality(w.solvers) = 1 then 'settlement'
         when w.solvers is not null then 'multi_solver'
-        when w.is_protocol then 'protocol'
         when w.candidate_is_solver then 'solver_non_settlement'
         else 'unattributed'
     end as attribution,
     case
         when w.solvers is not null and cardinality(w.solvers) = 1 then w.solvers[1]
-        when w.solvers is null and not w.is_protocol and w.candidate_is_solver then w.candidate
+        when w.solvers is null and w.candidate_is_solver then w.candidate
     end as solver,
     w.auction_ids,
     w.n_settlements,
