@@ -57,10 +57,11 @@ token_decimals as ( -- decimals for buffer mints only; fails if fungible has mor
     select
         token_mint_address,
         case
-            when count(*) > 1 then cast(
-                'ASSERTION FAILED: multiple tokens_solana.fungible rows for mint ' || token_mint_address
-                as integer
-            )
+            when count(*) > 1 then
+                cast(
+                    'ASSERTION FAILED: multiple tokens_solana.fungible rows for mint ' || token_mint_address
+                    as integer
+                )
             else max(decimals)
         end as decimals
     from tokens_solana.fungible
