@@ -1,5 +1,5 @@
 -- Query that fetches every Solana solver ever vouched for by a full bonding pool,
--- with active = true if the solver has a valid vouch at end_time
+-- with is_vouched = true if the solver has a valid vouch at end_time
 -- Parameters:
 --  {{end_time}} - the end date timestamp for the accounting period (exclusively)
 
@@ -25,7 +25,7 @@ vouches as (
         fp.pool_address,
         fp.pool_name,
         fp.creator,
-        True as active
+        True as is_vouched
     from cow_protocol_ethereum.solanavouchregister_evt_vouch as v
     inner join full_bonding_pools as fp
         on v.bondingpool = fp.pool_address and v.sender = fp.creator
@@ -42,7 +42,7 @@ invalidations as (
         fp.pool_address,
         fp.pool_name,
         fp.creator,
-        False as active
+        False as is_vouched
     from cow_protocol_ethereum.solanavouchregister_evt_invalidatevouch as v
     inner join full_bonding_pools as fp
         on v.bondingpool = fp.pool_address and v.sender = fp.creator
@@ -58,7 +58,7 @@ vouches_and_invalidations as (
 
 -- At this point we have excluded all arbitrary vouches (i.e., those not from initial funders of recognized pools)
 -- The next query ranks (solver, pool_address, creator) by most recent (vouch or invalidation)
--- and yields as rank 1, the current "active" status of the triplet.
+-- and yields as rank 1, the current vouch status of the triplet.
 ranked_vouches as (
     select
         *,
@@ -82,7 +82,7 @@ current_active_vouches as (
     from ranked_vouches
     where
         rk = 1
-        and active = True
+        and is_vouched = True
 ),
 
 -- To filter for the case of "same solver, different pool",
@@ -98,7 +98,7 @@ valid_vouches as (
     where time_rank = 1
 ),
 
--- every solver ever vouched for, so an invalidated one returns with active = false
+-- every solver ever vouched for, so an invalidated one returns with is_vouched = false
 all_solvers as (
     select distinct solver
     from vouches_and_invalidations
@@ -107,7 +107,7 @@ all_solvers as (
 select
     timestamp '{{end_time}}' as end_time,
     s.solver,
-    vv.solver is not Null as active,
+    vv.solver is not Null as is_vouched,
     vv.cow_reward_target,
     vv.solana_reward_target,
     vv.pool_address,
