@@ -181,7 +181,7 @@ tx_raw as (
                 coalesce(t.loaded_addresses.readonly, cast(array[] as array(varchar)))
             )
         end as keys
-    from dune.cowprotocol.result_solana_txs_past_10_days_materialized as t
+    from dune.cowprotocol.solana_cow_transactions as t
     where
         t.block_time >= cast('{{start_time}}' as timestamp)
         and t.block_time < cast('{{end_time}}' as timestamp)
