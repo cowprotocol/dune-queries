@@ -1,10 +1,7 @@
-with tuesdays as (
-    select cast(date_add('week', n, date '2024-12-31') as timestamp) as end_time
-    from unnest(sequence(0, 9999)) as t(n) --noqa: AL05, LT01
-    where date_add('week', n, date '2024-12-31') <= current_date
-),
+-- One row per chain and day; end_time is the day after the averaged day.
+-- Tuesday rows are the official accounting period rates.
 
-cow_prices as (
+with cow_prices as (
     select
         date(minute) + interval '1' day as end_time,
         avg(price) as cow_price
@@ -32,14 +29,16 @@ native_token_prices as (
         or blockchain = 'linea' and contract_address = 0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f
         or blockchain = 'plasma' and contract_address = 0x6100e367285b01f48d07953803a2d8dca5d19873
         or blockchain = 'ink' and contract_address = 0x4200000000000000000000000000000000000006
+        or blockchain = 'solana' and contract_address = from_base58('So11111111111111111111111111111111111111112')
     )
     group by 1, 2, 3
 )
 
 select
-    t.end_time,
+    p.end_time,
     p.blockchain,
     p.native_token_price,
     c.cow_price
-from tuesdays as t inner join native_token_prices as p on t.end_time = p.end_time
-inner join cow_prices as c on t.end_time = c.end_time
+from native_token_prices as p
+inner join cow_prices as c on p.end_time = c.end_time
+where p.end_time >= timestamp '2024-12-31'
