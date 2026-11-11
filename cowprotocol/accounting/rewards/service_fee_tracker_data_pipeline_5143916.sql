@@ -35,59 +35,99 @@ active_cow_dao_solver_names as (
 ),
 
 -- we now take one step back and look at all solver accounts (not only the active ones)
--- that have joined the CoW DAO bonding pool at some point,
--- and we recover the date of them joining
-all_cow_dao_solvers_ethereum as (
-    select --noqa: ST06
-        case
-            when s.environment = 'new' then cast(v.solver as varchar)
-            else s.name
-        end as solver_name,
-        v.evt_block_time
-    from
-        cow_protocol_ethereum.VouchRegister_evt_Vouch as v --noqa: CP02
-    inner join cow_protocol_ethereum.solvers as s on v.solver = s.address
-    where
-        v.bondingPool = 0x5d4020b9261f01b6f8a45db929704b0ad6f5e9e6 --noqa: CP02
-),
-
-all_cow_dao_solvers_gnosis as (
-    select --noqa: ST06
-        case
-            when s.environment = 'new' then cast(v.solver as varchar)
-            else s.name
-        end as solver_name,
-        v.evt_block_time
-    from
-        cow_protocol_gnosis.VouchRegister_evt_Vouch as v --noqa: CP02
-    inner join cow_protocol_gnosis.solvers as s on v.solver = s.address
-    where
-        v.bondingPool = 0x5d4020b9261f01b6f8a45db929704b0ad6f5e9e6 --noqa: CP02
-),
-
-all_cow_dao_solvers_arbitrum as (
-    select --noqa: ST06
-        case
-            when s.environment = 'new' then cast(v.solver as varchar)
-            else s.name
-        end as solver_name,
-        v.evt_block_time
-    from
-        cow_protocol_arbitrum.VouchRegister_evt_Vouch as v --noqa: CP02
-    inner join cow_protocol_arbitrum.solvers as s on v.solver = s.address
-    where
-        v.bondingPool = 0x5d4020b9261f01b6f8a45db929704b0ad6f5e9e6 --noqa: CP02
+-- that have joined the CoW DAO bonding pool at some point on any chain,
+-- and we recover the date of them joining. Names come from the same table as in query_1541516,
+-- so that they match the names of the active solvers above.
+all_vouches as (
+    select
+        'ethereum' as blockchain,
+        solver,
+        bondingpool,
+        evt_block_time
+    from "query_5143848(blockchain='ethereum')"
+    union all
+    select
+        'gnosis' as blockchain,
+        solver,
+        bondingpool,
+        evt_block_time
+    from "query_5143848(blockchain='gnosis')"
+    union all
+    select
+        'arbitrum' as blockchain,
+        solver,
+        bondingpool,
+        evt_block_time
+    from "query_5143848(blockchain='arbitrum')"
+    union all
+    select
+        'base' as blockchain,
+        solver,
+        bondingpool,
+        evt_block_time
+    from "query_5143848(blockchain='base')"
+    union all
+    select
+        'avalanche_c' as blockchain,
+        solver,
+        bondingpool,
+        evt_block_time
+    from "query_5143848(blockchain='avalanche_c')"
+    union all
+    select
+        'polygon' as blockchain,
+        solver,
+        bondingpool,
+        evt_block_time
+    from "query_5143848(blockchain='polygon')"
+    union all
+    select
+        'lens' as blockchain,
+        solver,
+        bondingpool,
+        evt_block_time
+    from "query_5143848(blockchain='lens')"
+    union all
+    select
+        'bnb' as blockchain,
+        solver,
+        bondingpool,
+        evt_block_time
+    from "query_5143848(blockchain='bnb')"
+    union all
+    select
+        'linea' as blockchain,
+        solver,
+        bondingpool,
+        evt_block_time
+    from "query_5143848(blockchain='linea')"
+    union all
+    select
+        'plasma' as blockchain,
+        solver,
+        bondingpool,
+        evt_block_time
+    from "query_5143848(blockchain='plasma')"
+    union all
+    select
+        'ink' as blockchain,
+        solver,
+        bondingpool,
+        evt_block_time
+    from "query_5143848(blockchain='ink')"
 ),
 
 all_cow_dao_solvers_all_networks as (
-    select *
-    from all_cow_dao_solvers_ethereum
-    union all
-    select *
-    from all_cow_dao_solvers_gnosis
-    union all
-    select *
-    from all_cow_dao_solvers_arbitrum
+    select --noqa: ST06
+        case
+            when s.environment = 'new' then cast(v.solver as varchar)
+            else s.name
+        end as solver_name,
+        v.evt_block_time
+    from all_vouches as v
+    inner join dune.cowprotocol.solvers as s on v.blockchain = s.blockchain and v.solver = s.address
+    where
+        v.bondingpool = 0x5d4020b9261f01b6f8a45db929704b0ad6f5e9e6
 ),
 
 -- we now process the all_cow_dao_solvers table so that we can associate the name of a solver under the CoW DAO bonding pool
