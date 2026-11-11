@@ -39,82 +39,22 @@ active_cow_dao_solver_names as (
 -- and we recover the date of them joining. Names come from the same table as in query_1541516,
 -- so that they match the names of the active solvers above.
 all_vouches as (
+    -- decoded vouches of ethereum, gnosis, arbitrum, base, avalanche_c, bnb, ink and lens
     select
-        'ethereum' as blockchain,
+        chain as blockchain,
         solver,
         bondingpool,
         evt_block_time
-    from "query_5143848(blockchain='ethereum')"
+    from cow_protocol_multichain.vouchregister_evt_vouch
     union all
+    -- vouches of the chain of this run if it has no decoded vouches, so that its solvers get a join date
     select
-        'gnosis' as blockchain,
+        '{{blockchain}}' as blockchain,
         solver,
         bondingpool,
         evt_block_time
-    from "query_5143848(blockchain='gnosis')"
-    union all
-    select
-        'arbitrum' as blockchain,
-        solver,
-        bondingpool,
-        evt_block_time
-    from "query_5143848(blockchain='arbitrum')"
-    union all
-    select
-        'base' as blockchain,
-        solver,
-        bondingpool,
-        evt_block_time
-    from "query_5143848(blockchain='base')"
-    union all
-    select
-        'avalanche_c' as blockchain,
-        solver,
-        bondingpool,
-        evt_block_time
-    from "query_5143848(blockchain='avalanche_c')"
-    union all
-    select
-        'polygon' as blockchain,
-        solver,
-        bondingpool,
-        evt_block_time
-    from "query_5143848(blockchain='polygon')"
-    union all
-    select
-        'lens' as blockchain,
-        solver,
-        bondingpool,
-        evt_block_time
-    from "query_5143848(blockchain='lens')"
-    union all
-    select
-        'bnb' as blockchain,
-        solver,
-        bondingpool,
-        evt_block_time
-    from "query_5143848(blockchain='bnb')"
-    union all
-    select
-        'linea' as blockchain,
-        solver,
-        bondingpool,
-        evt_block_time
-    from "query_5143848(blockchain='linea')"
-    union all
-    select
-        'plasma' as blockchain,
-        solver,
-        bondingpool,
-        evt_block_time
-    from "query_5143848(blockchain='plasma')"
-    union all
-    select
-        'ink' as blockchain,
-        solver,
-        bondingpool,
-        evt_block_time
-    from "query_5143848(blockchain='ink')"
+    from "query_5143848(blockchain='{{blockchain}}')"
+    where '{{blockchain}}' in ('polygon', 'linea', 'plasma')
 ),
 
 all_cow_dao_solvers_all_networks as (
