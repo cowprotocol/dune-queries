@@ -17,6 +17,7 @@
 -- raw_slippage_per_transaction columns:
 -- - block_time, tx_id
 -- - slippage_usd:       USD value of priced imbalances
+-- - slippage_lamports: value of prices impbalances, in lamports (SOL atoms)
 -- - unpriced_tokens:    number of tokens in the tx with no price (slippage_usd is then incomplete)
 
 with raw_token_imbalances as (
@@ -40,21 +41,26 @@ raw_slippage_breakdown as (
         i.tx_id,
         i.token_address,
         i.slippage_type,
-        i.amount               as slippage_atoms,
+        i.amount as slippage_atoms,
         p.price_unit,
-        i.amount * p.price_atom as slippage_usd
+        i.amount * p.price_atom as slippage_usd,
+        cast((i.amount * p.price_atom / np.price_atom) as int256) as slippage_lamports --noqa: PRS, LT02
     from raw_token_imbalances as i
     left join prices as p
         on i.token_address = p.token_address
         and i.hour = p.hour
+    left join prices as np
+        on i.hour = np.hour
+        and np.token_address = '11111111111111111111111111111111'
 ),
 
 raw_slippage_per_transaction as (
     select
         block_time,
         tx_id,
-        sum(slippage_usd)                as slippage_usd,
-        count_if(slippage_usd is null)   as unpriced_tokens
+        sum(slippage_usd) as slippage_usd,
+        sum(slippage_lamports) as slippage_lamports,
+        count_if(slippage_usd is null) as unpriced_tokens
     from raw_slippage_breakdown
     group by 1, 2
 )
