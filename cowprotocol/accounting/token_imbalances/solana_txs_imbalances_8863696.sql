@@ -38,7 +38,7 @@
 -- Assertions (the query fails instead of returning wrong data):
 --  - a buffer mint has more than one row in tokens_solana.fungible
 --  - a settlement tx has more than one solver
---  - start_time is before the data covered by the materialized view
+--  - start_time or end_time is outside the window of dune.cowprotocol.solana_cow_transactions
 --
 -- Notes:
 --  - Balances come from the materialized view dune.cowprotocol.result_solana_txs_past_10_days_materialized
@@ -150,17 +150,19 @@ solver_check as ( -- fails if a settlement tx has more than one solver (solver w
     from settles
 ),
 
-coverage_check as ( -- fails if the window starts before the materialized view's data
+coverage_check as ( -- fails if the window is outside the table's data: min(block_date) to its last build
     select
         case
-            when cast('{{start_time}}' as timestamp) < min(block_time)
-                then cast('ASSERTION FAILED: start_time is before the materialized view coverage' as integer)
+            when cast('{{start_time}}' as timestamp) < cast(min(block_date) as timestamp)
+                then cast('ASSERTION FAILED: start_time is before the solana_cow_transactions data' as integer)
+            when cast('{{end_time}}' as timestamp) > cast(max(built_at) as timestamp)
+                then cast('ASSERTION FAILED: end_time is after the last solana_cow_transactions build' as integer)
             else 1
         end as ok
-    from dune.cowprotocol.result_solana_txs_past_10_days_materialized
+    from dune.cowprotocol.solana_cow_transactions
 ),
 
--- ---------- raw balances of the CoW txs (materialized view) ----------
+-- ---------- raw balances of the CoW txs (dune_dbt table) ----------
 
 tx_raw as (
     select
@@ -323,5 +325,7 @@ select
 from with_amounts as a
 cross join solver_check
 cross join coverage_check
-where a.amount is distinct from 0 -- keeps null amounts (missing decimals) visible
+where
+    a.amount is distinct from 0 -- keeps null amounts (missing decimals) visible
+    and solver_check.ok + coverage_check.ok = 2 -- reads the checks, so the planner cannot prune them
 order by a.block_time desc, a.tx_id, a.buffer_account
