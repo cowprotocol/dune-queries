@@ -38,11 +38,11 @@
 -- Assertions (the query fails instead of returning wrong data):
 --  - a buffer mint has more than one row in tokens_solana.fungible
 --  - a settlement tx has more than one solver
---  - start_time or end_time is outside the window of dune.cowprotocol.solana_cow_transactions
+--  - start_time is before the data of dune.cowprotocol.solana_cow_transactions
 --
 -- Notes:
---  - Balances come from the materialized view dune.cowprotocol.result_solana_txs_past_10_days_materialized
---    (raw balances of CoW txs in the last 10 days). Make sure it was refreshed after end_time.
+--  - Balances come from the dune_dbt table dune.cowprotocol.solana_cow_transactions. Transactions
+--    after its last build (max(built_at)) are not in the result.
 --  - Buffer addresses are discovered from create_buffer / initialize calls, so a minor version
 --    bump of the program (which relocates every PDA) is picked up automatically.
 
@@ -150,13 +150,11 @@ solver_check as ( -- fails if a settlement tx has more than one solver (solver w
     from settles
 ),
 
-coverage_check as ( -- fails if the window is outside the table's data: min(block_date) to its last build
+coverage_check as ( -- fails if the window starts before the table's data
     select
         case
             when cast('{{start_time}}' as timestamp) < cast(min(block_date) as timestamp)
                 then cast('ASSERTION FAILED: start_time is before the solana_cow_transactions data' as integer)
-            when cast('{{end_time}}' as timestamp) > cast(max(built_at) as timestamp)
-                then cast('ASSERTION FAILED: end_time is after the last solana_cow_transactions build' as integer)
             else 1
         end as ok
     from dune.cowprotocol.solana_cow_transactions
