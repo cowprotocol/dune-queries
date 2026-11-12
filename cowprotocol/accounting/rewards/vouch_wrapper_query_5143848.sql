@@ -15,7 +15,9 @@ with polygon_vouching as (
         from_hex(substr(cast(topic3 as varchar), 27, 40)) as sender,
         from_hex(substr(cast(topic1 as varchar), 27, 40)) as solver
     from polygon.logs
-    where contract_address = 0xaaa4de096d02ae21729aa31d967e148d4e3ae501 and topic0 = 0xd30c692ff1e6e1e96d8aca701b7f8118d58f64ce4c680feda75c0fc76524f7fa
+    where
+        block_date >= date '2025-05-07' -- vouch registry deployment on polygon
+        and contract_address = 0xaaa4de096d02ae21729aa31d967e148d4e3ae501 and topic0 = 0xd30c692ff1e6e1e96d8aca701b7f8118d58f64ce4c680feda75c0fc76524f7fa
 ),
 
 bnb_vouching as (
@@ -54,7 +56,9 @@ linea_vouching as (
         from_hex(substr(cast(topic3 as varchar), 27, 40)) as sender,
         from_hex(substr(cast(topic1 as varchar), 27, 40)) as solver
     from linea.logs
-    where contract_address = 0xaaa4de096d02ae21729aa31d967e148d4e3ae501 and topic0 = 0xd30c692ff1e6e1e96d8aca701b7f8118d58f64ce4c680feda75c0fc76524f7fa
+    where
+        block_date >= date '2025-10-29' -- vouch registry deployment on linea
+        and contract_address = 0xaaa4de096d02ae21729aa31d967e148d4e3ae501 and topic0 = 0xd30c692ff1e6e1e96d8aca701b7f8118d58f64ce4c680feda75c0fc76524f7fa
 ),
 plasma_vouching as (
     select
@@ -73,7 +77,9 @@ plasma_vouching as (
         from_hex(substr(cast(topic3 as varchar), 27, 40)) as sender,
         from_hex(substr(cast(topic1 as varchar), 27, 40)) as solver
     from plasma.logs
-    where contract_address = 0xaaa4de096d02ae21729aa31d967e148d4e3ae501 and topic0 = 0xd30c692ff1e6e1e96d8aca701b7f8118d58f64ce4c680feda75c0fc76524f7fa
+    where
+        block_date >= date '2025-10-29' -- vouch registry deployment on plasma
+        and contract_address = 0xaaa4de096d02ae21729aa31d967e148d4e3ae501 and topic0 = 0xd30c692ff1e6e1e96d8aca701b7f8118d58f64ce4c680feda75c0fc76524f7fa
 ),
 multichain_vouching as (
     select *
