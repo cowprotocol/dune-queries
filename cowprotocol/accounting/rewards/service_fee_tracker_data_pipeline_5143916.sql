@@ -35,59 +35,80 @@ active_cow_dao_solver_names as (
 ),
 
 -- we now take one step back and look at all solver accounts (not only the active ones)
--- that have joined the CoW DAO bonding pool at some point,
--- and we recover the date of them joining
-all_cow_dao_solvers_ethereum as (
-    select --noqa: ST06
-        case
-            when s.environment = 'new' then cast(v.solver as varchar)
-            else s.name
-        end as solver_name,
-        v.evt_block_time
-    from
-        cow_protocol_ethereum.VouchRegister_evt_Vouch as v --noqa: CP02
-    inner join cow_protocol_ethereum.solvers as s on v.solver = s.address
-    where
-        v.bondingPool = 0x5d4020b9261f01b6f8a45db929704b0ad6f5e9e6 --noqa: CP02
+-- that have joined the CoW DAO bonding pool at some point on any chain,
+-- and we recover the date of them joining. Names come from the same table as in query_1541516,
+-- so that they match the names of the active solvers above.
+-- Vouches of all chains: the multichain table has the decoded vouches,
+-- query_5143848 reads the chains without decoded vouches from raw logs.
+all_vouches as (
+    select
+        chain as blockchain,
+        solver,
+        bondingpool,
+        sender,
+        evt_block_time
+    from cow_protocol_multichain.vouchregister_evt_vouch
+    union all
+    select
+        'polygon' as blockchain,
+        solver,
+        bondingpool,
+        sender,
+        evt_block_time
+    from "query_5143848(blockchain='polygon')"
+    union all
+    select
+        'linea' as blockchain,
+        solver,
+        bondingpool,
+        sender,
+        evt_block_time
+    from "query_5143848(blockchain='linea')"
+    union all
+    select
+        'plasma' as blockchain,
+        solver,
+        bondingpool,
+        sender,
+        evt_block_time
+    from "query_5143848(blockchain='plasma')"
 ),
 
-all_cow_dao_solvers_gnosis as (
-    select --noqa: ST06
-        case
-            when s.environment = 'new' then cast(v.solver as varchar)
-            else s.name
-        end as solver_name,
-        v.evt_block_time
-    from
-        cow_protocol_gnosis.VouchRegister_evt_Vouch as v --noqa: CP02
-    inner join cow_protocol_gnosis.solvers as s on v.solver = s.address
-    where
-        v.bondingPool = 0x5d4020b9261f01b6f8a45db929704b0ad6f5e9e6 --noqa: CP02
+full_bonding_pools as (
+    select
+        pool_address,
+        pool_name,
+        creator
+    from query_4056263
 ),
 
-all_cow_dao_solvers_arbitrum as (
-    select --noqa: ST06
-        case
-            when s.environment = 'new' then cast(v.solver as varchar)
-            else s.name
-        end as solver_name,
+-- only vouches made by the bonding pool creator are valid, as in query_1541516
+valid_cow_dao_vouches as (
+    select
+        v.blockchain,
+        v.solver,
         v.evt_block_time
-    from
-        cow_protocol_arbitrum.VouchRegister_evt_Vouch as v --noqa: CP02
-    inner join cow_protocol_arbitrum.solvers as s on v.solver = s.address
-    where
-        v.bondingPool = 0x5d4020b9261f01b6f8a45db929704b0ad6f5e9e6 --noqa: CP02
+    from all_vouches as v
+    inner join full_bonding_pools as fp
+        on
+        v.bondingpool = fp.pool_address
+        and v.sender = case
+            -- same Lens exception as in query_1541516
+            when v.blockchain = 'lens' and fp.pool_name = 'CoW DAO' then 0xe1ab179644b841e22bf036e467a3c64882a1b7c6
+            else fp.creator
+        end
+    where fp.pool_address = 0x5d4020b9261f01b6f8a45db929704b0ad6f5e9e6
 ),
 
 all_cow_dao_solvers_all_networks as (
-    select *
-    from all_cow_dao_solvers_ethereum
-    union all
-    select *
-    from all_cow_dao_solvers_gnosis
-    union all
-    select *
-    from all_cow_dao_solvers_arbitrum
+    select --noqa: ST06
+        case
+            when s.environment = 'new' then cast(v.solver as varchar)
+            else s.name
+        end as solver_name,
+        v.evt_block_time
+    from valid_cow_dao_vouches as v
+    inner join dune.cowprotocol.solvers as s on v.blockchain = s.blockchain and v.solver = s.address
 ),
 
 -- we now process the all_cow_dao_solvers table so that we can associate the name of a solver under the CoW DAO bonding pool
