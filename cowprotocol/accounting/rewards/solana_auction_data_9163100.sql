@@ -17,11 +17,12 @@ with slot_range as (
         min(slot) as start_slot,
         max(slot) as end_slot
     from solana.blocks
-    where time >= cast('{{start_time}}' as timestamp) - interval '1' day
-      and time <  cast('{{end_time}}' as timestamp) + interval '1' day
-      -- partition pruning; solana.blocks is huge
-      and date >= cast(cast('{{start_time}}' as timestamp) as date) - interval '1' day
-      and date <= cast(cast('{{end_time}}' as timestamp) as date) + interval '1' day
+    where
+        time >= cast('{{start_time}}' as timestamp) - interval '1' day
+        and time <  cast('{{end_time}}' as timestamp) + interval '1' day
+        -- partition pruning; solana.blocks is huge
+        and date >= cast(cast('{{start_time}}' as timestamp) as date) - interval '1' day
+        and date <= cast(cast('{{end_time}}' as timestamp) as date) + interval '1' day
 ),
 
 relevant_batches as (
