@@ -594,6 +594,13 @@ weth_deposits_withdrawals_ink as (
 
 special_balance_changes_ink as ( -- noqa: ST03
     select * from weth_deposits_withdrawals_ink
+),
+
+-- 2.12) robinhood
+-- WETH is aeWETH: wraps and unwraps are Transfer events from and to 0x0, already in erc20_transfers
+special_balance_changes_robinhood as ( -- noqa: ST03
+    select * from erc20_transfers
+    where false
 )
 
 
