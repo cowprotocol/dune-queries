@@ -29,6 +29,7 @@ native_token_prices as (
         or blockchain = 'linea' and contract_address = 0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f
         or blockchain = 'plasma' and contract_address = 0x6100e367285b01f48d07953803a2d8dca5d19873
         or blockchain = 'ink' and contract_address = 0x4200000000000000000000000000000000000006
+        or blockchain = 'robinhood' and contract_address = 0x0bd7d308f8e1639fab988df18a8011f41eacad73
         or blockchain = 'solana' and contract_address = from_base58('So11111111111111111111111111111111111111112')
     )
     group by 1, 2, 3
