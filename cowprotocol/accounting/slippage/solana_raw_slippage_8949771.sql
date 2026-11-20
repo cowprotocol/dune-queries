@@ -24,6 +24,7 @@ with raw_token_imbalances as (
     select
         block_time,
         tx_id,
+        solver,
         token_address,
         amount,
         'raw_imbalance' as slippage_type,
@@ -39,6 +40,7 @@ raw_slippage_breakdown as (
     select
         i.block_time,
         i.tx_id,
+        i.solver,
         i.token_address,
         i.slippage_type,
         i.amount as slippage_atoms,
