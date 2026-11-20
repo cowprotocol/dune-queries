@@ -7,12 +7,12 @@
 --    raw_slippage_per_transaction for per-transaction totals
 --
 -- raw_slippage_breakdown columns:
--- - block_time, tx_id:  settlement transaction
--- - token_address:      SPL mint (base58); 11111111111111111111111111111111 for native SOL
--- - slippage_type:      'raw_imbalance' (buffer balance change observable on chain)
--- - slippage_units:     signed imbalance in token units (decimal-adjusted)
--- - price_unit:         USD price of one unit
--- - slippage_usd:       USD value of the imbalance (null if no price)
+-- - block_time, tx_id, solver: info about settlement transaction
+-- - token_address:             SPL mint (base58); 11111111111111111111111111111111 for native SOL
+-- - slippage_type:             'raw_imbalance' (buffer balance change observable on chain)
+-- - slippage_units:            signed imbalance in token units (decimal-adjusted)
+-- - price_unit:                USD price of one unit
+-- - slippage_usd:              USD value of the imbalance (null if no price)
 --
 -- raw_slippage_per_transaction columns:
 -- - block_time, tx_id
@@ -24,6 +24,7 @@ with raw_token_imbalances as (
     select
         block_time,
         tx_id,
+        solver,
         token_address,
         amount,
         'raw_imbalance' as slippage_type,
@@ -39,6 +40,7 @@ raw_slippage_breakdown as (
     select
         i.block_time,
         i.tx_id,
+        i.solver,
         i.token_address,
         i.slippage_type,
         i.amount as slippage_atoms,
