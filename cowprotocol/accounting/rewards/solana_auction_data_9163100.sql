@@ -34,29 +34,29 @@ relevant_batches as (
 )
 
 select --noqa: ST06
-    rbd.environment,
-    rbd.auction_id,
-    rbd.deadline_slot,
-    rbd.solver,
-    cast(sum(coalesce(rbd.protocol_fee, 0)) as decimal(38, 0)) as total_protocol_fee,
-    cast(sum(rbd.winning_score) as decimal(38, 0)) as competition_score,
+    environment,
+    auction_id,
+    deadline_slot,
+    solver,
+    cast(sum(coalesce(protocol_fee, 0)) as decimal(38, 0)) as total_protocol_fee,
+    cast(sum(winning_score) as decimal(38, 0)) as competition_score,
     cast(sum(
         case
-            when rbd.slot is not null and rbd.slot <= rbd.deadline_slot then winning_score
+            when slot is not null and slot <= deadline_slot then winning_score
             else 0
         end
     ) as decimal(38, 0)) as observed_score,
-    cast(rbd.reference_score as decimal(38, 0)) as reference_score,
-    cast(rbd.uncapped_payment_native_token as decimal(38, 0)) as uncapped_payment_native_token,
-    cast(rbd.capped_payment as decimal(38, 0)) as capped_payment
-from relevant_batches as rbd
+    cast(reference_score as decimal(38, 0)) as reference_score,
+    cast(uncapped_payment_native_token as decimal(38, 0)) as uncapped_payment_native_token,
+    cast(capped_payment as decimal(38, 0)) as capped_payment
+from relevant_batches
 group by
-    rbd.environment,
-    rbd.auction_id,
-    rbd.deadline_slot,
-    rbd.solver,
+    environment,
+    auction_id,
+    deadline_slot,
+    solver,
     -- the last three columns for grouping are generated per auction and solver, not per solution
     -- the group by ensures that we do not double count these entries but just select them
-    rbd.reference_score,
-    rbd.uncapped_payment_native_token,
-    rbd.capped_payment
+    reference_score,
+    uncapped_payment_native_token,
+    capped_payment
