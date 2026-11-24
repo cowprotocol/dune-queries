@@ -13,7 +13,8 @@ with failed as (
         ,input
     from evms.traces
     where
-        block_date >= current_date - interval '{{days}}' day
+        blockchain in ('ethereum', 'gnosis', 'base', 'arbitrum', 'avalanche_c', 'polygon', 'bnb', 'linea', 'plasma', 'ink') -- chains in fct_trades; prunes partitions
+        and block_date >= current_date - interval '{{days}}' day
         and block_date < current_date
         and "from" in (0x01dcb88678aedd0c4cc9552b20f4718550250574, 0x60bf78233f48ec42ee3f101b9a05ec7878728006, 0xd496f9fcfba14d7bd1e45e4840d38ad85ded14dd) --hooks trampoline
         and not success
