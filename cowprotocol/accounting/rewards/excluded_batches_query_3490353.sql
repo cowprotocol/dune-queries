@@ -451,3 +451,6 @@ where
 
     -- for the week of November 3 - November 10, 2026
     or tx_hash = 0x4ACF1EB64861EB7A5F6C152A837595B1EBDC964D65616328EADC1E3DC016F78D
+
+    -- for the week of Nov 17-24, 2026
+    or tx_hash = 0x99513d47106e421144f9fbd10546a52ea5458959da7f4b06d0b3e84fe6fa7f5d
