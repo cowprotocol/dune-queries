@@ -4,11 +4,12 @@
 -- The output has the following columns:
 --    environment: varchar
 --    auction_id: integer
---    block_deadline: integer
---    solver: varbinary
+--    deadline_slot: integer
+--    solver: varchar
 --    total_protocol_fee: decimal(38, 0)
 --    competition_score: decimal(38, 0)
 --    observed_score: decimal(38, 0)
+--    reference_score: decimal(38, 0)
 --    uncapped_payment_native_token: decimal(38, 0)
 --    capped_payment: decimal(38, 0)
 
