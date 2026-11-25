@@ -35,7 +35,8 @@ slippage_per_transaction as (
         rs.block_time,
         rs.tx_hash,
         case
-            when '{{blockchain}}' = 'ethereum'
+            when
+                '{{blockchain}}' = 'ethereum'
                 and b.solver_address = 0x0dc6672a7edcc724310e5707c2094d70a6993eaf
                 and b.block_time <= cast('2026-11-24 00:00:00' as timestamp)
             then 0x1921e0ff550c09066edd4df05d304151c45e77de
