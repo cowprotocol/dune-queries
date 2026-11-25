@@ -363,11 +363,10 @@ where
     or tx_hash = 0x854cb9dce97d69b58fd33a758791632a4e46da4b72e9f1b63c9b19f8475df725
     or tx_hash = 0xf85fe273c6ed081e2935292dc0e8bf63d6ac776408e2bce5b7600a98570a2b9a
     or tx_hash = 0x22dc2ab6b310415a32c65676da295d5af3a08dd8d55c8afe43a1a97e470927e7
-    or tx_hash = 0x8d18ceb08c40a82eb1f81cd6e41ebafea74e68d161b47ea1ec676a8852c466cb
     or tx_hash = 0x24cac070c6c9b3f08ae17cfd1ae986cc51a91f14aea82a8d9d001785f33a0322
     or tx_hash = 0xb2b4034d98ef59b3c4b8bf7d7eb7eb837dea5061f4cb320d254f0a073352bedb
     or tx_hash = 0x0f5945131bbc23fe481b379d74c1fae0fd512c60b772ffb9ebb56e03bd07fd0d
-    
+
 
 -- Base
 union all
