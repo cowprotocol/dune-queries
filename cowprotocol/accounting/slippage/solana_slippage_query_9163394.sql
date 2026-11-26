@@ -9,20 +9,18 @@
 --
 -- The columns of slippage_per_transaction are
 -- - block_time: time of settlement transaction
--- - tx_hash: settlement transaction hash
+-- - tx_id: settlement transaction id
 -- - solver_address: address of the solver executing the settlement
 -- - slippage_usd: USD value of slippage
--- - slippage_wei: value of slippage in atoms of native token
--- - imbalance_usd: USD value of total buffer imbalance
--- - protocol_fee_usd: USD value of protocol fees
+-- - slippage_lamports: value of slippage in atoms of native token
+
 --
 -- The columns of slippage_per_solver are
 -- - solver_address: address of the solver executing the settlement
 -- - slippage_usd: USD value of slippage
--- - slippage_wei: value of slippage in atoms of native token
+-- - slippage_lamports: value of slippage in atoms of native token
 --
--- Results of the query are filtered to not include batches from excluded_batches.
--- Batches are also excluded if there is a non-zero imbalance and no value (in native atoms).
+-- Batches are excluded if there is a non-zero imbalance and no value (in native atoms).
 
 with slippage_per_transaction as (
     select
