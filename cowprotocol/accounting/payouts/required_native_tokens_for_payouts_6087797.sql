@@ -89,6 +89,7 @@ event_topics AS (
 -- This is a design choice as the query will be used to prepare for the payouts
 -- We will want to know do we have enough balances to execute at the time of running the query
 -- This way the balance keeps updating as funds are transferred to the safe
+-- include_balance = 'no' skips the balance (returns 0); this logs scan is most of the query cost
 wrapped_native_logs AS (
     SELECT
         topic0,
@@ -96,7 +97,7 @@ wrapped_native_logs AS (
         topic2,
         data
     FROM ethereum.logs
-    WHERE '{{blockchain}}' = 'ethereum' AND contract_address = 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2
+    WHERE '{{blockchain}}' = 'ethereum' AND '{{include_balance}}' = 'yes' AND contract_address = 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2
     UNION ALL
     SELECT
         topic0,
@@ -104,7 +105,7 @@ wrapped_native_logs AS (
         topic2,
         data
     FROM gnosis.logs
-    WHERE '{{blockchain}}' = 'gnosis' AND contract_address = 0xe91d153e0b41518a2ce8dd3d7944fa863463a97d
+    WHERE '{{blockchain}}' = 'gnosis' AND '{{include_balance}}' = 'yes' AND contract_address = 0xe91d153e0b41518a2ce8dd3d7944fa863463a97d
     UNION ALL
     SELECT
         topic0,
@@ -112,7 +113,7 @@ wrapped_native_logs AS (
         topic2,
         data
     FROM base.logs
-    WHERE '{{blockchain}}' = 'base' AND contract_address = 0x4200000000000000000000000000000000000006
+    WHERE '{{blockchain}}' = 'base' AND '{{include_balance}}' = 'yes' AND contract_address = 0x4200000000000000000000000000000000000006
     UNION ALL
     SELECT
         topic0,
@@ -120,7 +121,7 @@ wrapped_native_logs AS (
         topic2,
         data
     FROM avalanche_c.logs
-    WHERE '{{blockchain}}' = 'avalanche_c' AND contract_address = 0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7
+    WHERE '{{blockchain}}' = 'avalanche_c' AND '{{include_balance}}' = 'yes' AND contract_address = 0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7
     UNION ALL
     SELECT
         topic0,
@@ -128,7 +129,7 @@ wrapped_native_logs AS (
         topic2,
         data
     FROM bnb.logs
-    WHERE '{{blockchain}}' = 'bnb' AND contract_address = 0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c
+    WHERE '{{blockchain}}' = 'bnb' AND '{{include_balance}}' = 'yes' AND contract_address = 0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c
     UNION ALL
     SELECT
         topic0,
@@ -136,7 +137,7 @@ wrapped_native_logs AS (
         topic2,
         data
     FROM linea.logs
-    WHERE '{{blockchain}}' = 'linea' AND contract_address = 0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f
+    WHERE '{{blockchain}}' = 'linea' AND '{{include_balance}}' = 'yes' AND contract_address = 0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f
     UNION ALL
     SELECT
         topic0,
@@ -144,7 +145,7 @@ wrapped_native_logs AS (
         topic2,
         data
     FROM plasma.logs
-    WHERE '{{blockchain}}' = 'plasma' AND contract_address = 0x6100e367285b01f48d07953803a2d8dca5d19873
+    WHERE '{{blockchain}}' = 'plasma' AND '{{include_balance}}' = 'yes' AND contract_address = 0x6100e367285b01f48d07953803a2d8dca5d19873
     UNION ALL
     SELECT
         topic0,
@@ -152,7 +153,7 @@ wrapped_native_logs AS (
         topic2,
         data
     FROM ink.logs
-    WHERE '{{blockchain}}' = 'ink' AND contract_address = 0x4200000000000000000000000000000000000006
+    WHERE '{{blockchain}}' = 'ink' AND '{{include_balance}}' = 'yes' AND contract_address = 0x4200000000000000000000000000000000000006
     UNION ALL
     SELECT
         topic0,
@@ -160,7 +161,7 @@ wrapped_native_logs AS (
         topic2,
         data
     FROM arbitrum.logs
-    WHERE '{{blockchain}}' = 'arbitrum' AND contract_address = 0x82af49447d8a07e3bd95bd0d56f35241523fbab1
+    WHERE '{{blockchain}}' = 'arbitrum' AND '{{include_balance}}' = 'yes' AND contract_address = 0x82af49447d8a07e3bd95bd0d56f35241523fbab1
     UNION ALL
     SELECT
         topic0,
@@ -168,7 +169,7 @@ wrapped_native_logs AS (
         topic2,
         data
     FROM polygon.logs
-    WHERE '{{blockchain}}' = 'polygon' AND contract_address = 0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270
+    WHERE '{{blockchain}}' = 'polygon' AND '{{include_balance}}' = 'yes' AND contract_address = 0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270
 ),
 
 wrapped_native_events AS (
