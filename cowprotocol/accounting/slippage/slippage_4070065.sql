@@ -34,7 +34,15 @@ slippage_per_transaction as (
     select
         rs.block_time,
         rs.tx_hash,
-        solver_address,
+        case
+            when
+                '{{blockchain}}' = 'ethereum'
+                and b.solver_address = 0x0dc6672a7edcc724310e5707c2094d70a6993eaf
+                and b.block_time < cast('2026-11-24 00:00:00' as timestamp)
+                and b.block_time > cast('2026-11-21 00:00:00' as timestamp)
+                then 0x1921e0ff550c09066edd4df05d304151c45e77de
+            else b.solver_address
+        end as solver_address,
         sum(slippage_usd) as slippage_usd,
         sum(slippage_wei) as slippage_wei,
         sum(if(slippage_type = 'raw_imbalance', slippage_usd, 0)) as imbalance_usd,
