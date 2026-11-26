@@ -39,7 +39,7 @@ active_cow_dao_solver_names as (
 -- and we recover the date of them joining. Names come from the same table as in query_1541516,
 -- so that they match the names of the active solvers above.
 -- Vouches of all chains: the multichain table has the decoded vouches,
--- query_5143848 reads the chains without decoded vouches from raw logs.
+-- dune.cowprotocol.solver_vouch_events (dune_dbt) has the chains without decoded vouches, from raw logs.
 all_vouches as (
     select
         chain as blockchain,
@@ -50,28 +50,13 @@ all_vouches as (
     from cow_protocol_multichain.vouchregister_evt_vouch
     union all
     select
-        'polygon' as blockchain,
+        blockchain,
         solver,
-        bondingpool,
+        bonding_pool as bondingpool,
         sender,
-        evt_block_time
-    from "query_5143848(blockchain='polygon')"
-    union all
-    select
-        'linea' as blockchain,
-        solver,
-        bondingpool,
-        sender,
-        evt_block_time
-    from "query_5143848(blockchain='linea')"
-    union all
-    select
-        'plasma' as blockchain,
-        solver,
-        bondingpool,
-        sender,
-        evt_block_time
-    from "query_5143848(blockchain='plasma')"
+        block_time as evt_block_time
+    from dune.cowprotocol.solver_vouch_events
+    where blockchain in ('polygon', 'linea', 'plasma') and event_type = 'vouch'
 ),
 
 full_bonding_pools as (
