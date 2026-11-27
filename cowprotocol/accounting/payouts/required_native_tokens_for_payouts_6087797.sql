@@ -159,6 +159,14 @@ wrapped_native_logs AS (
         topic1,
         topic2,
         data
+    FROM robinhood.logs
+    WHERE '{{blockchain}}' = 'robinhood' AND contract_address = 0x0bd7d308f8e1639fab988df18a8011f41eacad73
+    UNION ALL
+    SELECT
+        topic0,
+        topic1,
+        topic2,
+        data
     FROM arbitrum.logs
     WHERE '{{blockchain}}' = 'arbitrum' AND contract_address = 0x82af49447d8a07e3bd95bd0d56f35241523fbab1
     UNION ALL
@@ -189,6 +197,9 @@ wrapped_native_events AS (
 wrapped_native_signed AS (
     SELECT
         CASE
+            -- robinhood WETH is aeWETH: no Deposit/Withdrawal events, wraps and unwraps are Transfer events from and to 0x0
+            WHEN '{{blockchain}}' = 'robinhood' AND e.topic0 = t.transfer_topic AND e.addr2 = e.holder THEN e.wad
+            WHEN '{{blockchain}}' = 'robinhood' AND e.topic0 = t.transfer_topic AND e.addr1 = e.holder THEN -e.wad
             WHEN e.topic0 = t.transfer_topic AND e.addr2 = e.holder AND e.addr1 != t.zero_address THEN e.wad
             WHEN e.topic0 = t.transfer_topic AND e.addr1 = e.holder AND e.addr2 != t.zero_address THEN -e.wad
             WHEN e.topic0 = t.deposit_topic THEN e.wad

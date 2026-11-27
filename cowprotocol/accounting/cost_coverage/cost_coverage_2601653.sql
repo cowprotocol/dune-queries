@@ -21,6 +21,7 @@ wrapped_native_token as (
             when 'linea' then 0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f -- WETH
             when 'plasma' then 0x6100e367285b01f48d07953803a2d8dca5d19873 -- WXPL
             when 'ink' then 0x4200000000000000000000000000000000000006 -- WETH
+            when 'robinhood' then 0x0bd7d308f8e1639fab988df18a8011f41eacad73 -- WETH
         end as native_token_address
 ),
 
@@ -48,6 +49,7 @@ rewards_safe as (
             when 'linea' then 0xa03be496e67ec29bc62f01a428683d7f9c204930
             when 'plasma' then 0xa03be496e67ec29bc62f01a428683d7f9c204930
             when 'ink' then 0xa03be496e67ec29bc62f01a428683d7f9c204930
+            when 'robinhood' then 0xa03be496e67ec29bc62f01a428683d7f9c204930
         end as rewards_safe_address
 ),
 
