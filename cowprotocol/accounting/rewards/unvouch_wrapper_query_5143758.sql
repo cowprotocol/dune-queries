@@ -6,15 +6,15 @@ with polygon_unvouching as (
         tx_from as evt_tx_from,
         tx_to as evt_tx_to,
         null as evt_tx_index,
-        index as evt_index,
+        evt_index,
         block_time as evt_block_time,
         block_number as evt_block_number,
         block_date as evt_block_date,
-        from_hex(substr(cast(topic2 as varchar), 27, 40)) as bondingPool, --noqa: CP02
-        from_hex(substr(cast(topic3 as varchar), 27, 40)) as sender, --noqa: CP02
-        from_hex(substr(cast(topic1 as varchar), 27, 40)) as solver
-    from polygon.logs
-    where contract_address = 0xaaa4de096d02ae21729aa31d967e148d4e3ae501 and topic0 = 0xfbe946aa1fb3fabb46cdd9f88982f3d42ef58fad11ed89cb15456b9fe4ea7d7d
+        bonding_pool as bondingPool, --noqa: CP02
+        sender,
+        solver
+    from dune.cowprotocol.solver_vouch_events
+    where blockchain = 'polygon' and event_type = 'invalidate'
 ),
 linea_unvouching as (
     select
@@ -24,15 +24,15 @@ linea_unvouching as (
         tx_from as evt_tx_from,
         tx_to as evt_tx_to,
         null as evt_tx_index,
-        index as evt_index,
+        evt_index,
         block_time as evt_block_time,
         block_number as evt_block_number,
         block_date as evt_block_date,
-        from_hex(substr(cast(topic2 as varchar), 27, 40)) as bondingPool, --noqa: CP02
-        from_hex(substr(cast(topic3 as varchar), 27, 40)) as sender,
-        from_hex(substr(cast(topic1 as varchar), 27, 40)) as solver
-    from linea.logs
-    where contract_address = 0xaaa4de096d02ae21729aa31d967e148d4e3ae501 and topic0 = 0xfbe946aa1fb3fabb46cdd9f88982f3d42ef58fad11ed89cb15456b9fe4ea7d7d
+        bonding_pool as bondingPool, --noqa: CP02
+        sender,
+        solver
+    from dune.cowprotocol.solver_vouch_events
+    where blockchain = 'linea' and event_type = 'invalidate'
 ),
 bnb_unvouching as (
     select
@@ -42,15 +42,15 @@ bnb_unvouching as (
         tx_from as evt_tx_from,
         tx_to as evt_tx_to,
         null as evt_tx_index,
-        index as evt_index,
+        evt_index,
         block_time as evt_block_time,
         block_number as evt_block_number,
         block_date as evt_block_date,
-        from_hex(substr(cast(topic2 as varchar), 27, 40)) as bondingPool, --noqa: CP02
-        from_hex(substr(cast(topic3 as varchar), 27, 40)) as sender,
-        from_hex(substr(cast(topic1 as varchar), 27, 40)) as solver
-    from bnb.logs
-    where contract_address = 0xaaa4de096d02ae21729aa31d967e148d4e3ae501 and topic0 = 0xfbe946aa1fb3fabb46cdd9f88982f3d42ef58fad11ed89cb15456b9fe4ea7d7d
+        bonding_pool as bondingPool, --noqa: CP02
+        sender,
+        solver
+    from dune.cowprotocol.solver_vouch_events
+    where blockchain = 'bnb' and event_type = 'invalidate'
 ),
 plasma_unvouching as (
     select
@@ -60,15 +60,15 @@ plasma_unvouching as (
         tx_from as evt_tx_from,
         tx_to as evt_tx_to,
         null as evt_tx_index,
-        index as evt_index,
+        evt_index,
         block_time as evt_block_time,
         block_number as evt_block_number,
         block_date as evt_block_date,
-        from_hex(substr(cast(topic2 as varchar), 27, 40)) as bondingPool, --noqa: CP02
-        from_hex(substr(cast(topic3 as varchar), 27, 40)) as sender,
-        from_hex(substr(cast(topic1 as varchar), 27, 40)) as solver
-    from plasma.logs
-    where contract_address = 0xaaa4de096d02ae21729aa31d967e148d4e3ae501 and topic0 = 0xfbe946aa1fb3fabb46cdd9f88982f3d42ef58fad11ed89cb15456b9fe4ea7d7d
+        bonding_pool as bondingPool, --noqa: CP02
+        sender,
+        solver
+    from dune.cowprotocol.solver_vouch_events
+    where blockchain = 'plasma' and event_type = 'invalidate'
 ),
 
 multichain_unvouching as (
