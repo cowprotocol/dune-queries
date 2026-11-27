@@ -68,6 +68,7 @@ precise_prices as (
         tte.hour = date_trunc('hour', p.minute)
         and p.contract_address = tte.proxy_address
         and p.blockchain = '{{blockchain}}'
+        and p.minute >= cast('{{start_time}}' as timestamp) and p.minute < cast('{{end_time}}' as timestamp)
     group by 1, 2, 3
 ),
 
